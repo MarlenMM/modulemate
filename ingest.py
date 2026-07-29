@@ -229,13 +229,64 @@ def chunk_text(text: str, target_words: int, overlap_words: int) -> list[str]:
     return pieces
 
 
+def chunk_lines(text: str, target_words: int) -> list[str]:
+    """Line-aware chunking for prose documents, never splitting mid-line.
+
+    Used for the assessment brief. Its sections are lists of semantically
+    independent facts -- one bullet gives the word limit, the next names the
+    permitted topics, a third covers late penalties. Embedded as one vector
+    those facts average into a diffuse point that matches no specific question
+    well: measured before this change, "What is the word limit for the report?"
+    scored 0.288 and ranked a lecture slide above the brief, while an
+    off-topic control question scored 0.349. Grouping whole lines up to a
+    tighter budget keeps each fact its own retrievable unit.
+    """
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    chunks: list[str] = []
+    current: list[str] = []
+    count = 0
+    for line in lines:
+        n = len(line.split())
+        if current and count + n > target_words:
+            chunks.append("\n".join(current))
+            current, count = [], 0
+        current.append(line)
+        count += n
+    if current:
+        chunks.append("\n".join(current))
+    return chunks or [text]
+
+
+def is_informative(text: str, min_alpha_ratio: float, min_word_tokens: int) -> bool:
+    """Reject chunks that carry no answerable language.
+
+    OCR over slide graphics recovers axis tick labels, legend fragments and
+    stray glyphs -- e.g. "100 75 50 25÷ 0 10 -10 -20" from a plot. These are
+    real strings, so they embed to real vectors and compete for retrieval
+    slots, but no student question is ever answered by them. Requiring a
+    minimum share of alphabetic characters and a minimum count of word-like
+    tokens removes them without touching genuine prose.
+    """
+    if not text.strip():
+        return False
+    alpha = sum(ch.isalpha() for ch in text)
+    total = sum(not ch.isspace() for ch in text)
+    if total == 0 or (alpha / total) < min_alpha_ratio:
+        return False
+    word_tokens = [t for t in re.split(r"\W+", text) if len(t) > 2 and t.isalpha()]
+    return len(word_tokens) >= min_word_tokens
+
+
 def build_chunks(cfg=None) -> list[Chunk]:
     """Run the whole ingestion pipeline over the converted corpus."""
     cfg = cfg or config.load()
     converted = cfg.path("corpus.converted_dir")
     target = cfg.require("index.chunk_target_words")
     overlap = cfg.require("index.chunk_overlap_words")
+    docx_target = cfg.require("index.chunk_target_words_docx")
     min_chars = cfg.require("index.min_chunk_chars")
+    min_alpha_ratio = cfg.require("index.min_alpha_ratio")
+    min_word_tokens = cfg.require("index.min_word_tokens")
 
     ocr_dir = cfg.path("corpus.ocr_dir")
 
@@ -256,10 +307,16 @@ def build_chunks(cfg=None) -> list[Chunk]:
         )
 
         for locator, text in units:
-            for piece_idx, piece in enumerate(
-                chunk_text(text, target, overlap)
-            ):
+            # Slides are visually chunked already, so a word-budget window with
+            # overlap suits them; the brief is prose and chunks by line.
+            pieces = (
+                chunk_lines(text, docx_target) if doc_type == "docx"
+                else chunk_text(text, target, overlap)
+            )
+            for piece_idx, piece in enumerate(pieces):
                 if len(piece) < min_chars:
+                    continue
+                if not is_informative(piece, min_alpha_ratio, min_word_tokens):
                     continue
                 slug = re.sub(r"[^a-z0-9]+", "-", locator.lower()).strip("-")
                 chunks.append(
