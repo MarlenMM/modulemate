@@ -1,0 +1,1240 @@
+{
+ "summary": {
+  "n_total": 49,
+  "n_in_scope": 38,
+  "n_out_of_scope": 11,
+  "n_answered": 38,
+  "hit_at_3": 0.8947,
+  "citation_correctness": 0.8947,
+  "citation_document_correctness": 0.9737,
+  "fabricated_citation_count": 0,
+  "fabricated_details": [],
+  "groundedness": 1.0,
+  "key_fact_present": 0.9211,
+  "refusal_rate_out_of_scope": 0.8182,
+  "false_refusal_rate_in_scope": 0.0,
+  "intent_accuracy": 0.898,
+  "latency_median": 5.947,
+  "latency_mean": 4.492,
+  "latency_p90": 7.961,
+  "latency_max": 9.915,
+  "confusion_labels": [
+   "admin/logistics",
+   "conceptual",
+   "code-help",
+   "out-of-scope/social"
+  ],
+  "confusion_matrix": [
+   [
+    13,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    13,
+    1,
+    0
+   ],
+   [
+    0,
+    2,
+    9,
+    0
+   ],
+   [
+    2,
+    0,
+    0,
+    9
+   ]
+  ],
+  "refusal_reasons": {
+   "intent": 9,
+   "threshold": 0,
+   "model": 0
+  },
+  "index_manifest": {
+   "built_at": "2026-07-29 08:44:17",
+   "n_chunks": 698,
+   "n_documents": 10,
+   "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+   "dim": 384,
+   "chunk_target_words": 230,
+   "chunk_overlap_words": 45,
+   "build_seconds": 5.0
+  },
+  "config": {
+   "k": 5,
+   "similarity_threshold": 0.35,
+   "generation_model": "llama-3.3-70b-versatile",
+   "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+   "backend": "openai_compatible"
+  },
+  "wall_clock_seconds": 354.1
+ },
+ "records": [
+  {
+   "id": "adm01",
+   "question": "What is the word limit for the individual project report?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.939,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5742,
+   "latency_seconds": 3.306,
+   "answer": "The word limit for the project report is 4000 words, which is expected to be around 25 pages with proper diagrams. \n[Source: HIT summer course_AI and ML_project_July2026, Requirements]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Requirements"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Requirements",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm02",
+   "question": "How much is the individual project worth in the overall assessment?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.866,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5197,
+   "latency_seconds": 0.619,
+   "answer": "The individual project is worth 60% of the overall assessment. This is confirmed in two parts of the course materials, but the percentage is directly stated in both the teaching schedule and the project details. \n[Source: HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 4] [Source: HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]",
+   "citations": [
+    [
+     "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+     "slide 4"
+    ],
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Assessment – Individual Project"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm03",
+   "question": "When is the individual project due?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.936,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6625,
+   "latency_seconds": 0.457,
+   "answer": "The individual project is due on Friday, 31 July, 2026, by 23:55. \n[Source: HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Assessment – Individual Project"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm04",
+   "question": "What is the penalty for submitting the report late?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.894,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5632,
+   "latency_seconds": 0.413,
+   "answer": "There is a 10% deduction for each day of late submission after the deadline. No submission will be accepted after 2 days of the deadline without any justified reasons. \n[Source: HIT summer course_AI and ML_project_July2026, Penalty]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Penalty"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Penalty",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm05",
+   "question": "How many days after the deadline will a submission still be accepted?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.767,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6509,
+   "latency_seconds": 0.733,
+   "answer": "A submission will still be accepted for 2 days after the deadline, but only if there are justified reasons for the late submission. \n[Source: HIT summer course_AI and ML_project_July2026, Penalty]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Penalty"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Penalty",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm06",
+   "question": "Who should I submit my completed project report to?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.946,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5837,
+   "latency_seconds": 0.516,
+   "answer": "You should submit your completed project report to Dr. Guanglei YANG, who will provide instructions on how to make the submission. \n[Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "The submission"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | The submission",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm07",
+   "question": "How should I name my submission file?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.846,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.3858,
+   "latency_seconds": 0.574,
+   "answer": "You should name your file by your student ID, in the format AI_assignment_ID.xxx, where ID is your student number. The file format can be in either pdf or word .doc or .docx.\n\n[Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "The submission"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | The submission",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm08",
+   "question": "Which file formats are accepted for the report submission?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.901,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.4408,
+   "latency_seconds": 0.415,
+   "answer": "The accepted file formats for the report submission are pdf, word .doc, or .docx. \n[Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "The submission"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | The submission",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm09",
+   "question": "How many marks is the literature survey worth in the report?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.883,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.462,
+   "latency_seconds": 4.599,
+   "answer": "The literature survey is worth 10% of the marks. \n[Source: HIT summer course_AI and ML_project_July2026, Assessment scheme]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Assessment scheme"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Assessment scheme",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm10",
+   "question": "Am I allowed to use AI tools when working on this project?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.666,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5902,
+   "latency_seconds": 8.082,
+   "answer": "There is no explicit statement in the provided passages that prohibits the use of AI tools for the project. However, the passages focus on the requirements, topics, and history of AI and ML, as well as challenges and tools, without directly addressing the use of AI tools in project work.\n\n[Source: HIT summer course_AI and ML_project_July2026, Requirements] [Source: AI notes1_introduction, slide 48]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Requirements"
+    ],
+    [
+     "AI notes1_introduction",
+     "slide 48"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Penalty",
+   "citation_correct": false,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm11",
+   "question": "Roughly how many pages should the project report be?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.941,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6777,
+   "latency_seconds": 3.59,
+   "answer": "The project report should be around 25 pages with proper diagrams. \n[Source: HIT summer course_AI and ML_project_July2026, Requirements]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Requirements"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course_AI and ML_project_July2026 | Requirements",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm12",
+   "question": "What percentage of the assessment is class attendance worth?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.648,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6157,
+   "latency_seconds": 4.686,
+   "answer": "Class attendance is worth 10% of the assessment. This is part of the Performance Assessment components, which also include Individual Assignment and Project Report. \n[Source: HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 4]",
+   "citations": [
+    [
+     "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+     "slide 4"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 4",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm13",
+   "question": "What time do the lectures run and in which building?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.528,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.4996,
+   "latency_seconds": 5.971,
+   "answer": "The lectures run from 08:30am to 11:45am and are held in the Campus Electrical Engineering Building 40025. This schedule applies to all four days of the course, from Monday, 27/07/2026, to Thursday, 30/07/2026.\n[Source: HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 3]",
+   "citations": [
+    [
+     "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+     "slide 3"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 3",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con01",
+   "question": "What is a decision tree?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.721,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7888,
+   "latency_seconds": 7.159,
+   "answer": "A decision tree is a non-parametric supervised learning algorithm, which is utilized for both classification and regression tasks. It has a hierarchical, tree structure, which consists of a root node, branches, internal nodes and leaf nodes. It is also a decision support tool that uses a tree-like model of decisions and their possible consequences, including chance event outcomes, resource costs, and utility. A decision tree is a flowchart-like tree structure, where each internal node denotes a test on an attribute, each branch represents an outcome of the test, and each leaf node holds a class label. \n[Source: AI notes6_machine learning_part 2, slide 7]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 7"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 7",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con02",
+   "question": "What is a convolutional neural network?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.852,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.679,
+   "latency_seconds": 9.915,
+   "answer": "A convolutional neural network (CNN) is a class of artificial neural network most commonly applied to analyze visual imagery. CNNs use a mathematical operation called convolution in place of general matrix multiplication in at least one of their layers. They are specifically designed to process pixel data and are used in image recognition and processing. \n[Source: AI notes8_deep learning, slide 8]",
+   "citations": [
+    [
+     "AI notes8_deep learning",
+     "slide 8"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes8_deep learning | slide 8",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con03",
+   "question": "What is clustering in machine learning?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.822,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7525,
+   "latency_seconds": 6.115,
+   "answer": "Clustering is the act of organizing similar objects into groups within a machine learning algorithm. It involves assigning related objects into clusters, which is beneficial for AI models. Clustering has many uses in data science, such as image processing, knowledge discovery in data, unsupervised learning, and various other applications. It aims to organize data into classes with high intra-class similarity and low inter-class similarity. \n[Source: AI notes6_machine learning_part 2, slide 66]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 66"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 66",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con04",
+   "question": "What is the difference between supervised and unsupervised learning?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.777,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7121,
+   "latency_seconds": 7.116,
+   "answer": "The main difference between supervised and unsupervised learning is that supervised learning uses labeled input data to train a model and predict future outputs, whereas unsupervised learning uses unlabeled input data to find hidden patterns or intrinsic structures. Supervised learning is used for prediction, classification, and regression, while unsupervised learning is used for analysis, clustering, density estimation, and dimensionality reduction. In supervised learning, the input data is labeled, and the model is trained on a training dataset, whereas in unsupervised learning, the input data is unlabeled, and the model uses just the input dataset.\n\n[Source: AI notes5_machine learning_part 1, slide 25]",
+   "citations": [
+    [
+     "AI notes5_machine learning_part 1",
+     "slide 25"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 67",
+   "citation_correct": false,
+   "citation_doc_correct": false,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": false
+  },
+  {
+   "id": "con05",
+   "question": "What is a neural network?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.921,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.8427,
+   "latency_seconds": 9.369,
+   "answer": "A neural network is a network or circuit of biological neurons, or, in a modern sense, an artificial neural network, composed of artificial neurons or nodes. It can be either a biological neural network, made up of biological neurons, or an artificial neural network, used for solving artificial intelligence (AI) problems. Neural networks are also known as artificial neural networks (ANNs) or simulated neural networks (SNNs), and are a subset of machine learning and are at the heart of deep learning algorithms. They use interconnected nodes or neurons in a layered structure that resembles the human brain to create an adaptive system that computers use to learn from their mistakes and improve continuously.\n\n[Source: AI notes7_neural networks, slide 9]",
+   "citations": [
+    [
+     "AI notes7_neural networks",
+     "slide 9"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes7_neural networks | slide 9",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con06",
+   "question": "What is artificial intelligence?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.902,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7747,
+   "latency_seconds": 9.122,
+   "answer": "Artificial Intelligence (AI) is a machine's ability to perform cognitive functions as humans do, such as perceiving, learning, reasoning, and solving problems. The benchmark for AI is the human level concerning reasoning, speech, and vision. AI is also defined as the intelligence of a machine or computer that enables it to imitate or mimic human capabilities. Additionally, AI can be described as the use of computer systems to perform tasks normally associated with human intelligence.\n\n[Source: AI notes1_introduction, slide 6]",
+   "citations": [
+    [
+     "AI notes1_introduction",
+     "slide 6"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes1_introduction | slide 6",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con07",
+   "question": "What is k-means clustering?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.456,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.8183,
+   "latency_seconds": 7.961,
+   "answer": "K-means clustering is a method of vector quantization, originally from signal processing, that aims to partition n observations into k clusters in which each observation belongs to the cluster with the nearest mean (cluster centers or cluster centroid), serving as a prototype of the cluster. It is an unsupervised learning technique to classify unlabeled data by grouping them by features, rather than pre-defined categories. The variable K represents the number of groups or categories created. \n[Source: AI notes6_machine learning_part 2, slide 79]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 79"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 79",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con08",
+   "question": "What is a support vector machine?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.619,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5747,
+   "latency_seconds": 6.962,
+   "answer": "A Support Vector Machine (SVM) is a type of classifier that maps training examples to points in space to maximize the width of the gap between two categories. New examples are then mapped into that same space and predicted to belong to a category based on which side of the gap they fall. SVMs can perform both linear and non-linear classification using the kernel trick, which implicitly maps inputs into high-dimensional feature spaces.\n\n[Source: AI notes6_machine learning_part 2, slide 62]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 62"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 62",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con09",
+   "question": "What is the k-nearest neighbours algorithm?",
+   "intent_true": "conceptual",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.762,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6705,
+   "latency_seconds": 5.947,
+   "answer": "The k-nearest neighbors algorithm (k-NN) is a non-parametric supervised learning method. It is a type of classification where the function is only approximated locally and all computation is deferred until function evaluation. \n\n[Source: AI notes6_machine learning_part 2, slide 60]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 60"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 60",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con10",
+   "question": "What is a naive Bayes classifier?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.665,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7318,
+   "latency_seconds": 6.969,
+   "answer": "A naive Bayes classifier is a family of simple \"probabilistic classifiers\" based on applying Bayes' theorem with strong (naive) independence assumptions between the features. It calculates the posterior probability using the formula P(c|X) = P(x1|c)xP(x2|c)x..xP(x|c)x P(c). \n\n[Source: AI notes6_machine learning_part 2, slide 61]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 61"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 61",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con11",
+   "question": "What are the main types of machine learning?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.78,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6624,
+   "latency_seconds": 7.07,
+   "answer": "The main types of machine learning are Supervised, Unsupervised, and Reinforcement learning, with Task Driven and Data Driven approaches also mentioned. Additionally, Semi-supervised learning is listed as another type. These types are categorized based on their learning approaches, such as learning from mistakes or being driven by tasks or data. \n[Source: AI notes5_machine learning_part 1, slide 22] [Source: AI notes5_machine learning_part 1, slide 3]",
+   "citations": [
+    [
+     "AI notes5_machine learning_part 1",
+     "slide 22"
+    ],
+    [
+     "AI notes5_machine learning_part 1",
+     "slide 3"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "AI notes5_machine learning_part 1 | slide 8",
+   "citation_correct": false,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con12",
+   "question": "Which layers does a convolutional neural network consist of?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.47,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6908,
+   "latency_seconds": 6.93,
+   "answer": "A convolutional neural network consists of an input layer, hidden layers, and an output layer. The hidden layers include one or more layers that perform convolutions, as well as other layers such as pooling layers, fully connected layers, and normalization layers.\n\n[Source: AI notes8_deep learning, slide 11]",
+   "citations": [
+    [
+     "AI notes8_deep learning",
+     "slide 11"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes8_deep learning | slide 11",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con13",
+   "question": "What is uninformed or blind search?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.589,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.806,
+   "latency_seconds": 6.967,
+   "answer": "Uninformed or blind search is a type of search algorithm that uses no information other than the initial state, the search operator, and a test for a solution. It does not use any domain knowledge or information to judge where the solution is likely to be. The different types of blind searches are characterized by the order in which they expand the nodes. \n\n[Source: AI notes2_search, slide 23]",
+   "citations": [
+    [
+     "AI notes2_search",
+     "slide 23"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes2_search | slide 23",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": false
+  },
+  {
+   "id": "con14",
+   "question": "What are the differences between an artificial neural network and a convolutional neural network?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.844,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7046,
+   "latency_seconds": 8.324,
+   "answer": "The main differences between an Artificial Neural Network (ANN) and a Convolutional Neural Network (CNN) are: \n1. ANN uses fully connected layers, while CNN uses partially connected layers. \n2. ANN can be used only for small images, while CNN can be used for any image. \n3. ANN considers the entire image for learning patterns, while CNN considers only the part of the image that is in the receptive field. \n4. The number of parameters in ANN is very high, while in CNN it is very less. \n5. ANN is not very efficient for images and is expensive, while CNN is very efficient for images and less expensive. \n6. ANN does not learn the patterns in spatial hierarchy, while CNN learns the spatial hierarchy of patterns.\n\n[Source: AI notes8_deep learning, slide 20]",
+   "citations": [
+    [
+     "AI notes8_deep learning",
+     "slide 20"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes8_deep learning | slide 20",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod01",
+   "question": "What are the steps for constructing a decision tree?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.637,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7612,
+   "latency_seconds": 6.038,
+   "answer": "The steps for constructing a decision tree are: \n1. Tree construction, which involves recursively splitting the tree according to selected attributes (conditions), and \n2. Tree pruning, which involves identifying and removing irrelevant branches to increase classification accuracy.\n[Source: AI notes6_machine learning_part 2, slide 18]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 18"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "AI notes6_machine learning_part 2 | slide 22",
+   "citation_correct": false,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": false
+  },
+  {
+   "id": "cod02",
+   "question": "What are the two stages involved in building a decision tree?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.53,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6622,
+   "latency_seconds": 6.999,
+   "answer": "The two stages involved in building a decision tree are Tree construction and Tree pruning. Tree construction involves recursively splitting the tree according to selected attributes, while Tree pruning involves identifying and removing irrelevant branches to increase classification accuracy. \n[Source: AI notes6_machine learning_part 2, slide 18]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 18"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 18",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod03",
+   "question": "How does the breadth-first search algorithm explore a graph?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.663,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6647,
+   "latency_seconds": 6.216,
+   "answer": "The breadth-first search algorithm explores a graph by expanding outward from the root in all possible directions, adding nodes one \"layer\" at a time. It explores the root first, then expands all nodes at level 1 before entering level 2, and continues this process until it reaches the goal state. This is done by adding the root with the initial state to a queue, tree, and visited list, and then dequeuing a node from the queue to check if it has the goal state. \n\n[Source: AI notes2_search, slide 25]",
+   "citations": [
+    [
+     "AI notes2_search",
+     "slide 25"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes2_search | slide 25",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod04",
+   "question": "What are the two key steps in the generate and test search procedure?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.676,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5957,
+   "latency_seconds": 4.782,
+   "answer": "The two key steps in the generate and test search procedure are: \n1. Generate a possible state, and \n2. Test to see if it is a goal state (found a solution). \nIf the test is positive, the procedure quits; if not, it goes back to step 1.\n[Source: AI notes2_search, slide 22]",
+   "citations": [
+    [
+     "AI notes2_search",
+     "slide 22"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes2_search | slide 22",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod05",
+   "question": "How is Euclidean distance calculated between two vectors?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.488,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5851,
+   "latency_seconds": 7.268,
+   "answer": "Euclidean distance is calculated between two vectors x and y as the square root of the sum of the squared differences between corresponding elements. The formula for Euclidean distance is d(x, y) = √∑(xₖ - yₖ)², which can also be written as d(x, y) = √(x₁ - y₁)² + (x₂ - y₂)² + ... + (xₙ - yₙ)². This is a special case of the Minkowski distance, where p = 2. \n[Source: AI notes6_machine learning_part 2, slide 75]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 75"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 75",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod06",
+   "question": "When is Manhattan distance called Hamming distance?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.343,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7032,
+   "latency_seconds": 6.962,
+   "answer": "Manhattan distance is called Hamming distance when all features are binary. This means that Hamming distance counts the number of differences between two binary vectors. \n\n[Source: AI notes6_machine learning_part 2, slide 77]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 77"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 77",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod07",
+   "question": "How does edit distance measure the similarity of two objects?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.436,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5853,
+   "latency_seconds": 4.955,
+   "answer": "Edit distance measures the similarity of two objects by transforming one of the objects into the other and measuring how much effort it takes. This is done by counting the number of deletions, substitutions, and insertions needed to transform one object into the other, with each operation having a specific cost. The total cost is then calculated to determine the edit distance between the two objects. For example, the edit distance between two objects can be calculated as the sum of the costs of deletions, substitutions, and insertions, such as 5 × 1 + 3 × 1 + 1 × 2 = 10. \n[Source: AI notes6_machine learning_part 2, slide 78]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 78"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "AI notes6_machine learning_part 2 | slide 78",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod08",
+   "question": "Which criteria are used to evaluate a search algorithm?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.661,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6678,
+   "latency_seconds": 6.962,
+   "answer": "The criteria used to evaluate a search algorithm are Completeness, Speed (worst time complexity), and Memory (worst space complexity). These criteria measure whether the algorithm always finds a solution, the highest number of nodes that may need to be created, and the largest amounts of nodes that may need to be stored, respectively. \n[Source: AI notes2_search, slide 24]",
+   "citations": [
+    [
+     "AI notes2_search",
+     "slide 24"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes2_search | slide 24",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod09",
+   "question": "How does the k-means algorithm use centroids?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.556,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7687,
+   "latency_seconds": 7.169,
+   "answer": "The k-means algorithm identifies k number of centroids and allocates every data point to the nearest cluster, while keeping the centroids as small as possible. The 'means' in the K-means refers to averaging of the data, which is finding the centroid. The algorithm then recomputes the centroid of each cluster by assigning each point to its closest centroid and computing the new centroid (mean) of each cluster.\n\n[Source: AI notes6_machine learning_part 2, slide 80] [Source: AI notes6_machine learning_part 2, slide 81]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 80"
+    ],
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 81"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 80",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod10",
+   "question": "What properties should a dissimilarity function have?",
+   "intent_true": "code-help",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.441,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.4872,
+   "latency_seconds": 6.077,
+   "answer": "A dissimilarity function should have the following properties: \nSymmetry, which means d(x, y) = d(y,x), \nPositive separability, which means d(x, y) = 0, if and only if x = y, \nand Triangular inequality, which means d(x, y) ≤ d(x,z) + d(z,y). \nThese properties ensure that the function behaves intuitively, allowing us to compare objects in a consistent manner.\n[Source: AI notes6_machine learning_part 2, slide 74]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 74"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 74",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod11",
+   "question": "What is top-down decision tree induction?",
+   "intent_true": "code-help",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.491,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.7829,
+   "latency_seconds": 7.161,
+   "answer": "Top-down decision tree induction is a method where we start with any property and partition the training set into disjoint subsets. From there, we can recursively construct a subtree for each partition. This process involves testing the value of an input attribute at each node, with branches corresponding to possible values of the attribute, and leaf nodes supplying the values to be returned if that leaf is reached.\n\n[Source: AI notes6_machine learning_part 2, slide 29] [Source: AI notes6_machine learning_part 2, slide 30]",
+   "citations": [
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 29"
+    ],
+    [
+     "AI notes6_machine learning_part 2",
+     "slide 30"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "AI notes6_machine learning_part 2 | slide 30",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "oos01",
+   "question": "Hello, how are you today?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.963,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.041,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos02",
+   "question": "Can you write me a poem about the sea?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.85,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.009,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos03",
+   "question": "What is the capital of France?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.751,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.009,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos04",
+   "question": "Tell me a joke.",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.809,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.008,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos05",
+   "question": "What is the weather forecast for tomorrow?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.725,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.013,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos06",
+   "question": "Can you book me a flight to Beijing?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.847,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.008,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos07",
+   "question": "Who won the football World Cup in 2022?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.534,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.008,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos08",
+   "question": "Can you grant me an extension on my submission deadline?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.6,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5379,
+   "latency_seconds": 4.701,
+   "answer": "No submission will be accepted after 2 days of the deadline without any justified reasons. \n[Source: HIT summer course_AI and ML_project_July2026, Penalty]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Penalty"
+    ]
+   ]
+  },
+  {
+   "id": "oos09",
+   "question": "I am feeling really stressed about my exams, what should I do?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.807,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.039,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos10",
+   "question": "What is a good recipe for dinner tonight?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.737,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.013,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
+   "id": "oos11",
+   "question": "Can you write my project report for me?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.784,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6965,
+   "latency_seconds": 4.766,
+   "answer": "You are required to submit a 4000-word written report on your project. The report should include proper diagrams and be around 25 pages. You are also required to work on an AI and ML related project to demonstrate your knowledge and skill. \n[Source: HIT summer course_AI and ML_project_July2026, Requirements]",
+   "citations": [
+    [
+     "HIT summer course_AI and ML_project_July2026",
+     "Requirements"
+    ]
+   ]
+  }
+ ]
+}
