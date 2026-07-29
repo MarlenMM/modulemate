@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# ModuleMate — FR1 stage 0: legacy Office format conversion.
+# ModuleMate — FR1 stage 0: normalise staged sources into ingestible formats.
 #
-# The module corpus ships as legacy binary .ppt / .doc (OLE2 compound files).
-# python-pptx and python-docx read only the OOXML formats (.pptx / .docx) and
-# raise PackageNotFoundError on the legacy binaries, so conversion is a
-# mandatory first step of the ingestion pipeline, not a convenience.
+# The corpus arrives in six formats. Three need conversion before any Python
+# library will read them:
+#   .ppt  -> .pptx   legacy binary OLE2; python-pptx raises PackageNotFoundError
+#   .doc  -> .docx   same
+#   .rtf  -> .txt    chat exports; no structured reader worth the dependency
+# The rest (.pptx, .docx, .pdf, .ipynb) pass through untouched.
 #
 # Idempotent: safe to re-run (supports FR9 one-command rebuild).
 set -euo pipefail
@@ -20,10 +22,11 @@ if ! command -v soffice >/dev/null 2>&1; then
 fi
 
 mkdir -p "$OUT"
-
 shopt -s nullglob
+
 ppt_files=("$RAW"/*.ppt)
 doc_files=("$RAW"/*.doc)
+rtf_files=("$RAW"/*.rtf)
 
 if [ ${#ppt_files[@]} -gt 0 ]; then
   echo "Converting ${#ppt_files[@]} .ppt -> .pptx ..."
@@ -35,10 +38,28 @@ if [ ${#doc_files[@]} -gt 0 ]; then
   soffice --headless --convert-to docx --outdir "$OUT" "${doc_files[@]}" >/dev/null
 fi
 
-# Pass through any files already in a modern format.
-for f in "$RAW"/*.pptx "$RAW"/*.docx; do
+if [ ${#rtf_files[@]} -gt 0 ]; then
+  echo "Converting ${#rtf_files[@]} .rtf -> .txt ..."
+  for f in "${rtf_files[@]}"; do
+    base="$(basename "${f%.rtf}")"
+    if command -v textutil >/dev/null 2>&1; then
+      # macOS native: handles the RTF variants these exports use, and keeps
+      # the UTF-8 of mixed Chinese/English chat text intact.
+      textutil -convert txt -encoding UTF-8 -output "$OUT/$base.txt" "$f"
+    else
+      soffice --headless --convert-to txt:Text --outdir "$OUT" "$f" >/dev/null
+    fi
+  done
+fi
+
+# Formats that need no conversion.
+for f in "$RAW"/*.pptx "$RAW"/*.docx "$RAW"/*.pdf "$RAW"/*.ipynb; do
   cp -n "$f" "$OUT/" 2>/dev/null || true
 done
 
+echo
 echo "Converted corpus in $OUT:"
-ls -1 "$OUT"
+for ext in pptx docx pdf ipynb txt; do
+  n=$(find "$OUT" -maxdepth 1 -name "*.$ext" | wc -l | tr -d ' ')
+  [ "$n" -gt 0 ] && printf "  %-6s %s\n" ".$ext" "$n"
+done

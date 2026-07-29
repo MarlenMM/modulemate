@@ -1,0 +1,108 @@
+# ModuleMate — corpus source manifest.
+#
+# Declares which files from the HIT Summer folder enter the knowledge base.
+# Kept as data, not code, so the corpus can be re-scoped without touching the
+# pipeline (NFR5). `scripts/collect_corpus.py` applies these rules and stages
+# eligible files into corpus/raw/.
+#
+# GOVERNING RULE: include material issued by the course — lectures, labs,
+# assignment briefs, quizzes, notebooks, schedules, handbooks, announcements.
+# Exclude the student's own work and anything derived from it.
+
+source_root: "/Users/marlenmelis/Documents/HIT Summer"
+
+# Only these extensions are ever staged. Datasets (.csv, .pkl, .zip) and images
+# carry no answerable prose and would bloat the index, so they are absent here
+# by design rather than by exclusion rule.
+allowed_extensions: [".pdf", ".ppt", ".pptx", ".doc", ".docx", ".ipynb", ".rtf"]
+
+include_globs:
+  # --- Programme-level information issued by the institution ---
+  - "2026 HIT Global Summer School*.pdf"
+
+  # --- Code Review / Code Clone Detection project: staff-issued material only ---
+  # NOT lab1/2/3.pdf — see exclude_globs. Those are named like lab handouts but
+  # are the student's own completed experiment reports.
+  - "Code Review Project/Experiment_Eng_1st.pdf"       # Jiakun Liu, Lecture 1
+  - "Code Review Project/实验指导书_代码审查_英文.pdf"   # English lab guide, Chinese filename
+
+  # --- Week 1: Machine Learning (Prof. Burnaev / Skoltech materials) ---
+  - "Lectures Week 1/*.pdf"
+  - "Lectures Week 1/*.docx"
+  - "Lectures Week 1/*.ipynb"
+  - "Lectures Week 1/*.rtf"
+  - "Lectures Week 1/Classification_simple/*"
+  - "Lectures Week 1/Regression_simple/*"
+  - "Lectures Week 1/clustering/*"
+  - "Lectures Week 1/recommendations/*"
+  # Worked seminar notebooks. Verified course-issued, not student work: both
+  # carry Colab badges pointing at the public adasegroup/ML2025_seminars repo.
+  - "Lectures Week 1/advanced seminar/Seminar_*.ipynb"
+
+  # --- Week 2: AI & Machine Learning (Prof. Jane You) ---
+  - "Lectures Week 2/AI notes*.ppt"
+  - "Lectures Week 2/HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou.ppt"
+  - "Lectures Week 2/HIT summer course_AI and ML_project_July2026.doc"
+  - "Lectures Week 2/HIT summer course_AI and ML_assignment_July2026.doc"
+
+  # --- Course group chats: staff announcements, deadlines, logistics ---
+  # See the privacy note in IMPLEMENTATION_SUMMARY_FOR_REPORT.md before
+  # enabling. Set include_chats: false to drop these without editing globs.
+  - "chats/*.rtf"
+
+# Applied after include_globs; an exclusion always wins.
+exclude_globs:
+  # The student's own projects and work products
+  - "smart-chatbot/**"
+  - "code-review-ai/**"
+  - "Code Review Project/Code_Review_Project_Plan.md"
+  - "Code Review Project/Experiment_Report__Eng_/**"
+  - "**/*ANSWERED*"
+  # Named like staff lab handouts, but these are the student's own submitted
+  # experiment reports — compiled from Experiment_Report__Eng_/main.tex and
+  # carrying the cover block "Name Marlen Melis / Student ID 2026140428".
+  # Caught first by reading them, and now also by the authorship guard below.
+  - "Code Review Project/lab1.pdf"
+  - "Code Review Project/lab2.pdf"
+  - "Code Review Project/lab3.pdf"
+
+  # Editor autosaves — byte-near duplicates of their parent notebooks
+  - "**/.ipynb_checkpoints/**"
+
+  # Image-only scan with no extractable text, and Chinese-language throughout.
+  # The embedding model is English-only (locked scope), so OCRing it would add
+  # ~12 pages the retriever cannot match against English questions.
+  - "Lectures Week 1/计算学部2026国际暑期学校手册.pdf"
+
+  # Redundant re-exports of the assessment brief already staged as .doc
+  - "Lectures Week 2/HIT summer course_AI and ML_project_July2026.pdf"
+  - "Lectures Week 2/HIT summer course_AI and ML_project_July2026.txt"
+
+# Toggle for the group-chat sources above.
+include_chats: true
+
+# Authorship guard. Any staged file whose opening pages contain one of these
+# strings is rejected as the student's own work, whatever the globs say.
+# This is a backstop, not the primary mechanism: lab1-3.pdf were named exactly
+# like staff handouts and were only caught by reading them. The guard makes the
+# same mistake self-correcting for any file added later.
+student_identifiers:
+  - "Marlen Melis"
+  - "2026140428"
+
+# Files are de-duplicated by content hash after collection; several lecture
+# PDFs are copied into more than one folder in the source tree.
+deduplicate_by_hash: true
+
+# Staged filename overrides. The filename stem becomes the document name in
+# every citation, so it has to be something a student can act on.
+#
+# This is not cosmetic. Measured: given the stem
+# "Code Review Project__实验指导书_代码审查_英文", the generator ignored the
+# citation label it was handed and instead cited the document's own English
+# running header — producing a citation naming a document that does not exist
+# in the index, i.e. a fabricated citation and an NFR3 violation. Given an
+# ASCII name it copies the label as instructed.
+rename:
+  "Code Review Project/实验指导书_代码审查_英文.pdf":
+    "Code Review Project__Lab Guide_Code Review_English.pdf"

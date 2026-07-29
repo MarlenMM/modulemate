@@ -54,20 +54,33 @@ def main() -> None:
         rejected = float((neg < t).mean())    # out-of-scope questions refused
         rows.append((float(t), kept, rejected, kept + rejected - 1.0))
 
-    # Youden's J (retention + rejection - 1). Chasing 100% rejection here is
-    # the wrong objective: two out-of-scope questions ("write my project report
-    # for me", "grant me an extension") are *about* corpus topics and score
-    # above every in-scope question's floor, so forcing the gate to reject them
-    # costs most of the in-scope recall. Those two are policy-based refusals,
-    # and the intent router — not the similarity gate — is the layer that
-    # catches them. Calibrate the gate for topical separation and let the
-    # router do its own job; the harness measures the combined refusal rate.
-    best_j = max(r[3] for r in rows)
-    optimal = [r for r in rows if abs(r[3] - best_j) < 1e-9]
-    # Tie-break to the middle of the plateau, maximising margin either side.
-    best = optimal[len(optimal) // 2]
-    rule = ("maximum Youden's J (in-scope retention + out-of-scope rejection - 1), "
-            "tie-broken to the centre of the optimal plateau")
+    # Selection is retention-constrained, not Youden-optimal, and that is a
+    # deliberate consequence of the layered design.
+    #
+    # A false refusal is not a soft failure here: the pipeline returns before
+    # retrieval, so the turn yields no passages at all and the question counts
+    # as a hit@3 miss as well as an unanswered question. Measured earlier in
+    # the build, an over-eager gate dropped hit@3 from 0.895 to 0.842 on its
+    # own. Meanwhile out-of-scope traffic has two further layers behind this
+    # one — the intent router and the generator's scope rule — so rejection
+    # given up here is largely recovered downstream, whereas recall given up
+    # here is lost outright.
+    #
+    # So: keep essentially every in-scope question, then reject as much
+    # out-of-scope as that allows. Youden's J is still reported per row for
+    # comparison.
+    min_retention = 0.98
+    eligible = [r for r in rows if r[1] >= min_retention]
+    if eligible:
+        best = max(eligible, key=lambda r: (r[2], r[0]))
+        rule = (f"maximum out-of-scope rejection subject to in-scope retention "
+                f">= {min_retention:.0%} (a false refusal costs both an answer "
+                f"and a hit@3, and two further refusal layers back this one up)")
+    else:
+        best_j = max(r[3] for r in rows)
+        optimal = [r for r in rows if abs(r[3] - best_j) < 1e-9]
+        best = optimal[len(optimal) // 2]
+        rule = ("maximum Youden's J — no cut-off met the retention floor")
 
     threshold = best[0]
     gate_resistant = [

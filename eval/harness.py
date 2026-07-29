@@ -67,6 +67,21 @@ def hit_at_k(result: TurnResult, item: dict, k: int) -> bool:
     return False
 
 
+def hit_at_k_document(result: TurnResult, item: dict, k: int) -> bool:
+    """True if the expected *document* appears in the top-k, regardless of the
+    slide/page within it.
+
+    Reported alongside exact hit@k because the programme-wide corpus answers
+    several questions in more than one place — two brochures state the venue,
+    the assignment and project briefs each carry a "Penalty" section — so an
+    exact-locator miss is often a differently-correct retrieval rather than a
+    failure. See results/retrieval_analysis.md.
+    """
+    want_doc = normalise(item.get("expected_source_doc"))
+    return any(normalise(p.source_document) == want_doc
+               for p in result.passages[:k])
+
+
 def citation_correct(result: TurnResult, item: dict) -> bool:
     """True if any emitted citation names the expected document and locator."""
     want_doc = normalise(item.get("expected_source_doc"))
@@ -198,6 +213,7 @@ def run(limit: int | None = None, use_judge: bool = True) -> dict:
 
         if not is_oos:
             rec["hit_at_k"] = hit_at_k(result, item, k)
+            rec["hit_at_k_document"] = hit_at_k_document(result, item, k)
             rec["expected"] = (
                 f"{item['expected_source_doc']} | "
                 f"{item['expected_slide_or_section']}"
@@ -250,6 +266,9 @@ def summarise(records: list[dict], cfg, bot: ModuleMate, k: int) -> dict:
         "n_out_of_scope": len(out_scope),
         "n_answered": len(answered),
         f"hit_at_{k}": mean(r["hit_at_k"] for r in in_scope),
+        f"hit_at_{k}_document": mean(
+            r.get("hit_at_k_document", False) for r in in_scope
+        ),
         "citation_correctness": mean(
             r.get("citation_correct", False) for r in answered
         ),
