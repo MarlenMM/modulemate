@@ -106,8 +106,37 @@ TRAINING_UTTERANCES: dict[str, list[str]] = {
         "How do you calculate the gradient of the error?",
         "What steps are involved in training a CNN?",
         "What technique is used to avoid overfitting during training?",
+        # Distance and similarity metrics. The module devotes a run of slides
+        # to these (Euclidean, Manhattan, Hamming, edit distance, properties
+        # of a dissimilarity function), but the original utterances above were
+        # all "how do I / what are the steps of" procedural phrasings, so
+        # property- and definition-shaped questions about metrics fell outside
+        # every class and landed in out-of-scope with low confidence.
+        "How is Euclidean distance computed between two points?",
+        "What is the formula for Minkowski distance?",
+        "How do you measure the similarity between two vectors?",
+        "What is Hamming distance used for?",
+        "Which distance metric should be used for binary features?",
+        "What conditions must a distance function satisfy?",
+        "How is the cost of an edit operation calculated?",
     ],
+    # Two sub-populations share this class, and the split matters.
+    #
+    # (a) Chit-chat and general-knowledge turns. These are also topically far
+    #     from the corpus, so the similarity gate catches them independently.
+    #
+    # (b) Policy refusals. §2.6 of the specification places pastoral matters,
+    #     extenuating circumstances, academic appeals, grading and doing the
+    #     student's work out of scope "by design". These are phrased around
+    #     deadlines, marks and reports, so they retrieve corpus passages at
+    #     high similarity (measured: 0.54 and 0.70) and the similarity gate
+    #     structurally cannot reject them. The router is the only layer that
+    #     can, which is why this class carries deliberate coverage of them.
+    #     The first evaluation run under-represented (b) — three examples
+    #     against twenty admin examples about deadlines and reports — and both
+    #     policy questions in the gold set were wrongly answered as a result.
     OUT_OF_SCOPE: [
+        # (a) social and general knowledge
         "Hello!",
         "Hi there, how are you?",
         "Good morning",
@@ -123,13 +152,48 @@ TRAINING_UTTERANCES: dict[str, list[str]] = {
         "Can you help me book a flight?",
         "What do you think about politics?",
         "Are you a real person?",
-        "Can you do my assignment for me?",
-        "What is my grade going to be?",
-        "I am feeling stressed about my exams, can you help?",
-        "Can you get me an extension on my deadline?",
         "What is the meaning of life?",
+        # (b) policy refusals — pastoral / extenuating / appeals
+        "I am feeling stressed about my exams, can you help?",
+        "I was ill last week, can I claim extenuating circumstances?",
+        "I want to appeal the mark I was given.",
+        "My family situation is affecting my studies, what should I do?",
+        "Can you excuse my absence from the lecture?",
+        "I need special consideration because of my health.",
+        "Can you change the deadline for me?",
+        "Please give me more time to finish the assignment.",
+        "Can you make an exception to the late penalty in my case?",
+        # (b) policy refusals — doing the student's work / grading
+        "Can you do my assignment for me?",
+        "Write the literature review section for me.",
+        "Please complete this project on my behalf.",
+        "Draft my report introduction.",
+        "What is my grade going to be?",
+        "Can you mark my draft and tell me what score it would get?",
+        "Give me the answers to the assignment questions.",
+        "Solve this homework problem for me.",
     ],
 }
+
+# Held-out probes for the policy sub-population, used only to measure whether
+# the router generalises beyond its training phrasings. Never trained on, and
+# deliberately worded differently from both the training set and the gold set.
+METRIC_PROBES: list[str] = [
+    "In what situation is Manhattan distance equivalent to Hamming distance?",
+    "What characteristics does a good dissimilarity measure need?",
+    "How would I work out the edit distance between two words?",
+]
+
+POLICY_PROBES: list[str] = [
+    "Would it be possible to hand in a few days later than planned?",
+    "I had a hospital appointment and missed the class, does that count?",
+    "Could you produce the first draft of section three for me?",
+    "Am I going to pass this module based on what I have done?",
+    "Is there any way to get the penalty waived just this once?",
+    "Could you put together the whole thing so I only have to proofread it?",
+    "I disagree with how my work was assessed, can you overturn it?",
+    "My internet was down so I could not submit, can you fix that for me?",
+]
 
 
 @dataclass
@@ -196,6 +260,9 @@ class IntentClassifier:
             train(self.cfg)
         self.clf = joblib.load(path)
         self.short_circuit = set(self.cfg.get("intents.short_circuit", []))
+        self.min_confidence = self.cfg.get(
+            "intents.short_circuit_min_confidence", 0.0
+        )
 
     def predict(self, text: str) -> IntentPrediction:
         vector = index_mod.embed_texts([text], self.cfg)
@@ -208,9 +275,15 @@ class IntentClassifier:
             scores={c: float(p) for c, p in zip(classes, probs)},
         )
 
-    def should_short_circuit(self, label: str) -> bool:
-        """True when the intent bypasses retrieval and generation (FR7)."""
-        return label in self.short_circuit
+    def should_short_circuit(self, label: str, confidence: float = 1.0) -> bool:
+        """True when the intent bypasses retrieval and generation (FR7).
+
+        Confidence-gated on purpose: a short-circuit refuses without ever
+        retrieving, so an unconfident prediction must not trigger one. Below
+        the cut-off the turn proceeds to retrieval and the similarity gate
+        decides, which lets the two refusal layers check each other.
+        """
+        return label in self.short_circuit and confidence >= self.min_confidence
 
 
 if __name__ == "__main__":
@@ -229,3 +302,27 @@ if __name__ == "__main__":
     ]:
         p = clf.predict(q)
         print(f"  {p.label:22s} {p.confidence:.2f}  {q}")
+
+    # Generalisation check on unseen policy phrasings. Reported because the
+    # out-of-scope training set was deliberately strengthened after the first
+    # evaluation run; without this, the improved refusal rate on the gold set
+    # could not be distinguished from having fitted the gold set.
+    correct = 0
+    print("\nHeld-out policy probes (never trained on, not in the gold set):")
+    for q in POLICY_PROBES:
+        p = clf.predict(q)
+        ok = p.label == OUT_OF_SCOPE
+        correct += ok
+        print(f"  {'OK ' if ok else 'ERR'}  {p.label:22s} {p.confidence:.2f}  {q}")
+    print(f"\n  policy generalisation: {correct}/{len(POLICY_PROBES)} "
+          f"= {correct / len(POLICY_PROBES):.1%}")
+
+    ok_metric = 0
+    print("\nHeld-out distance-metric probes (never trained on):")
+    for q in METRIC_PROBES:
+        p = clf.predict(q)
+        ok = p.label == CODE_HELP
+        ok_metric += ok
+        print(f"  {'OK ' if ok else 'ERR'}  {p.label:22s} {p.confidence:.2f}  {q}")
+    print(f"\n  metric generalisation: {ok_metric}/{len(METRIC_PROBES)} "
+          f"= {ok_metric / len(METRIC_PROBES):.1%}")
