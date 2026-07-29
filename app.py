@@ -1,11 +1,12 @@
 """M7 — Streamlit chat interface (FR8, NFR6), with S2 source panel.
 
 Design intent, tied to the "Ana" persona: she will not trust an answer she
-cannot check. So the citation is rendered as a distinct caption under every
-answer, and the passages the answer was built from are one click away with
-their similarity scores. Refusals are styled as a warning block so that
-"I don't know" is visually unmistakable from an answer — a refusal that looks
-like an answer is the failure mode the whole guardrail layer exists to prevent.
+cannot check. The citation the generator emits is left inline at the end of
+the answer, and the passages the answer was built from are one click away in
+the source panel with their similarity scores. Refusals are styled as a
+warning block so that "I don't know" is visually unmistakable from an answer —
+a refusal that looks like an answer is the failure mode the whole guardrail
+layer exists to prevent.
 """
 from __future__ import annotations
 
