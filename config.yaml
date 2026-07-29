@@ -19,7 +19,7 @@ index:
   # The assessment brief is prose whose sections list independent facts, so it
   # chunks line-wise at a tighter budget — see ingest.chunk_lines for the
   # measurement that motivated splitting it out from the slide budget.
-  chunk_target_words_docx: 55
+  chunk_target_words_docx: 32
   min_chunk_chars: 40            # drop title-only / decorative fragments
   # OCR noise filter — see ingest.is_informative. Chart axis labels and stray
   # glyphs embed as real vectors and compete for retrieval slots, so chunks
@@ -52,8 +52,14 @@ generation:
   backend: openai_compatible
   api_key_env: GROQ_API_KEY
   base_url: https://api.groq.com/openai/v1
-  model: llama-3.3-70b-versatile
-  rewrite_model: llama-3.3-70b-versatile  # query rewriting (FR4) — same model
+  # Model selection is a live R3 (API cost/limits) mitigation, not a
+  # preference. The first full evaluation exhausted the provider's 100k
+  # tokens/day allowance for llama-3.3-70b-versatile mid-run. Each model
+  # carries its own daily quota, so generation, rewriting and the evaluation
+  # judge are deliberately spread across three of them. Swapping any of these
+  # is a config edit; no module imports a model name.
+  model: llama-3.1-8b-instant
+  rewrite_model: llama-3.1-8b-instant     # query rewriting (FR4) — cheap + fast
   temperature: 0.0               # determinism (NFR7)
   max_tokens: 600                # capped token budget (R3)
   timeout_seconds: 30
@@ -77,6 +83,14 @@ intents:
   # Intents that bypass retrieval and generation entirely (FR7).
   short_circuit:
     - out-of-scope/social
+  # A short-circuit is a hard refusal with no retrieval, so an unconfident
+  # router prediction must not trigger one. Measured on the gold set: every
+  # correctly routed out-of-scope question scored >= 0.713, while the two
+  # in-scope questions wrongly routed out-of-scope scored 0.422 and 0.460.
+  # Below this cut-off the turn falls through to retrieval and the similarity
+  # gate rules on it instead, so the two refusal layers check each other
+  # rather than the router being a single point of failure.
+  short_circuit_min_confidence: 0.60
   model_path: index_store/intent_clf.joblib
 
 evaluation:
@@ -84,3 +98,6 @@ evaluation:
   gold_set: eval/gold_set.json
   hit_at_k: 3                    # NFR2 measures hit@3
   seed: 42                       # NFR7 reproducibility
+  # Groundedness judge runs on a different model from the generator, both to
+  # spread the daily token quota and so the generator is not marking its own work.
+  judge_model: openai/gpt-oss-20b

@@ -76,7 +76,7 @@ class ModuleMate:
         intent = self.classifier.predict(question)
 
         # --- Step 2: intent short-circuit, before any network call (FR7) ---
-        if self.classifier.should_short_circuit(intent.label):
+        if self.classifier.should_short_circuit(intent.label, intent.confidence):
             return TurnResult(
                 question=question,
                 rewritten_query=question,

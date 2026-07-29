@@ -309,10 +309,18 @@ def build_chunks(cfg=None) -> list[Chunk]:
         for locator, text in units:
             # Slides are visually chunked already, so a word-budget window with
             # overlap suits them; the brief is prose and chunks by line.
-            pieces = (
-                chunk_lines(text, docx_target) if doc_type == "docx"
-                else chunk_text(text, target, overlap)
-            )
+            if doc_type == "docx":
+                # Prefix the section heading onto each piece. A lone bullet
+                # ("-- You can use AI to the fullest.") embeds ambiguously,
+                # and the heading is exactly the disambiguating context a
+                # reader would use. It is also what the chunk is cited as, so
+                # the retrieved text and its citation stay consistent.
+                pieces = [
+                    f"{locator}\n{piece}"
+                    for piece in chunk_lines(text, docx_target)
+                ]
+            else:
+                pieces = chunk_text(text, target, overlap)
             for piece_idx, piece in enumerate(pieces):
                 if len(piece) < min_chars:
                     continue

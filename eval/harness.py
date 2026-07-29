@@ -119,8 +119,13 @@ def lexical_groundedness(answer: str, result: TurnResult) -> bool:
     return (covered / len(words)) >= 0.65
 
 
-def judge_groundedness(bot: ModuleMate, result: TurnResult) -> tuple[bool, str]:
-    """LLM-as-judge faithfulness check, with a lexical fallback."""
+def judge_groundedness(bot: ModuleMate, result: TurnResult,
+                       judge_model: str) -> tuple[bool, str]:
+    """LLM-as-judge faithfulness check, with a lexical fallback.
+
+    Judged by a different model from the one that wrote the answer, so the
+    generator is not marking its own work.
+    """
     context = "\n\n".join(
         f"--- PASSAGE {i} ---\n{p.text}"
         for i, p in enumerate(result.passages, start=1)
@@ -128,7 +133,9 @@ def judge_groundedness(bot: ModuleMate, result: TurnResult) -> tuple[bool, str]:
     user = f"CONTEXT:\n{context}\n\nANSWER:\n{result.answer}\n\nVerdict:"
     try:
         text, _, _ = bot.generator.backend.complete(
-            JUDGE_SYSTEM, user, bot.generator.model, 0.0, 10
+            # Generous token budget: reasoning-style models spend tokens
+            # before emitting the verdict, and a tight cap returns empty.
+            JUDGE_SYSTEM, user, judge_model, 0.0, 600
         )
         verdict = text.strip().upper()
         if "UNGROUNDED" in verdict:
@@ -157,6 +164,7 @@ def confusion_matrix(labels: list[str], truth: list[str],
 def run(limit: int | None = None, use_judge: bool = True) -> dict:
     cfg = config.load()
     k = cfg.require("evaluation.hit_at_k")
+    judge_model = cfg.get("evaluation.judge_model") or cfg.require("generation.model")
     items = load_gold(cfg.path("evaluation.gold_set"))
     if limit:
         items = items[:limit]
@@ -199,7 +207,7 @@ def run(limit: int | None = None, use_judge: bool = True) -> dict:
                 rec["citation_doc_correct"] = citation_doc_correct(result, item)
                 rec["fabricated"] = fabricated_citations(result, known)
                 grounded, how = (
-                    judge_groundedness(bot, result) if use_judge
+                    judge_groundedness(bot, result, judge_model) if use_judge
                     else (lexical_groundedness(result.answer, result), "lexical")
                 )
                 rec["grounded"] = grounded
@@ -274,6 +282,8 @@ def summarise(records: list[dict], cfg, bot: ModuleMate, k: int) -> dict:
             "k": cfg.require("retrieval.k"),
             "similarity_threshold": cfg.require("retrieval.similarity_threshold"),
             "generation_model": cfg.require("generation.model"),
+            "judge_model": cfg.get("evaluation.judge_model"),
+            "rewrite_model": cfg.get("generation.rewrite_model"),
             "embedding_model": cfg.require("embedding.model_name"),
             "backend": cfg.require("generation.backend"),
         },
