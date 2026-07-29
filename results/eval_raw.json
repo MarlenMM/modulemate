@@ -1,23 +1,23 @@
 {
  "summary": {
-  "n_total": 49,
-  "n_in_scope": 38,
+  "n_total": 63,
+  "n_in_scope": 52,
   "n_out_of_scope": 11,
-  "n_answered": 38,
-  "hit_at_3": 0.8947,
-  "citation_correctness": 0.9211,
-  "citation_document_correctness": 0.9737,
+  "n_answered": 50,
+  "hit_at_3": 0.7885,
+  "citation_correctness": 0.82,
+  "citation_document_correctness": 0.92,
   "fabricated_citation_count": 0,
   "fabricated_details": [],
-  "groundedness": 0.9474,
-  "key_fact_present": 0.9474,
+  "groundedness": 0.94,
+  "key_fact_present": 0.9,
   "refusal_rate_out_of_scope": 1.0,
-  "false_refusal_rate_in_scope": 0.0,
-  "intent_accuracy": 0.898,
-  "latency_median": 10.797,
-  "latency_mean": 8.821,
-  "latency_p90": 14.895,
-  "latency_max": 18.955,
+  "false_refusal_rate_in_scope": 0.0385,
+  "intent_accuracy": 0.8571,
+  "latency_median": 10.931,
+  "latency_mean": 9.963,
+  "latency_p90": 16.906,
+  "latency_max": 22.933,
   "confusion_labels": [
    "admin/logistics",
    "conceptual",
@@ -26,21 +26,21 @@
   ],
   "confusion_matrix": [
    [
-    13,
+    18,
     0,
     0,
     0
    ],
    [
     0,
-    12,
+    16,
     2,
     0
    ],
    [
-    0,
+    4,
     1,
-    10,
+    11,
     0
    ],
    [
@@ -51,30 +51,30 @@
    ]
   ],
   "refusal_reasons": {
-   "intent": 9,
-   "threshold": 0,
-   "model": 2
+   "intent": 8,
+   "threshold": 2,
+   "model": 3
   },
   "index_manifest": {
-   "built_at": "2026-07-29 09:07:56",
-   "n_chunks": 704,
-   "n_documents": 10,
+   "built_at": "2026-07-29 10:20:11",
+   "n_chunks": 1799,
+   "n_documents": 51,
    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
    "dim": 384,
    "chunk_target_words": 230,
    "chunk_overlap_words": 45,
-   "build_seconds": 7.8
+   "build_seconds": 13.8
   },
   "config": {
    "k": 5,
-   "similarity_threshold": 0.35,
+   "similarity_threshold": 0.48,
    "generation_model": "llama-3.1-8b-instant",
    "judge_model": "openai/gpt-oss-20b",
    "rewrite_model": "llama-3.1-8b-instant",
    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
    "backend": "openai_compatible"
   },
-  "wall_clock_seconds": 463.2
+  "wall_clock_seconds": 667.4
  },
  "records": [
   {
@@ -82,24 +82,20 @@
    "question": "What is the word limit for the individual project report?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.93,
+   "intent_confidence": 0.936,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5521,
-   "latency_seconds": 3.269,
-   "answer": "The word limit for the individual project report is 4000 words. \n[Source: HIT summer course_AI and ML_project_July2026, Requirements] [Source: HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]",
+   "latency_seconds": 5.836,
+   "answer": "The word limit for the individual project report is 4000 words. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Requirements]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Requirements"
-    ],
-    [
-     "HIT summer course_AI and ML_project_July2026",
-     "Assessment – Individual Project"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Requirements",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Requirements",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -112,24 +108,24 @@
    "question": "How much is the individual project worth in the overall assessment?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.841,
+   "intent_confidence": 0.874,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6347,
-   "latency_seconds": 0.513,
-   "answer": "The individual project is worth 60% of the overall assessment. \n\n[Source: HIT summer course_AI and ML_project_July2026, Assessment – Individual Project] [Source: HIT summer course_AI and ML_project_July2026, Assessment scheme]",
+   "latency_seconds": 0.422,
+   "answer": "The individual project is worth 60% of the overall assessment. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Assessment – Individual Project"
     ],
     [
-     "HIT summer course_AI and ML_project_July2026",
-     "Assessment scheme"
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+     "Assessment – Individual Project"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -142,24 +138,24 @@
    "question": "When is the individual project due?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.931,
+   "intent_confidence": 0.964,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6574,
-   "latency_seconds": 0.429,
-   "answer": "The individual project is due on Friday, 31 July, 2026, at 23:55 Sunday. \n\n[Source: HIT summer course_AI and ML_project_July2026, Assessment – Individual Project] [Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "latency_seconds": 0.415,
+   "answer": "The individual project is due on Friday, 31 July, 2026, at 11:55 p.m. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]\n[Source: chats__HIT 2026 Summer Course AI and ML, part 4]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Assessment – Individual Project"
     ],
     [
-     "HIT summer course_AI and ML_project_July2026",
-     "The submission"
+     "chats__HIT 2026 Summer Course AI and ML",
+     "part 4"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -172,24 +168,24 @@
    "question": "What is the penalty for submitting the report late?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.802,
+   "intent_confidence": 0.805,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6779,
-   "latency_seconds": 0.36,
-   "answer": "The penalty for submitting the report late is a 10% deduction for each day of late submission after the deadline. No submission will be accepted after 2 days of the deadline without any justified reasons.\n\n[Source: HIT summer course_AI and ML_project_July2026, Penalty] [Source: HIT summer course_AI and ML_project_July2026, Penalty]",
+   "latency_seconds": 0.412,
+   "answer": "For each day of late submission after the deadline, there is a 10% deduction. No submission will be accepted after 2 days of the deadline without any justified reasons. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Penalty] [Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Penalty]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Penalty"
     ],
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
      "Penalty"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Penalty",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Penalty",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -202,28 +198,28 @@
    "question": "How many days after the deadline will a submission still be accepted?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.731,
+   "intent_confidence": 0.826,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.5041,
-   "latency_seconds": 3.821,
-   "answer": "A submission will still be accepted without any justified reasons for 2 days after the deadline. \n\n[Source: HIT summer course_AI and ML_project_July2026, Penalty] [Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "top_score": 0.5812,
+   "latency_seconds": 0.417,
+   "answer": "A submission will still be accepted 2 days after the deadline without any justified reasons. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Penalty] [Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Penalty]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
      "Penalty"
     ],
     [
-     "HIT summer course_AI and ML_project_July2026",
-     "The submission"
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+     "Penalty"
     ]
    ],
-   "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Penalty",
+   "hit_at_k": false,
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Penalty",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
-   "grounded": true,
+   "grounded": false,
    "grounded_by": "llm",
    "fact_present": true
   },
@@ -232,20 +228,20 @@
    "question": "Who should I submit my completed project report to?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.929,
+   "intent_confidence": 0.948,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5829,
-   "latency_seconds": 7.989,
-   "answer": "You should submit your completed project report to Dr. Guanglei YANG. He will tell you how to make your submission before the deadline.\n\n[Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "latency_seconds": 10.815,
+   "answer": "You should submit your completed project report to Dr. Guanglei YANG. He will tell you how to make your submission before the deadline. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "The submission"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | The submission",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | The submission",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -258,22 +254,22 @@
    "question": "How should I name my submission file?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.844,
+   "intent_confidence": 0.869,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.4292,
-   "latency_seconds": 7.843,
-   "answer": "You should name your file by your student ID, i.e, AI_assignment_ID.xxx, where ID is your student number, and the file format can be in either pdf or word .doc or .docx. \n\n[Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "top_score": 0.5123,
+   "latency_seconds": 9.872,
+   "answer": "According to PASSAGE 5, the filenames should be named as follows: \nIndividual Assignment: AI_assignment_StudentID.xxx\nIndividual Project Report: AI_project_StudentID.xxx\n\nFor example, if your student ID is 123456, the filenames should be:\nAI_assignment_123456.pdf\nAI_project_123456.pdf\n\n[Source: chats__HIT 2026 Summer Course AI and ML, part 6]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
-     "The submission"
+     "chats__HIT 2026 Summer Course AI and ML",
+     "part 6"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | The submission",
-   "citation_correct": true,
-   "citation_doc_correct": true,
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | The submission",
+   "citation_correct": false,
+   "citation_doc_correct": false,
    "fabricated": [],
    "grounded": true,
    "grounded_by": "llm",
@@ -284,20 +280,24 @@
    "question": "Which file formats are accepted for the report submission?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.86,
+   "intent_confidence": 0.904,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.4581,
-   "latency_seconds": 9.929,
-   "answer": "The accepted file formats for the report submission are pdf, .doc, and .docx. \n[Source: HIT summer course_AI and ML_project_July2026, The submission]",
+   "top_score": 0.5199,
+   "latency_seconds": 9.79,
+   "answer": "The accepted file formats for the report submission are PDF (.pdf), Microsoft Word (.doc or .docx). \n\n[Source: chats__HIT 2026 Summer Course AI and ML, part 5] [Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "chats__HIT 2026 Summer Course AI and ML",
+     "part 5"
+    ],
+    [
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "The submission"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | The submission",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | The submission",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -310,24 +310,20 @@
    "question": "How many marks is the literature survey worth in the report?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.8,
+   "intent_confidence": 0.812,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5943,
-   "latency_seconds": 7.836,
-   "answer": "The literature survey is worth 10% of the report. \n\n[Source: HIT summer course_AI and ML_project_July2026, Assessment scheme] [Source: HIT summer course_AI and ML_project_July2026, Assessment scheme]",
+   "latency_seconds": 3.566,
+   "answer": "The literature survey is worth 10% of the marks in the report. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment scheme]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
-     "Assessment scheme"
-    ],
-    [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Assessment scheme"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Assessment scheme",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Assessment scheme",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -340,50 +336,35 @@
    "question": "Am I allowed to use AI tools when working on this project?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.634,
-   "refused": false,
-   "refusal_reason": null,
+   "intent_confidence": 0.709,
+   "refused": true,
+   "refusal_reason": "model",
    "top_score": 0.5163,
-   "latency_seconds": 15.974,
-   "answer": "The module materials do not explicitly state whether you are allowed to use AI tools when working on the project. However, they do suggest a list of AI tools that you should know in 2026, which implies that these tools are relevant to the field of AI and ML. \n\n[Source: AI notes1_introduction, slide 48] [Source: AI notes1_introduction, slide 31]",
-   "citations": [
-    [
-     "AI notes1_introduction",
-     "slide 48"
-    ],
-    [
-     "AI notes1_introduction",
-     "slide 31"
-    ]
-   ],
+   "latency_seconds": 13.758,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": [],
    "hit_at_k": false,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Penalty",
-   "citation_correct": false,
-   "citation_doc_correct": false,
-   "fabricated": [],
-   "grounded": false,
-   "grounded_by": "lexical",
-   "fact_present": true
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Penalty"
   },
   {
    "id": "adm11",
    "question": "Roughly how many pages should the project report be?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.934,
+   "intent_confidence": 0.948,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6335,
-   "latency_seconds": 6.872,
-   "answer": "The report should be around 25 pages with proper diagrams. \n[Source: HIT summer course_AI and ML_project_July2026, Requirements]",
+   "latency_seconds": 9.722,
+   "answer": "The report should be around 25 pages with proper diagrams. \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Requirements]",
    "citations": [
     [
-     "HIT summer course_AI and ML_project_July2026",
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Requirements"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course_AI and ML_project_July2026 | Requirements",
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Requirements",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -396,24 +377,20 @@
    "question": "What percentage of the assessment is class attendance worth?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.538,
+   "intent_confidence": 0.759,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6157,
-   "latency_seconds": 8.786,
-   "answer": "Class attendance is worth 10% of the assessment.\n\n[Source: HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 4] [Source: HIT summer course_AI and ML_project_July2026, Assessment scheme]",
+   "latency_seconds": 8.746,
+   "answer": "Class attendance is worth 10% of the assessment.\n\n[Source: Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 4]",
    "citations": [
     [
-     "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+     "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
      "slide 4"
-    ],
-    [
-     "HIT summer course_AI and ML_project_July2026",
-     "Assessment scheme"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 4",
+   "expected": "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 4",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -426,20 +403,20 @@
    "question": "What time do the lectures run and in which building?",
    "intent_true": "admin/logistics",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.451,
+   "intent_confidence": 0.895,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.4996,
-   "latency_seconds": 9.791,
-   "answer": "The lectures run from 08:30am to 11:45am in the EE Building 40025 (电机楼40025). \n\n[Source: HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 3]",
+   "latency_seconds": 8.79,
+   "answer": "The lectures run from 08:30am to 11:45am in the EE Building 40025 (电机楼40025). \n\n[Source: Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 3]",
    "citations": [
     [
-     "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+     "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
      "slide 3"
     ]
    ],
    "hit_at_k": true,
-   "expected": "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 3",
+   "expected": "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 3",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -452,24 +429,20 @@
    "question": "What is a decision tree?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.728,
+   "intent_confidence": 0.725,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7888,
-   "latency_seconds": 12.948,
-   "answer": "A decision tree is a decision support tool that uses a tree-like model of decisions and their possible consequences, including chance event outcomes, resource costs, and utility. It is one way to display an algorithm that only contains conditional control statements. A decision tree is also a non-parametric supervised learning algorithm, which is utilized for both classification and regression tasks. It has a hierarchical, tree structure, which consists of a root node, branches, internal nodes and leaf nodes.\n\n[Source: AI notes6_machine learning_part 2, slide 7] [Source: AI notes6_machine learning_part 2, slide 9]",
+   "latency_seconds": 15.068,
+   "answer": "A decision tree is a decision support tool that uses a tree-like model of decisions and their possible consequences, including chance event outcomes, resource costs, and utility. It is also a non-parametric supervised learning algorithm, which is utilized for both classification and regression tasks. It has a hierarchical, tree structure, which consists of a root node, branches, internal nodes and leaf nodes.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 7]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 7"
-    ],
-    [
-     "AI notes6_machine learning_part 2",
-     "slide 9"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 7",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 7",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -482,20 +455,20 @@
    "question": "What is a convolutional neural network?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.846,
+   "intent_confidence": 0.844,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.679,
-   "latency_seconds": 18.955,
-   "answer": "A convolutional neural network (CNN) is a class of artificial neural network most commonly applied to analyze visual imagery. It uses a mathematical operation called convolution in place of general matrix multiplication in at least one of its layers. They are specifically designed to process pixel data and are used in image recognition and processing.\n\n[Source: AI notes8_deep learning, slide 8]",
+   "latency_seconds": 19.899,
+   "answer": "A convolutional neural network (CNN) is a class of artificial neural network most commonly applied to analyze visual imagery. It uses a mathematical operation called convolution in place of general matrix multiplication in at least one of its layers. CNNs are specifically designed to process pixel data and are used in image recognition and processing.\n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 8]",
    "citations": [
     [
-     "AI notes8_deep learning",
+     "Lectures Week 2__AI notes8_deep learning",
      "slide 8"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes8_deep learning | slide 8",
+   "expected": "Lectures Week 2__AI notes8_deep learning | slide 8",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -508,24 +481,24 @@
    "question": "What is clustering in machine learning?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.767,
+   "intent_confidence": 0.759,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7525,
-   "latency_seconds": 12.892,
-   "answer": "Clustering in machine learning is the act of organizing similar objects into groups within a machine learning algorithm. It involves assigning related objects into clusters, which is beneficial for AI models. Clustering has many uses in data science, such as image processing, knowledge discovery in data, unsupervised learning, and various other applications.\n\n[Source: AI notes6_machine learning_part 2, slide 66] [Source: AI notes6_machine learning_part 2, slide 68]",
+   "latency_seconds": 15.022,
+   "answer": "Clustering in machine learning is the act of organizing similar objects into groups within a machine learning algorithm. It involves assigning related objects into clusters, which is beneficial for AI models. Clustering has many uses in data science, such as image processing, knowledge discovery in data, unsupervised learning, and various other applications.\n\nClustering is essentially an approach to discover a useful summary of the data, and it aims to find classes (clusters) of objects such that some standard of quality is met. It involves organizing data into classes with high intra-class similarity and low inter-class similarity.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 66] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 68]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 66"
     ],
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 68"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 66",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 66",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -538,24 +511,24 @@
    "question": "What is the difference between supervised and unsupervised learning?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.758,
+   "intent_confidence": 0.74,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7121,
-   "latency_seconds": 12.996,
-   "answer": "Supervised learning assumes the existence of a teacher, some fitness measure, or other external method of classifying training instances, whereas unsupervised learning eliminates the teacher and requires that the learners form and evaluate concepts on their own. Supervised learning trains a model on known input and output data so that it can predict future outputs, whereas unsupervised learning finds hidden patterns or intrinsic structures in input data.\n\n[Source: AI notes5_machine learning_part 1, slide 25] [Source: AI notes6_machine learning_part 2, slide 67]",
+   "latency_seconds": 13.944,
+   "answer": "Supervised learning assumes the existence of a teacher, some fitness measure, or other external method of classifying training instances, whereas unsupervised learning eliminates the teacher and requires that the learners form and evaluate concepts on their own. Supervised learning trains a model on known input and output data to predict future outputs, whereas unsupervised learning finds hidden patterns or intrinsic structures in input data.\n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 25] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 67]",
    "citations": [
     [
-     "AI notes5_machine learning_part 1",
+     "Lectures Week 2__AI notes5_machine learning_part 1",
      "slide 25"
     ],
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 67"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 67",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 67",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -568,20 +541,20 @@
    "question": "What is a neural network?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.923,
+   "intent_confidence": 0.921,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.8427,
-   "latency_seconds": 17.0,
-   "answer": "A neural network is a network or circuit of biological neurons, or, in a modern sense, an artificial neural network, composed of artificial neurons or nodes. It is either a biological neural network, made up of biological neurons, or an artificial neural network, used for solving artificial intelligence (AI) problems.\n\n[Source: AI notes7_neural networks, slide 9]",
+   "latency_seconds": 19.026,
+   "answer": "A neural network is a network or circuit of biological neurons, or, in a modern sense, an artificial neural network, composed of artificial neurons or nodes. It is either a biological neural network, made up of biological neurons, or an artificial neural network, used for solving artificial intelligence (AI) problems. A neural network is also a type of machine learning process that uses interconnected nodes or neurons in a layered structure that resembles the human brain.\n\n[Source: Lectures Week 2__AI notes7_neural networks, slide 9]",
    "citations": [
     [
-     "AI notes7_neural networks",
+     "Lectures Week 2__AI notes7_neural networks",
      "slide 9"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes7_neural networks | slide 9",
+   "expected": "Lectures Week 2__AI notes7_neural networks | slide 9",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -594,24 +567,20 @@
    "question": "What is artificial intelligence?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.901,
+   "intent_confidence": 0.892,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7747,
-   "latency_seconds": 18.942,
-   "answer": "Artificial Intelligence (AI) is a machine's ability to perform cognitive functions as humans do, such as perceiving, learning, reasoning, and solving problems. It is also the intelligence of a machine or computer that enables it to imitate or mimic human capabilities. Additionally, AI is the use of computer systems to perform tasks normally associated with human intelligence.\n\n[Source: AI notes1_introduction, slide 6] [Source: AI notes1_introduction, slide 4]",
+   "latency_seconds": 19.876,
+   "answer": "Artificial Intelligence (AI) is a machine's ability to perform cognitive functions as humans do, such as perceiving, learning, reasoning, and solving problems. It is also described as the intelligence of a machine or computer that enables it to imitate or mimic human capabilities. Additionally, AI is the use of computer systems to perform tasks normally associated with human intelligence.\n\n[Source: Lectures Week 2__AI notes1_introduction, slide 6]",
    "citations": [
     [
-     "AI notes1_introduction",
+     "Lectures Week 2__AI notes1_introduction",
      "slide 6"
-    ],
-    [
-     "AI notes1_introduction",
-     "slide 4"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes1_introduction | slide 6",
+   "expected": "Lectures Week 2__AI notes1_introduction | slide 6",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -624,20 +593,20 @@
    "question": "What is k-means clustering?",
    "intent_true": "conceptual",
    "intent_pred": "code-help",
-   "intent_confidence": 0.46,
+   "intent_confidence": 0.445,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.8183,
-   "latency_seconds": 14.895,
-   "answer": "K-means clustering is a method of vector quantization that aims to partition n observations into k clusters in which each observation belongs to the cluster with the nearest mean (cluster centers or cluster centroid). It is an unsupervised learning technique to classify unlabeled data by grouping them by features, rather than pre-defined categories.\n\n[Source: AI notes6_machine learning_part 2, slide 79]",
+   "latency_seconds": 15.867,
+   "answer": "K-means clustering is a method of vector quantization that aims to partition n observations into k clusters in which each observation belongs to the cluster with the nearest mean (cluster centers or cluster centroid). It is an unsupervised learning technique to classify unlabeled data by grouping them by features, rather than pre-defined categories.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 79]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 79"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 79",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 79",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -650,24 +619,20 @@
    "question": "What is a support vector machine?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.553,
+   "intent_confidence": 0.542,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5747,
-   "latency_seconds": 12.849,
-   "answer": "A Support Vector Machine (SVM) maps training examples to points in space so as to maximise the width of the gap between the two categories. New examples are then mapped into that same space and predicted to belong to a category based on which side of the gap they fall. SVMs can also efficiently perform non-linear classification using the kernel trick, implicitly mapping their inputs into high-dimensional feature spaces.\n\n[Source: AI notes6_machine learning_part 2, slide 62] [Source: AI notes5_machine learning_part 1, slide 3]",
+   "latency_seconds": 14.805,
+   "answer": "A Support Vector Machine (SVM) maps training examples to points in space so as to maximise the width of the gap between the two categories. New examples are then mapped into that same space and predicted to belong to a category based on which side of the gap they fall. SVMs can also perform non-linear classification using the kernel trick, implicitly mapping their inputs into high-dimensional feature spaces.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 62]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 62"
-    ],
-    [
-     "AI notes5_machine learning_part 1",
-     "slide 3"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 62",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 62",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -680,20 +645,24 @@
    "question": "What is the k-nearest neighbours algorithm?",
    "intent_true": "conceptual",
    "intent_pred": "code-help",
-   "intent_confidence": 0.92,
+   "intent_confidence": 0.911,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6705,
-   "latency_seconds": 11.859,
-   "answer": "The k-nearest neighbors algorithm (k-NN) is a non-parametric supervised learning method that is a type of classification where the function is only approximated locally and all computation is deferred until function evaluation.\n\n[Source: AI notes6_machine learning_part 2, slide 60]",
+   "latency_seconds": 13.916,
+   "answer": "The k-nearest neighbors algorithm (k-NN) is a non-parametric supervised learning method that is a type of classification where the function is only approximated locally and all computation is deferred until function evaluation. It is used to rank objects based on their proximity to a new data point, and the class of the new data point is determined by the most popular class among its k nearest neighbors.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 60] [Source: Lectures Week 1__Lecture_3_Classification, page 33]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 60"
+    ],
+    [
+     "Lectures Week 1__Lecture_3_Classification",
+     "page 33"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 60",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 60",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -706,25 +675,29 @@
    "question": "What is a naive Bayes classifier?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.665,
+   "intent_confidence": 0.649,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7318,
-   "latency_seconds": 13.951,
-   "answer": "A naive Bayes classifier is a family of simple \"probabilistic classifiers\" based on applying Bayes' theorem with strong (naive) independence assumptions between the features. It is used to calculate the posterior probability P(c|X) = P(x1|c)xP(x2|c)x..xP(x|c)x P(c), where P(doc | cat) is the class prior probability, P(doc) is the likelihood, and P(c) is the predictor prior probability.\n\n[Source: AI notes6_machine learning_part 2, slide 61]",
+   "latency_seconds": 13.922,
+   "answer": "A naive Bayes classifier is a family of simple \"probabilistic classifiers\" based on applying Bayes' theorem with strong (naive) independence assumptions between the features. It is a conditional probability model that assigns probabilities for each of K possible classes given an object to be classified, represented by features x = (x1,...,x d). \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 61] [Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 58]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 61"
+    ],
+    [
+     "Lectures Week 1__Lecture_4_Imbalanced_Multiclass",
+     "page 58"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 61",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 61",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "lexical",
+   "grounded_by": "llm",
    "fact_present": true
   },
   {
@@ -732,24 +705,20 @@
    "question": "What are the main types of machine learning?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.782,
+   "intent_confidence": 0.779,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6624,
-   "latency_seconds": 12.839,
-   "answer": "The main types of machine learning mentioned in the passages are Supervised, Unsupervised, and Reinforcement. Additionally, the passage on slide 22 also mentions Task Driven, Data Driven, and Learning from mistakes as types of machine learning.\n\n[Source: AI notes5_machine learning_part 1, slide 22] [Source: AI notes5_machine learning_part 1, slide 3]",
+   "latency_seconds": 13.81,
+   "answer": "According to Passage 4, the main types of machine learning are:\n\n1. Supervised Learning\n2. Unsupervised Learning\n3. Reinforcement Learning\n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 22]",
    "citations": [
     [
-     "AI notes5_machine learning_part 1",
+     "Lectures Week 2__AI notes5_machine learning_part 1",
      "slide 22"
-    ],
-    [
-     "AI notes5_machine learning_part 1",
-     "slide 3"
     ]
    ],
    "hit_at_k": false,
-   "expected": "AI notes5_machine learning_part 1 | slide 8",
+   "expected": "Lectures Week 2__AI notes5_machine learning_part 1 | slide 8",
    "citation_correct": false,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -762,20 +731,20 @@
    "question": "Which layers does a convolutional neural network consist of?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.445,
+   "intent_confidence": 0.433,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6908,
-   "latency_seconds": 14.834,
-   "answer": "A convolutional neural network consists of an input layer, hidden layers, and an output layer. The hidden layers include one or more layers that perform convolutions. \n\n[Source: AI notes8_deep learning, slide 11]",
+   "latency_seconds": 15.762,
+   "answer": "A convolutional neural network consists of an input layer, hidden layers, and an output layer. The hidden layers include one or more layers that perform convolutions. \n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 11]",
    "citations": [
     [
-     "AI notes8_deep learning",
+     "Lectures Week 2__AI notes8_deep learning",
      "slide 11"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes8_deep learning | slide 11",
+   "expected": "Lectures Week 2__AI notes8_deep learning | slide 11",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -788,24 +757,20 @@
    "question": "What is uninformed or blind search?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.566,
+   "intent_confidence": 0.557,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.806,
-   "latency_seconds": 12.917,
-   "answer": "Uninformed or blind search is a type of search algorithm that uses no information other than the initial state, the search operator, and a test for a solution. It is characterized by the order in which it expands the nodes, which can have a dramatic effect on how well the search performs. Uninformed searches are normally very inefficient.\n\n[Source: AI notes2_search, slide 23] [Source: AI notes2_search, slide 54]",
+   "latency_seconds": 13.915,
+   "answer": "Uninformed or blind search is a type of search algorithm that uses no information other than the initial state, the search operator, and a test for a solution. It is characterized by the order in which it expands the nodes, which can have a dramatic effect on how well the search performs.\n\n[Source: Lectures Week 2__AI notes2_search, slide 23]",
    "citations": [
     [
-     "AI notes2_search",
+     "Lectures Week 2__AI notes2_search",
      "slide 23"
-    ],
-    [
-     "AI notes2_search",
-     "slide 54"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes2_search | slide 23",
+   "expected": "Lectures Week 2__AI notes2_search | slide 23",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -818,24 +783,20 @@
    "question": "What are the differences between an artificial neural network and a convolutional neural network?",
    "intent_true": "conceptual",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.824,
+   "intent_confidence": 0.822,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7046,
-   "latency_seconds": 15.988,
-   "answer": "An artificial neural network (ANN) uses fully connected layers, can be used only for small images, and considers the entire image for learning patterns. In contrast, a convolutional neural network (CNN) uses partially connected layers, can be used for any image, and considers only the part of the image within the receptive field. Additionally, CNNs have fewer parameters and are more efficient for images compared to ANNs.\n\n[Source: AI notes8_deep learning, slide 20] [Source: AI notes8_deep learning, slide 11]",
+   "latency_seconds": 16.906,
+   "answer": "An artificial neural network (ANN) uses fully connected layers and can be used only for small images, considering the entire image for learning patterns. In contrast, a convolutional neural network (CNN) uses partially connected layers, can be used for any image, and considers only the part of the image within the receptive field. Additionally, CNNs have fewer parameters and are more efficient for images compared to ANNs.\n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 20]",
    "citations": [
     [
-     "AI notes8_deep learning",
+     "Lectures Week 2__AI notes8_deep learning",
      "slide 20"
-    ],
-    [
-     "AI notes8_deep learning",
-     "slide 11"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes8_deep learning | slide 20",
+   "expected": "Lectures Week 2__AI notes8_deep learning | slide 20",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -848,20 +809,20 @@
    "question": "What are the steps for constructing a decision tree?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.611,
+   "intent_confidence": 0.589,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7612,
-   "latency_seconds": 10.797,
-   "answer": "Building a decision tree involves two steps: Tree construction and Tree pruning. Tree construction involves recursively splitting the tree according to selected attributes (conditions), while Tree pruning involves identifying and removing irrelevant branches to increase classification accuracy.\n\n[Source: AI notes6_machine learning_part 2, slide 18]",
+   "latency_seconds": 12.779,
+   "answer": "Building a decision tree involves two steps: Tree construction and Tree pruning. Tree construction involves recursively splitting the tree according to selected attributes (conditions), while Tree pruning involves identifying and removing irrelevant branches to increase classification accuracy.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 18]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 18"
     ]
    ],
    "hit_at_k": false,
-   "expected": "AI notes6_machine learning_part 2 | slide 22",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 22",
    "citation_correct": false,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -874,20 +835,20 @@
    "question": "What are the two stages involved in building a decision tree?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.489,
+   "intent_confidence": 0.483,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6622,
-   "latency_seconds": 12.822,
-   "answer": "The two stages involved in building a decision tree are Tree construction and Tree pruning. Tree construction involves recursively splitting the tree according to selected attributes (conditions), while Tree pruning involves identifying and removing irrelevant branches to increase classification accuracy.\n\n[Source: AI notes6_machine learning_part 2, slide 18]",
+   "latency_seconds": 13.789,
+   "answer": "The two stages involved in building a decision tree are Tree construction and Tree pruning. Tree construction involves recursively splitting the tree according to selected attributes (conditions), while Tree pruning involves identifying and removing irrelevant branches to increase classification accuracy.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 18]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 18"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 18",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 18",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -900,20 +861,20 @@
    "question": "How does the breadth-first search algorithm explore a graph?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.745,
+   "intent_confidence": 0.741,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6647,
-   "latency_seconds": 10.929,
-   "answer": "The breadth-first search algorithm explores a graph by exploring outward from the root in all possible directions, adding nodes one \"layer\" at a time. It does this by expanding all nodes at level 1 before entering level 2, and so on, until it reaches the goal state. This is done by adding the root with the initial state to a queue, tree, and visited list, and then dequeuing a node from the queue to check if it has the goal state. If not, it adds the child nodes to the queue, tree, and visited list if they have not been visited. \n\n[Source: AI notes2_search, slide 25]",
+   "latency_seconds": 11.789,
+   "answer": "The breadth-first search algorithm explores a graph by exploring outward from the root in all possible directions, adding nodes one \"layer\" at a time. It expands all nodes at level 1 before entering level 2, and continues this process until it reaches the goal state. Specifically, it expands all nodes at level j before entering level j+1.\n\n[Source: Lectures Week 2__AI notes2_search, slide 25]",
    "citations": [
     [
-     "AI notes2_search",
+     "Lectures Week 2__AI notes2_search",
      "slide 25"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes2_search | slide 25",
+   "expected": "Lectures Week 2__AI notes2_search | slide 25",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -926,20 +887,20 @@
    "question": "What are the two key steps in the generate and test search procedure?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.685,
+   "intent_confidence": 0.622,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5957,
-   "latency_seconds": 10.776,
-   "answer": "The two key steps in the generate and test search procedure are Step 1: Generate a possible state and Step 2: Test to see if it is a goal state (found a solution). \n\n[Source: AI notes2_search, slide 22]",
+   "latency_seconds": 12.722,
+   "answer": "The two key steps in the generate and test search procedure are:\n\nStep 1. Generate a possible state\nStep 2. Test to see if it is a goal state (found a solution)\n\n[Source: Lectures Week 2__AI notes2_search, slide 22]",
    "citations": [
     [
-     "AI notes2_search",
+     "Lectures Week 2__AI notes2_search",
      "slide 22"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes2_search | slide 22",
+   "expected": "Lectures Week 2__AI notes2_search | slide 22",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -952,20 +913,20 @@
    "question": "How is Euclidean distance calculated between two vectors?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.92,
+   "intent_confidence": 0.916,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5851,
-   "latency_seconds": 11.956,
-   "answer": "Euclidean distance is calculated as the square root of the sum of the squared differences between corresponding elements of the two vectors. This is expressed as d(x, y) = √(x1 - y1)² + (x2 - y2)² + ... + (xd - yd)².\n\n[Source: AI notes6_machine learning_part 2, slide 75]",
+   "latency_seconds": 7.807,
+   "answer": "The Euclidean distance between two vectors x and y is calculated as the square root of the sum of the squared differences between their corresponding components. This is expressed as d(x, y) = √(x1 - y1)² + (x2 - y2)² + ... + (xd - yd)². \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 75]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 75"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 75",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 75",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -978,20 +939,20 @@
    "question": "When is Manhattan distance called Hamming distance?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.804,
+   "intent_confidence": 0.788,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7032,
-   "latency_seconds": 11.79,
-   "answer": "Manhattan distance is called Hamming distance when all features are binary. \n[Source: AI notes6_machine learning_part 2, slide 77]",
+   "latency_seconds": 11.831,
+   "answer": "Manhattan distance is called Hamming distance when all features are binary. \n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 77]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 77"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 77",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 77",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -1004,50 +965,50 @@
    "question": "How does edit distance measure the similarity of two objects?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.887,
+   "intent_confidence": 0.886,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5853,
-   "latency_seconds": 10.837,
-   "answer": "Edit distance measures the similarity of two objects by transforming one of the objects into the other and measuring how much effort it takes. This is done by counting the number of operations (deletions, substitutions, and insertions) needed to transform one object into the other, with each operation assigned a cost. The total cost is then calculated as the sum of the costs of these operations.\n\n[Source: AI notes6_machine learning_part 2, slide 78]",
+   "latency_seconds": 11.88,
+   "answer": "Edit distance is not mentioned in the provided context as a measure of similarity. However, Levenshtein distance is mentioned as a string metric for measuring the difference between two sequences, which is the minimum number of single-character edits (insertions, deletions or substitutions) required to change one word into the other. \n\n[Source: Lectures Week 1__Lecture_3_Classification, page 30]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
-     "slide 78"
+     "Lectures Week 1__Lecture_3_Classification",
+     "page 30"
     ]
    ],
    "hit_at_k": false,
-   "expected": "AI notes6_machine learning_part 2 | slide 78",
-   "citation_correct": true,
-   "citation_doc_correct": true,
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 78",
+   "citation_correct": false,
+   "citation_doc_correct": false,
    "fabricated": [],
-   "grounded": false,
-   "grounded_by": "lexical",
-   "fact_present": true
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": false
   },
   {
    "id": "cod08",
    "question": "Which criteria are used to evaluate a search algorithm?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.763,
+   "intent_confidence": 0.733,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6678,
-   "latency_seconds": 11.815,
-   "answer": "A search algorithm can be evaluated using the following criteria: Optimality, Time Complexity, Space Complexity, and Completeness. \n\n[Source: AI notes2_search, slide 16] [Source: AI notes2_search, slide 24]",
+   "latency_seconds": 12.959,
+   "answer": "A search algorithm is evaluated based on the following criteria: \n- Completeness: Does the algorithm always find a solution (via tracking a path)?\n- Speed (worst time complexity): What is the highest number of nodes that may need to be created?\n- Memory (worst space complexity): What are the largest amounts of nodes that may need to be stored?\n- Optimality: A \"best\" solution is the one that requires the least cost to reach a goal state from the initial state.\n- Time Complexity: How long does it take to find a solution?\n- Space Complexity: How much memory does it take to perform the search?\n- Completeness: Is the strategy guaranteed to find a solution (before the resource exhausted)?\n\n[Source: Lectures Week 2__AI notes2_search, slide 16] [Source: Lectures Week 2__AI notes2_search, slide 24]",
    "citations": [
     [
-     "AI notes2_search",
+     "Lectures Week 2__AI notes2_search",
      "slide 16"
     ],
     [
-     "AI notes2_search",
+     "Lectures Week 2__AI notes2_search",
      "slide 24"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes2_search | slide 24",
+   "expected": "Lectures Week 2__AI notes2_search | slide 24",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -1060,20 +1021,24 @@
    "question": "How does the k-means algorithm use centroids?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.727,
+   "intent_confidence": 0.71,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7687,
-   "latency_seconds": 13.881,
-   "answer": "The k-means algorithm identifies k number of centroids, and then allocates every data point to the nearest cluster, while keeping the centroids as small as possible. The centroids are found by averaging the data. \n\n[Source: AI notes6_machine learning_part 2, slide 80]",
+   "latency_seconds": 16.958,
+   "answer": "The k-means algorithm identifies k number of centroids, and then allocates every data point to the nearest cluster, while keeping the centroids as small as possible. The centroids are used as the center point of each cluster, and each point is assigned to the cluster with the closest centroid. The centroids are also used to compute the new centroid (mean) of each cluster.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 80] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 81]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 80"
+    ],
+    [
+     "Lectures Week 2__AI notes6_machine learning_part 2",
+     "slide 81"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 80",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 80",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -1086,24 +1051,20 @@
    "question": "What properties should a dissimilarity function have?",
    "intent_true": "code-help",
    "intent_pred": "code-help",
-   "intent_confidence": 0.408,
+   "intent_confidence": 0.405,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.4872,
-   "latency_seconds": 11.964,
-   "answer": "A dissimilarity function should have the following properties: symmetry, positive separability, and triangular inequality. This is to ensure that the function behaves correctly and can accurately measure the dissimilarity between objects.\n\n[Source: AI notes6_machine learning_part 2, slide 74] [Source: AI notes6_machine learning_part 2, slide 74]",
+   "latency_seconds": 10.745,
+   "answer": "A dissimilarity function should have the following properties: symmetry, positive separability, and the triangular inequality. \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 74]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
-     "slide 74"
-    ],
-    [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 74"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 74",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 74",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -1116,24 +1077,401 @@
    "question": "What is top-down decision tree induction?",
    "intent_true": "code-help",
    "intent_pred": "conceptual",
-   "intent_confidence": 0.548,
+   "intent_confidence": 0.541,
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7829,
-   "latency_seconds": 11.87,
-   "answer": "Top-down decision tree induction is a process where from any property, we may partition the training set into disjoint subsets, and recursively, we can construct a subtree for each partition. This process starts from the top of the tree and moves down to the leaves.\n\n[Source: AI notes6_machine learning_part 2, slide 30] [Source: AI notes6_machine learning_part 2, slide 29]",
+   "latency_seconds": 13.808,
+   "answer": "Top-down decision tree induction is a process where, from any property, we may partition the training set into disjoint subsets, and recursively construct a subtree for each partition. This process starts from the top of the tree and moves down to the leaves.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 30]",
    "citations": [
     [
-     "AI notes6_machine learning_part 2",
+     "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 30"
-    ],
-    [
-     "AI notes6_machine learning_part 2",
-     "slide 29"
     ]
    ],
    "hit_at_k": true,
-   "expected": "AI notes6_machine learning_part 2 | slide 30",
+   "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 30",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "lexical",
+   "fact_present": true
+  },
+  {
+   "id": "con15",
+   "question": "What is class imbalance in binary classification?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.416,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6561,
+   "latency_seconds": 11.162,
+   "answer": "In binary classification, class imbalance occurs when the dataset has a \"natural\" imbalance, where one class (the minor class) is of prime interest but has a much smaller number of instances compared to the other class (the major class). This can lead to biased results from standard classifiers, which are designed to treat both classes equally. As a result, the classifier may perform poorly on the minor class, even if its overall accuracy is good.\n\n[Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 5]",
+   "citations": [
+    [
+     "Lectures Week 1__Lecture_4_Imbalanced_Multiclass",
+     "page 5"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Lectures Week 1__Lecture_4_Imbalanced_Multiclass | page 5",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": false,
+   "grounded_by": "lexical",
+   "fact_present": true
+  },
+  {
+   "id": "con16",
+   "question": "What are the two document representations used for retrieving Wikipedia articles?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.368,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6205,
+   "latency_seconds": 8.784,
+   "answer": "The two document representations used for retrieving Wikipedia articles are word counts and TF-IDF.\n\n[Source: Programming_Exercise_Clustering, Retrieving Wikipedia articles]",
+   "citations": [
+    [
+     "Programming_Exercise_Clustering",
+     "Retrieving Wikipedia articles"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "Programming_Exercise_Clustering | What you will do",
+   "citation_correct": false,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "con17",
+   "question": "How is the regression problem defined in terms of training data?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.673,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5527,
+   "latency_seconds": 11.878,
+   "answer": "The regression problem is defined as finding the relationship between explanatory variables (or independent variables) and our variable of interest (or dependent variable). This is also mentioned as a type of supervised learning problem where the output is a real value.\n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 54]\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 27]",
+   "citations": [
+    [
+     "Lectures Week 2__AI notes5_machine learning_part 1",
+     "slide 54"
+    ],
+    [
+     "Lectures Week 2__AI notes5_machine learning_part 1",
+     "slide 27"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "Lectures Week 1__Lecture_2_Regression | page 6",
+   "citation_correct": false,
+   "citation_doc_correct": false,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": false
+  },
+  {
+   "id": "con18",
+   "question": "What is the purpose of analysing product sentiment in the classification assignment?",
+   "intent_true": "conceptual",
+   "intent_pred": "conceptual",
+   "intent_confidence": 0.459,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6677,
+   "latency_seconds": 9.84,
+   "answer": "The purpose of analyzing product sentiment in the classification assignment is to explore the application of classifiers further, training a sentiment analysis model using a set of key polarizing words, and comparing the results with those of a classifier using all words. This is done to understand the types of errors a classifier makes and to verify the weights learned to each of these words.\n\n[Source: Classification_simple__Analyzing_Product_Sentiment, Analyzing product sentiment]\n[Source: Classification_simple__Analyzing_Product_Sentiment, Analyzing product sentiment]",
+   "citations": [
+    [
+     "Classification_simple__Analyzing_Product_Sentiment",
+     "Analyzing product sentiment"
+    ],
+    [
+     "Classification_simple__Analyzing_Product_Sentiment",
+     "Analyzing product sentiment"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Classification_simple__Analyzing_Product_Sentiment | Analyzing product sentiment",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod12",
+   "question": "How many pull requests should be retrieved for each project in the code review experiment?",
+   "intent_true": "code-help",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.801,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6063,
+   "latency_seconds": 19.06,
+   "answer": "According to Passage 1, Step 1 of the Experimental Procedure, you need to retrieve 300 pull requests (PRs) for each project.\n\n[Source: Code Review Project__Lab Guide_Code Review_English, page 4]",
+   "citations": [
+    [
+     "Code Review Project__Lab Guide_Code Review_English",
+     "page 4"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Code Review Project__Lab Guide_Code Review_English | page 4",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod13",
+   "question": "Which API is used to retrieve pull request data in the code review lab?",
+   "intent_true": "code-help",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.502,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6577,
+   "latency_seconds": 18.946,
+   "answer": "The GitHub API is used to retrieve pull request data in the code review lab. This is mentioned in Passage 2, Step 1: Retrieve Pull Requests, where it says \"use the GitHub API to retrieve 300 pull requests (PRs) for each project.\"\n\n[Source: Code Review Project__Lab Guide_Code Review_English, page 4]",
+   "citations": [
+    [
+     "Code Review Project__Lab Guide_Code Review_English",
+     "page 4"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Code Review Project__Lab Guide_Code Review_English | page 4",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod14",
+   "question": "What approaches increase the importance of the minor class in imbalanced classification?",
+   "intent_true": "code-help",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.271,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6509,
+   "latency_seconds": 11.795,
+   "answer": "There are three approaches to increase the importance of the minor class in imbalanced classification: adapting a probability threshold for classifiers, modifying a loss function by assigning more weight to the minor class error, and resampling a dataset to soften or remove class imbalance.\n\n[Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 9]",
+   "citations": [
+    [
+     "Lectures Week 1__Lecture_4_Imbalanced_Multiclass",
+     "page 9"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Lectures Week 1__Lecture_4_Imbalanced_Multiclass | page 9",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "cod15",
+   "question": "Which Python libraries does the product sentiment notebook use?",
+   "intent_true": "code-help",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.365,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.6935,
+   "latency_seconds": 9.795,
+   "answer": "The product sentiment notebook uses Pandas, Matplotlib, and scikit-learn. \n\n[Source: Classification_simple__FND03-NB01, cell 1] [Source: Classification_simple__Analyzing_Product_Sentiment, The data and starter code]",
+   "citations": [
+    [
+     "Classification_simple__FND03-NB01",
+     "cell 1"
+    ],
+    [
+     "Classification_simple__Analyzing_Product_Sentiment",
+     "The data and starter code"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Classification_simple__FND03-NB01 | cell 1",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm14",
+   "question": "Where is the HIT Global Summer School held?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.854,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5966,
+   "latency_seconds": 22.933,
+   "answer": "The HIT Global Summer School is held at Harbin Institute of Technology in Harbin, P.R. China.\n\n[Source: 2026 HIT Global Summer School, page 1]\n[Source: 2026 HIT Global Summer School Academic theme list, page 2]\n[Source: 2026 HIT Global Summer School Academic theme list, page 7]\n[Source: 2026 HIT Global Summer School Academic theme list, page 6]",
+   "citations": [
+    [
+     "2026 HIT Global Summer School",
+     "page 1"
+    ],
+    [
+     "2026 HIT Global Summer School Academic theme list",
+     "page 2"
+    ],
+    [
+     "2026 HIT Global Summer School Academic theme list",
+     "page 7"
+    ],
+    [
+     "2026 HIT Global Summer School Academic theme list",
+     "page 6"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "2026 HIT Global Summer School Academic theme list | page 1",
+   "citation_correct": false,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm15",
+   "question": "What language proficiency is required for the summer school?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.871,
+   "refused": true,
+   "refusal_reason": "threshold",
+   "top_score": 0.4572,
+   "latency_seconds": 0.027,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": [],
+   "hit_at_k": false,
+   "expected": "2026 HIT Global Summer School Academic theme list | page 1"
+  },
+  {
+   "id": "adm16",
+   "question": "Who teaches the Intelligent Software Engineering laboratory course?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.767,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.71,
+   "latency_seconds": 10.931,
+   "answer": "Jiakun Liu from the School of Computing at Harbin Institute of Technology teaches the Intelligent Software Engineering laboratory course.\n\n[Source: Code Review Project__Experiment_Eng_1st, page 2]",
+   "citations": [
+    [
+     "Code Review Project__Experiment_Eng_1st",
+     "page 2"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Code Review Project__Experiment_Eng_1st | page 1",
+   "citation_correct": false,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm17",
+   "question": "What is the penalty if plagiarism is found in a submission?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.588,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.8113,
+   "latency_seconds": 8.778,
+   "answer": "The penalty for plagiarism is a zero mark for the submission.\n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Penalty]",
+   "citations": [
+    [
+     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+     "Penalty"
+    ]
+   ],
+   "hit_at_k": true,
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026 | Penalty",
+   "citation_correct": true,
+   "citation_doc_correct": true,
+   "fabricated": [],
+   "grounded": true,
+   "grounded_by": "llm",
+   "fact_present": true
+  },
+  {
+   "id": "adm18",
+   "question": "When is the individual assignment due, as opposed to the project?",
+   "intent_true": "admin/logistics",
+   "intent_pred": "admin/logistics",
+   "intent_confidence": 0.95,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.5826,
+   "latency_seconds": 10.872,
+   "answer": "The individual assignment is due on Friday, 31 July, 2026 (23:55 Sunday), but the project report is due at 11:55 p.m. on the same day. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]\n[Source: chats__HIT 2026 Summer Course AI and ML, part 4]",
+   "citations": [
+    [
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+     "Assessment – Individual Project"
+    ],
+    [
+     "chats__HIT 2026 Summer Course AI and ML",
+     "part 4"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026 | The submission",
+   "citation_correct": false,
+   "citation_doc_correct": false,
+   "fabricated": [],
+   "grounded": false,
+   "grounded_by": "lexical",
+   "fact_present": false
+  },
+  {
+   "id": "cod16",
+   "question": "Which algorithm does Part C of the assignment ask you to use to build a decision tree?",
+   "intent_true": "code-help",
+   "intent_pred": "code-help",
+   "intent_confidence": 0.599,
+   "refused": false,
+   "refusal_reason": null,
+   "top_score": 0.637,
+   "latency_seconds": 11.891,
+   "answer": "The assignment asks to build a decision tree using the ID3 algorithm.\n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Part C (10 marks)]",
+   "citations": [
+    [
+     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+     "Part C (10 marks)"
+    ]
+   ],
+   "hit_at_k": false,
+   "expected": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026 | Part C (10 marks)",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
@@ -1150,7 +1488,7 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.04,
+   "latency_seconds": 0.022,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1163,7 +1501,7 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.01,
+   "latency_seconds": 0.009,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1172,11 +1510,11 @@
    "question": "What is the capital of France?",
    "intent_true": "out-of-scope/social",
    "intent_pred": "out-of-scope/social",
-   "intent_confidence": 0.816,
+   "intent_confidence": 0.772,
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.009,
+   "latency_seconds": 0.01,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1185,20 +1523,7 @@
    "question": "Tell me a joke.",
    "intent_true": "out-of-scope/social",
    "intent_pred": "out-of-scope/social",
-   "intent_confidence": 0.895,
-   "refused": true,
-   "refusal_reason": "intent",
-   "top_score": 0.0,
-   "latency_seconds": 0.008,
-   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
-   "citations": []
-  },
-  {
-   "id": "oos05",
-   "question": "What is the weather forecast for tomorrow?",
-   "intent_true": "out-of-scope/social",
-   "intent_pred": "out-of-scope/social",
-   "intent_confidence": 0.803,
+   "intent_confidence": 0.909,
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
@@ -1207,15 +1532,28 @@
    "citations": []
   },
   {
+   "id": "oos05",
+   "question": "What is the weather forecast for tomorrow?",
+   "intent_true": "out-of-scope/social",
+   "intent_pred": "out-of-scope/social",
+   "intent_confidence": 0.793,
+   "refused": true,
+   "refusal_reason": "intent",
+   "top_score": 0.0,
+   "latency_seconds": 0.01,
+   "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
+   "citations": []
+  },
+  {
    "id": "oos06",
    "question": "Can you book me a flight to Beijing?",
    "intent_true": "out-of-scope/social",
    "intent_pred": "out-of-scope/social",
-   "intent_confidence": 0.907,
+   "intent_confidence": 0.835,
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.007,
+   "latency_seconds": 0.011,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1224,11 +1562,11 @@
    "question": "Who won the football World Cup in 2022?",
    "intent_true": "out-of-scope/social",
    "intent_pred": "out-of-scope/social",
-   "intent_confidence": 0.697,
+   "intent_confidence": 0.596,
    "refused": true,
-   "refusal_reason": "intent",
-   "top_score": 0.0,
-   "latency_seconds": 0.007,
+   "refusal_reason": "threshold",
+   "top_score": 0.1783,
+   "latency_seconds": 0.019,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1237,11 +1575,11 @@
    "question": "Can you grant me an extension on my submission deadline?",
    "intent_true": "out-of-scope/social",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.547,
+   "intent_confidence": 0.601,
    "refused": true,
    "refusal_reason": "model",
-   "top_score": 0.5053,
-   "latency_seconds": 7.695,
+   "top_score": 0.5148,
+   "latency_seconds": 9.688,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1250,11 +1588,11 @@
    "question": "I am feeling really stressed about my exams, what should I do?",
    "intent_true": "out-of-scope/social",
    "intent_pred": "out-of-scope/social",
-   "intent_confidence": 0.915,
+   "intent_confidence": 0.889,
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.038,
+   "latency_seconds": 0.021,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1263,11 +1601,11 @@
    "question": "What is a good recipe for dinner tonight?",
    "intent_true": "out-of-scope/social",
    "intent_pred": "out-of-scope/social",
-   "intent_confidence": 0.788,
+   "intent_confidence": 0.759,
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.012,
+   "latency_seconds": 0.007,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   },
@@ -1276,11 +1614,11 @@
    "question": "Can you write my project report for me?",
    "intent_true": "out-of-scope/social",
    "intent_pred": "admin/logistics",
-   "intent_confidence": 0.627,
+   "intent_confidence": 0.586,
    "refused": true,
    "refusal_reason": "model",
-   "top_score": 0.4883,
-   "latency_seconds": 7.695,
+   "top_score": 0.5237,
+   "latency_seconds": 9.783,
    "answer": "I can't answer that from the module materials I have. My knowledge is limited to the AI & ML lecture decks, the teaching schedule and the assessment brief for this module. Please ask your tutor, Dr. Guanglei YANG, or check the module handbook directly.",
    "citations": []
   }

@@ -153,6 +153,72 @@ def extract_pptx(path: Path, ocr_dir: Path | None = None) -> list[tuple[str, str
     return list(merged.items())
 
 
+def extract_pdf(path: Path) -> list[tuple[str, str]]:
+    """Return [(page label, text)] — one entry per page.
+
+    Page number is the natural citation anchor for a PDF and is what a student
+    sees in a reader, so it is used directly. Pages with no extractable text
+    are dropped rather than OCRed: unlike the .ppt decks, every PDF staged by
+    the manifest was verified to carry a text layer, and the one scanned
+    document in the source tree is excluded there with a reason.
+    """
+    from pypdf import PdfReader
+
+    reader = PdfReader(str(path))
+    units: list[tuple[str, str]] = []
+    for idx, page in enumerate(reader.pages, start=1):
+        try:
+            text = (page.extract_text() or "").strip()
+        except Exception:
+            continue
+        if text:
+            units.append((f"page {idx}", text))
+    return units
+
+
+def extract_ipynb(path: Path) -> list[tuple[str, str]]:
+    """Return [(cell label, text)] — one entry per meaningful notebook cell.
+
+    Markdown cells carry the teaching narrative and code cells the worked
+    technique; both are retained, with code fenced so the generator can tell
+    prose from an API call it should quote verbatim. Cell outputs are dropped —
+    they are mostly dataframes and plot payloads, and a retrieved table of
+    floats answers no student question. Citation is by cell index, which is
+    stable for a notebook distributed read-only.
+    """
+    with open(path, "r", encoding="utf-8") as fh:
+        nb = json.load(fh)
+
+    units: list[tuple[str, str]] = []
+    for idx, cell in enumerate(nb.get("cells", []), start=1):
+        source = "".join(cell.get("source", [])).strip()
+        if not source:
+            continue
+        kind = cell.get("cell_type")
+        if kind == "code":
+            text = f"Code:\n```python\n{source}\n```"
+        elif kind == "markdown":
+            text = source
+        else:
+            continue
+        units.append((f"cell {idx}", text))
+    return units
+
+
+def extract_txt(path: Path, target_words: int) -> list[tuple[str, str]]:
+    """Return [(part label, text)] for plain text with no inherent structure.
+
+    Used for the converted chat exports. A group chat has no headings, pages or
+    slides, so there is no natural citation anchor; consecutive lines are
+    grouped to the chunk budget and cited as sequential parts. The label is
+    honest about granularity rather than inventing a page number.
+    """
+    with open(path, "r", encoding="utf-8", errors="replace") as fh:
+        raw = fh.read()
+    pieces = chunk_lines(raw, target_words)
+    return [(f"part {i}", piece) for i, piece in enumerate(pieces, start=1)]
+
+
 def _is_heading(text: str) -> bool:
     """Structural heading test for a converted .doc with no heading styles.
 
@@ -257,6 +323,33 @@ def chunk_lines(text: str, target_words: int) -> list[str]:
     return chunks or [text]
 
 
+def latin_ratio(text: str) -> float:
+    """Share of letters that are Latin, among all letters present."""
+    latin = cjk = 0
+    for ch in text:
+        code = ord(ch)
+        if 0x4E00 <= code <= 0x9FFF or 0x3400 <= code <= 0x4DBF or \
+           0x3040 <= code <= 0x30FF or 0xAC00 <= code <= 0xD7AF:
+            cjk += 1
+        elif ch.isalpha() and code < 0x0250:
+            latin += 1
+    total = latin + cjk
+    return 1.0 if total == 0 else latin / total
+
+
+def is_english_enough(text: str, min_latin_ratio: float) -> bool:
+    """Reject passages that are predominantly CJK.
+
+    The locked scope is English-only and the embedding model
+    (all-MiniLM-L6-v2) is English-trained, so a Chinese passage embeds to a
+    point that no English question lands near. Indexing it cannot help
+    retrieval and can only displace an English chunk from the top-k. The
+    group-chat exports are genuinely bilingual, so this is applied per chunk
+    rather than per document — the English half of a chat is kept.
+    """
+    return latin_ratio(text) >= min_latin_ratio
+
+
 def is_informative(text: str, min_alpha_ratio: float, min_word_tokens: int) -> bool:
     """Reject chunks that carry no answerable language.
 
@@ -287,45 +380,78 @@ def build_chunks(cfg=None) -> list[Chunk]:
     min_chars = cfg.require("index.min_chunk_chars")
     min_alpha_ratio = cfg.require("index.min_alpha_ratio")
     min_word_tokens = cfg.require("index.min_word_tokens")
+    min_latin_ratio = cfg.require("index.min_latin_ratio")
+    min_alpha_ratio_code = cfg.require("index.min_alpha_ratio_code")
 
     ocr_dir = cfg.path("corpus.ocr_dir")
 
-    files = sorted(converted.glob("*.pptx")) + sorted(converted.glob("*.docx"))
+    files: list[Path] = []
+    for ext in ("pptx", "docx", "pdf", "ipynb", "txt"):
+        files.extend(sorted(converted.glob(f"*.{ext}")))
     if not files:
         raise FileNotFoundError(
-            f"No .pptx/.docx found in {converted}. "
-            f"Run ./scripts/convert_corpus.sh first."
+            f"No ingestible files in {converted}. Run:\n"
+            f"  python scripts/collect_corpus.py && ./scripts/convert_corpus.sh"
         )
 
     chunks: list[Chunk] = []
     for path in files:
         doc_type = path.suffix.lstrip(".")
         stem = path.stem  # the name used in citations
-        units = (
-            extract_pptx(path, ocr_dir) if doc_type == "pptx"
-            else extract_docx(path)
-        )
+        # Beamer-style lecture PDFs emit one page per incremental reveal, so
+        # the same paragraph recurs verbatim across up to seven consecutive
+        # pages. Measured on this corpus: 133 duplicated chunks. Left in, a
+        # single passage can occupy several of the k retrieval slots with
+        # identical text, starving the answer of other evidence. The first
+        # occurrence wins, so citations point at the page where the content
+        # first appears.
+        seen_texts: set[str] = set()
+        if doc_type == "pptx":
+            units = extract_pptx(path, ocr_dir)
+        elif doc_type == "docx":
+            units = extract_docx(path)
+        elif doc_type == "pdf":
+            units = extract_pdf(path)
+        elif doc_type == "ipynb":
+            units = extract_ipynb(path)
+        else:  # txt — converted chat exports
+            units = extract_txt(path, docx_target)
 
         for locator, text in units:
-            # Slides are visually chunked already, so a word-budget window with
-            # overlap suits them; the brief is prose and chunks by line.
-            if doc_type == "docx":
+            # Slides and PDF pages are visually chunked already, so a word
+            # budget with overlap suits them; prose sources chunk by line.
+            if doc_type in ("docx", "txt"):
                 # Prefix the section heading onto each piece. A lone bullet
                 # ("-- You can use AI to the fullest.") embeds ambiguously,
                 # and the heading is exactly the disambiguating context a
                 # reader would use. It is also what the chunk is cited as, so
                 # the retrieved text and its citation stay consistent.
-                pieces = [
-                    f"{locator}\n{piece}"
-                    for piece in chunk_lines(text, docx_target)
-                ]
+                pieces = (
+                    [f"{locator}\n{piece}"
+                     for piece in chunk_lines(text, docx_target)]
+                    if doc_type == "docx" else chunk_lines(text, docx_target)
+                )
             else:
                 pieces = chunk_text(text, target, overlap)
             for piece_idx, piece in enumerate(pieces):
                 if len(piece) < min_chars:
                     continue
-                if not is_informative(piece, min_alpha_ratio, min_word_tokens):
+                # Source code is legitimately symbol-dense, so the OCR-noise
+                # ratio would discard exactly the notebook cells that answer
+                # "which function did the lab use?".
+                ratio = (
+                    min_alpha_ratio_code
+                    if doc_type == "ipynb" and piece.lstrip().startswith("Code:")
+                    else min_alpha_ratio
+                )
+                if not is_informative(piece, ratio, min_word_tokens):
                     continue
+                if not is_english_enough(piece, min_latin_ratio):
+                    continue
+                fingerprint = " ".join(piece.split()).lower()
+                if fingerprint in seen_texts:
+                    continue
+                seen_texts.add(fingerprint)
                 slug = re.sub(r"[^a-z0-9]+", "-", locator.lower()).strip("-")
                 chunks.append(
                     Chunk(

@@ -3,60 +3,612 @@
   "description": "ModuleMate gold set (M8/FR10). Every in-scope question is answerable from the ingested corpus, and expected_source_doc / expected_slide_or_section were established by reading the indexed chunks directly, not by recording what the retriever returned. Out-of-scope items have null expectations and exist to measure the refusal rate (NFR3).",
   "code_help_note": "The locked evaluation plan names a 'code-help' intent sourced from lab worksheets. No lab worksheet exists in this module's materials, so rather than invent one, code-help questions are drawn from the genuine algorithmic and procedural content already present in the search, machine-learning and deep-learning decks: named algorithms, ordered steps, distance formulae and evaluation criteria. See IMPLEMENTATION_SUMMARY_FOR_REPORT.md section 2.",
   "citation_format": "[Source: <document>, <slide N | section title>]",
-  "counts": {"admin/logistics": 13, "conceptual": 14, "code-help": 11, "out-of-scope/social": 11, "total": 49}
+  "counts": {
+   "admin/logistics": 18,
+   "conceptual": 18,
+   "code-help": 16,
+   "out-of-scope/social": 11,
+   "total": 63
+  },
+  "corpus_note": "Expanded beyond the AI & ML module to the whole HIT Summer School corpus: Week 1 machine-learning lectures and notebooks, the Intelligent Software Engineering lab guide, programme-level information and course group chats. Staff-issued material only; the student's own reports and answers are excluded by corpus_sources.yaml and by an authorship guard."
  },
  "items": [
-  {"id": "adm01", "intent": "admin/logistics", "question": "What is the word limit for the individual project report?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Requirements", "expected_answer_contains": ["4000"]},
-  {"id": "adm02", "intent": "admin/logistics", "question": "How much is the individual project worth in the overall assessment?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Assessment – Individual Project", "expected_answer_contains": ["60"]},
-  {"id": "adm03", "intent": "admin/logistics", "question": "When is the individual project due?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Assessment – Individual Project", "expected_answer_contains": ["31"]},
-  {"id": "adm04", "intent": "admin/logistics", "question": "What is the penalty for submitting the report late?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Penalty", "expected_answer_contains": ["10"]},
-  {"id": "adm05", "intent": "admin/logistics", "question": "How many days after the deadline will a submission still be accepted?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Penalty", "expected_answer_contains": ["2"]},
-  {"id": "adm06", "intent": "admin/logistics", "question": "Who should I submit my completed project report to?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "The submission", "expected_answer_contains": ["YANG"]},
-  {"id": "adm07", "intent": "admin/logistics", "question": "How should I name my submission file?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "The submission", "expected_answer_contains": ["AI_assignment"]},
-  {"id": "adm08", "intent": "admin/logistics", "question": "Which file formats are accepted for the report submission?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "The submission", "expected_answer_contains": ["pdf"]},
-  {"id": "adm09", "intent": "admin/logistics", "question": "How many marks is the literature survey worth in the report?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Assessment scheme", "expected_answer_contains": ["10"]},
-  {"id": "adm10", "intent": "admin/logistics", "question": "Am I allowed to use AI tools when working on this project?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Penalty", "expected_answer_contains": ["AI"]},
-  {"id": "adm11", "intent": "admin/logistics", "question": "Roughly how many pages should the project report be?", "expected_source_doc": "HIT summer course_AI and ML_project_July2026", "expected_slide_or_section": "Requirements", "expected_answer_contains": ["25"]},
-  {"id": "adm12", "intent": "admin/logistics", "question": "What percentage of the assessment is class attendance worth?", "expected_source_doc": "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou", "expected_slide_or_section": "slide 4", "expected_answer_contains": ["10"]},
-  {"id": "adm13", "intent": "admin/logistics", "question": "What time do the lectures run and in which building?", "expected_source_doc": "HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou", "expected_slide_or_section": "slide 3", "expected_answer_contains": ["08:30"]},
-
-  {"id": "con01", "intent": "conceptual", "question": "What is a decision tree?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 7", "expected_answer_contains": ["supervised"]},
-  {"id": "con02", "intent": "conceptual", "question": "What is a convolutional neural network?", "expected_source_doc": "AI notes8_deep learning", "expected_slide_or_section": "slide 8", "expected_answer_contains": ["convolution"]},
-  {"id": "con03", "intent": "conceptual", "question": "What is clustering in machine learning?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 66", "expected_answer_contains": ["group"]},
-  {"id": "con04", "intent": "conceptual", "question": "What is the difference between supervised and unsupervised learning?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 67", "expected_answer_contains": ["teacher"]},
-  {"id": "con05", "intent": "conceptual", "question": "What is a neural network?", "expected_source_doc": "AI notes7_neural networks", "expected_slide_or_section": "slide 9", "expected_answer_contains": ["neuron"]},
-  {"id": "con06", "intent": "conceptual", "question": "What is artificial intelligence?", "expected_source_doc": "AI notes1_introduction", "expected_slide_or_section": "slide 6", "expected_answer_contains": ["cognitive"]},
-  {"id": "con07", "intent": "conceptual", "question": "What is k-means clustering?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 79", "expected_answer_contains": ["cluster"]},
-  {"id": "con08", "intent": "conceptual", "question": "What is a support vector machine?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 62", "expected_answer_contains": ["gap"]},
-  {"id": "con09", "intent": "conceptual", "question": "What is the k-nearest neighbours algorithm?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 60", "expected_answer_contains": ["non-parametric"]},
-  {"id": "con10", "intent": "conceptual", "question": "What is a naive Bayes classifier?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 61", "expected_answer_contains": ["Bayes"]},
-  {"id": "con11", "intent": "conceptual", "question": "What are the main types of machine learning?", "expected_source_doc": "AI notes5_machine learning_part 1", "expected_slide_or_section": "slide 8", "expected_answer_contains": ["supervised"]},
-  {"id": "con12", "intent": "conceptual", "question": "Which layers does a convolutional neural network consist of?", "expected_source_doc": "AI notes8_deep learning", "expected_slide_or_section": "slide 11", "expected_answer_contains": ["hidden"]},
-  {"id": "con13", "intent": "conceptual", "question": "What is uninformed or blind search?", "expected_source_doc": "AI notes2_search", "expected_slide_or_section": "slide 23", "expected_answer_contains": ["goal"]},
-  {"id": "con14", "intent": "conceptual", "question": "What are the differences between an artificial neural network and a convolutional neural network?", "expected_source_doc": "AI notes8_deep learning", "expected_slide_or_section": "slide 20", "expected_answer_contains": ["connected"]},
-
-  {"id": "cod01", "intent": "code-help", "question": "What are the steps for constructing a decision tree?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 22", "expected_answer_contains": ["root"]},
-  {"id": "cod02", "intent": "code-help", "question": "What are the two stages involved in building a decision tree?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 18", "expected_answer_contains": ["pruning"]},
-  {"id": "cod03", "intent": "code-help", "question": "How does the breadth-first search algorithm explore a graph?", "expected_source_doc": "AI notes2_search", "expected_slide_or_section": "slide 25", "expected_answer_contains": ["root"]},
-  {"id": "cod04", "intent": "code-help", "question": "What are the two key steps in the generate and test search procedure?", "expected_source_doc": "AI notes2_search", "expected_slide_or_section": "slide 22", "expected_answer_contains": ["goal"]},
-  {"id": "cod05", "intent": "code-help", "question": "How is Euclidean distance calculated between two vectors?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 75", "expected_answer_contains": ["distance"]},
-  {"id": "cod06", "intent": "code-help", "question": "When is Manhattan distance called Hamming distance?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 77", "expected_answer_contains": ["binary"]},
-  {"id": "cod07", "intent": "code-help", "question": "How does edit distance measure the similarity of two objects?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 78", "expected_answer_contains": ["transform"]},
-  {"id": "cod08", "intent": "code-help", "question": "Which criteria are used to evaluate a search algorithm?", "expected_source_doc": "AI notes2_search", "expected_slide_or_section": "slide 24", "expected_answer_contains": ["completeness"]},
-  {"id": "cod09", "intent": "code-help", "question": "How does the k-means algorithm use centroids?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 80", "expected_answer_contains": ["centroid"]},
-  {"id": "cod10", "intent": "code-help", "question": "What properties should a dissimilarity function have?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 74", "expected_answer_contains": ["symmetry"]},
-  {"id": "cod11", "intent": "code-help", "question": "What is top-down decision tree induction?", "expected_source_doc": "AI notes6_machine learning_part 2", "expected_slide_or_section": "slide 30", "expected_answer_contains": ["partition"]},
-
-  {"id": "oos01", "intent": "out-of-scope/social", "question": "Hello, how are you today?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos02", "intent": "out-of-scope/social", "question": "Can you write me a poem about the sea?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos03", "intent": "out-of-scope/social", "question": "What is the capital of France?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos04", "intent": "out-of-scope/social", "question": "Tell me a joke.", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos05", "intent": "out-of-scope/social", "question": "What is the weather forecast for tomorrow?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos06", "intent": "out-of-scope/social", "question": "Can you book me a flight to Beijing?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos07", "intent": "out-of-scope/social", "question": "Who won the football World Cup in 2022?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos08", "intent": "out-of-scope/social", "question": "Can you grant me an extension on my submission deadline?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos09", "intent": "out-of-scope/social", "question": "I am feeling really stressed about my exams, what should I do?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos10", "intent": "out-of-scope/social", "question": "What is a good recipe for dinner tonight?", "expected_source_doc": null, "expected_slide_or_section": null},
-  {"id": "oos11", "intent": "out-of-scope/social", "question": "Can you write my project report for me?", "expected_source_doc": null, "expected_slide_or_section": null}
+  {
+   "id": "adm01",
+   "intent": "admin/logistics",
+   "question": "What is the word limit for the individual project report?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Requirements",
+   "expected_answer_contains": [
+    "4000"
+   ]
+  },
+  {
+   "id": "adm02",
+   "intent": "admin/logistics",
+   "question": "How much is the individual project worth in the overall assessment?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Assessment – Individual Project",
+   "expected_answer_contains": [
+    "60"
+   ]
+  },
+  {
+   "id": "adm03",
+   "intent": "admin/logistics",
+   "question": "When is the individual project due?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Assessment – Individual Project",
+   "expected_answer_contains": [
+    "31"
+   ]
+  },
+  {
+   "id": "adm04",
+   "intent": "admin/logistics",
+   "question": "What is the penalty for submitting the report late?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Penalty",
+   "expected_answer_contains": [
+    "10"
+   ]
+  },
+  {
+   "id": "adm05",
+   "intent": "admin/logistics",
+   "question": "How many days after the deadline will a submission still be accepted?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Penalty",
+   "expected_answer_contains": [
+    "2"
+   ]
+  },
+  {
+   "id": "adm06",
+   "intent": "admin/logistics",
+   "question": "Who should I submit my completed project report to?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "The submission",
+   "expected_answer_contains": [
+    "YANG"
+   ]
+  },
+  {
+   "id": "adm07",
+   "intent": "admin/logistics",
+   "question": "How should I name my submission file?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "The submission",
+   "expected_answer_contains": [
+    "AI_assignment"
+   ]
+  },
+  {
+   "id": "adm08",
+   "intent": "admin/logistics",
+   "question": "Which file formats are accepted for the report submission?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "The submission",
+   "expected_answer_contains": [
+    "pdf"
+   ]
+  },
+  {
+   "id": "adm09",
+   "intent": "admin/logistics",
+   "question": "How many marks is the literature survey worth in the report?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Assessment scheme",
+   "expected_answer_contains": [
+    "10"
+   ]
+  },
+  {
+   "id": "adm10",
+   "intent": "admin/logistics",
+   "question": "Am I allowed to use AI tools when working on this project?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Penalty",
+   "expected_answer_contains": [
+    "AI"
+   ]
+  },
+  {
+   "id": "adm11",
+   "intent": "admin/logistics",
+   "question": "Roughly how many pages should the project report be?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+   "expected_slide_or_section": "Requirements",
+   "expected_answer_contains": [
+    "25"
+   ]
+  },
+  {
+   "id": "adm12",
+   "intent": "admin/logistics",
+   "question": "What percentage of the assessment is class attendance worth?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+   "expected_slide_or_section": "slide 4",
+   "expected_answer_contains": [
+    "10"
+   ]
+  },
+  {
+   "id": "adm13",
+   "intent": "admin/logistics",
+   "question": "What time do the lectures run and in which building?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+   "expected_slide_or_section": "slide 3",
+   "expected_answer_contains": [
+    "08:30"
+   ]
+  },
+  {
+   "id": "con01",
+   "intent": "conceptual",
+   "question": "What is a decision tree?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 7",
+   "expected_answer_contains": [
+    "supervised"
+   ]
+  },
+  {
+   "id": "con02",
+   "intent": "conceptual",
+   "question": "What is a convolutional neural network?",
+   "expected_source_doc": "Lectures Week 2__AI notes8_deep learning",
+   "expected_slide_or_section": "slide 8",
+   "expected_answer_contains": [
+    "convolution"
+   ]
+  },
+  {
+   "id": "con03",
+   "intent": "conceptual",
+   "question": "What is clustering in machine learning?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 66",
+   "expected_answer_contains": [
+    "group"
+   ]
+  },
+  {
+   "id": "con04",
+   "intent": "conceptual",
+   "question": "What is the difference between supervised and unsupervised learning?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 67",
+   "expected_answer_contains": [
+    "teacher"
+   ]
+  },
+  {
+   "id": "con05",
+   "intent": "conceptual",
+   "question": "What is a neural network?",
+   "expected_source_doc": "Lectures Week 2__AI notes7_neural networks",
+   "expected_slide_or_section": "slide 9",
+   "expected_answer_contains": [
+    "neuron"
+   ]
+  },
+  {
+   "id": "con06",
+   "intent": "conceptual",
+   "question": "What is artificial intelligence?",
+   "expected_source_doc": "Lectures Week 2__AI notes1_introduction",
+   "expected_slide_or_section": "slide 6",
+   "expected_answer_contains": [
+    "cognitive"
+   ]
+  },
+  {
+   "id": "con07",
+   "intent": "conceptual",
+   "question": "What is k-means clustering?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 79",
+   "expected_answer_contains": [
+    "cluster"
+   ]
+  },
+  {
+   "id": "con08",
+   "intent": "conceptual",
+   "question": "What is a support vector machine?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 62",
+   "expected_answer_contains": [
+    "gap"
+   ]
+  },
+  {
+   "id": "con09",
+   "intent": "conceptual",
+   "question": "What is the k-nearest neighbours algorithm?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 60",
+   "expected_answer_contains": [
+    "non-parametric"
+   ]
+  },
+  {
+   "id": "con10",
+   "intent": "conceptual",
+   "question": "What is a naive Bayes classifier?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 61",
+   "expected_answer_contains": [
+    "Bayes"
+   ]
+  },
+  {
+   "id": "con11",
+   "intent": "conceptual",
+   "question": "What are the main types of machine learning?",
+   "expected_source_doc": "Lectures Week 2__AI notes5_machine learning_part 1",
+   "expected_slide_or_section": "slide 8",
+   "expected_answer_contains": [
+    "supervised"
+   ]
+  },
+  {
+   "id": "con12",
+   "intent": "conceptual",
+   "question": "Which layers does a convolutional neural network consist of?",
+   "expected_source_doc": "Lectures Week 2__AI notes8_deep learning",
+   "expected_slide_or_section": "slide 11",
+   "expected_answer_contains": [
+    "hidden"
+   ]
+  },
+  {
+   "id": "con13",
+   "intent": "conceptual",
+   "question": "What is uninformed or blind search?",
+   "expected_source_doc": "Lectures Week 2__AI notes2_search",
+   "expected_slide_or_section": "slide 23",
+   "expected_answer_contains": [
+    "goal"
+   ]
+  },
+  {
+   "id": "con14",
+   "intent": "conceptual",
+   "question": "What are the differences between an artificial neural network and a convolutional neural network?",
+   "expected_source_doc": "Lectures Week 2__AI notes8_deep learning",
+   "expected_slide_or_section": "slide 20",
+   "expected_answer_contains": [
+    "connected"
+   ]
+  },
+  {
+   "id": "cod01",
+   "intent": "code-help",
+   "question": "What are the steps for constructing a decision tree?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 22",
+   "expected_answer_contains": [
+    "root"
+   ]
+  },
+  {
+   "id": "cod02",
+   "intent": "code-help",
+   "question": "What are the two stages involved in building a decision tree?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 18",
+   "expected_answer_contains": [
+    "pruning"
+   ]
+  },
+  {
+   "id": "cod03",
+   "intent": "code-help",
+   "question": "How does the breadth-first search algorithm explore a graph?",
+   "expected_source_doc": "Lectures Week 2__AI notes2_search",
+   "expected_slide_or_section": "slide 25",
+   "expected_answer_contains": [
+    "root"
+   ]
+  },
+  {
+   "id": "cod04",
+   "intent": "code-help",
+   "question": "What are the two key steps in the generate and test search procedure?",
+   "expected_source_doc": "Lectures Week 2__AI notes2_search",
+   "expected_slide_or_section": "slide 22",
+   "expected_answer_contains": [
+    "goal"
+   ]
+  },
+  {
+   "id": "cod05",
+   "intent": "code-help",
+   "question": "How is Euclidean distance calculated between two vectors?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 75",
+   "expected_answer_contains": [
+    "distance"
+   ]
+  },
+  {
+   "id": "cod06",
+   "intent": "code-help",
+   "question": "When is Manhattan distance called Hamming distance?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 77",
+   "expected_answer_contains": [
+    "binary"
+   ]
+  },
+  {
+   "id": "cod07",
+   "intent": "code-help",
+   "question": "How does edit distance measure the similarity of two objects?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 78",
+   "expected_answer_contains": [
+    "transform"
+   ]
+  },
+  {
+   "id": "cod08",
+   "intent": "code-help",
+   "question": "Which criteria are used to evaluate a search algorithm?",
+   "expected_source_doc": "Lectures Week 2__AI notes2_search",
+   "expected_slide_or_section": "slide 24",
+   "expected_answer_contains": [
+    "completeness"
+   ]
+  },
+  {
+   "id": "cod09",
+   "intent": "code-help",
+   "question": "How does the k-means algorithm use centroids?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 80",
+   "expected_answer_contains": [
+    "centroid"
+   ]
+  },
+  {
+   "id": "cod10",
+   "intent": "code-help",
+   "question": "What properties should a dissimilarity function have?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 74",
+   "expected_answer_contains": [
+    "symmetry"
+   ]
+  },
+  {
+   "id": "cod11",
+   "intent": "code-help",
+   "question": "What is top-down decision tree induction?",
+   "expected_source_doc": "Lectures Week 2__AI notes6_machine learning_part 2",
+   "expected_slide_or_section": "slide 30",
+   "expected_answer_contains": [
+    "partition"
+   ]
+  },
+  {
+   "id": "con15",
+   "intent": "conceptual",
+   "question": "What is class imbalance in binary classification?",
+   "expected_source_doc": "Lectures Week 1__Lecture_4_Imbalanced_Multiclass",
+   "expected_slide_or_section": "page 5",
+   "expected_answer_contains": [
+    "imbalance"
+   ]
+  },
+  {
+   "id": "con16",
+   "intent": "conceptual",
+   "question": "What are the two document representations used for retrieving Wikipedia articles?",
+   "expected_source_doc": "Programming_Exercise_Clustering",
+   "expected_slide_or_section": "What you will do",
+   "expected_answer_contains": [
+    "TF-IDF"
+   ]
+  },
+  {
+   "id": "con17",
+   "intent": "conceptual",
+   "question": "How is the regression problem defined in terms of training data?",
+   "expected_source_doc": "Lectures Week 1__Lecture_2_Regression",
+   "expected_slide_or_section": "page 6",
+   "expected_answer_contains": [
+    "training"
+   ]
+  },
+  {
+   "id": "con18",
+   "intent": "conceptual",
+   "question": "What is the purpose of analysing product sentiment in the classification assignment?",
+   "expected_source_doc": "Classification_simple__Analyzing_Product_Sentiment",
+   "expected_slide_or_section": "Analyzing product sentiment",
+   "expected_answer_contains": [
+    "sentiment"
+   ]
+  },
+  {
+   "id": "cod12",
+   "intent": "code-help",
+   "question": "How many pull requests should be retrieved for each project in the code review experiment?",
+   "expected_source_doc": "Code Review Project__Lab Guide_Code Review_English",
+   "expected_slide_or_section": "page 4",
+   "expected_answer_contains": [
+    "300"
+   ]
+  },
+  {
+   "id": "cod13",
+   "intent": "code-help",
+   "question": "Which API is used to retrieve pull request data in the code review lab?",
+   "expected_source_doc": "Code Review Project__Lab Guide_Code Review_English",
+   "expected_slide_or_section": "page 4",
+   "expected_answer_contains": [
+    "GitHub"
+   ]
+  },
+  {
+   "id": "cod14",
+   "intent": "code-help",
+   "question": "What approaches increase the importance of the minor class in imbalanced classification?",
+   "expected_source_doc": "Lectures Week 1__Lecture_4_Imbalanced_Multiclass",
+   "expected_slide_or_section": "page 9",
+   "expected_answer_contains": [
+    "threshold"
+   ]
+  },
+  {
+   "id": "cod15",
+   "intent": "code-help",
+   "question": "Which Python libraries does the product sentiment notebook use?",
+   "expected_source_doc": "Classification_simple__FND03-NB01",
+   "expected_slide_or_section": "cell 1",
+   "expected_answer_contains": [
+    "andas"
+   ]
+  },
+  {
+   "id": "adm14",
+   "intent": "admin/logistics",
+   "question": "Where is the HIT Global Summer School held?",
+   "expected_source_doc": "2026 HIT Global Summer School Academic theme list",
+   "expected_slide_or_section": "page 1",
+   "expected_answer_contains": [
+    "Harbin"
+   ]
+  },
+  {
+   "id": "adm15",
+   "intent": "admin/logistics",
+   "question": "What language proficiency is required for the summer school?",
+   "expected_source_doc": "2026 HIT Global Summer School Academic theme list",
+   "expected_slide_or_section": "page 1",
+   "expected_answer_contains": [
+    "English"
+   ]
+  },
+  {
+   "id": "adm16",
+   "intent": "admin/logistics",
+   "question": "Who teaches the Intelligent Software Engineering laboratory course?",
+   "expected_source_doc": "Code Review Project__Experiment_Eng_1st",
+   "expected_slide_or_section": "page 1",
+   "expected_answer_contains": [
+    "Liu"
+   ]
+  },
+  {
+   "id": "adm17",
+   "intent": "admin/logistics",
+   "question": "What is the penalty if plagiarism is found in a submission?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+   "expected_slide_or_section": "Penalty",
+   "expected_answer_contains": [
+    "ZERO"
+   ]
+  },
+  {
+   "id": "adm18",
+   "intent": "admin/logistics",
+   "question": "When is the individual assignment due, as opposed to the project?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+   "expected_slide_or_section": "The submission",
+   "expected_answer_contains": [
+    "29"
+   ]
+  },
+  {
+   "id": "cod16",
+   "intent": "code-help",
+   "question": "Which algorithm does Part C of the assignment ask you to use to build a decision tree?",
+   "expected_source_doc": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+   "expected_slide_or_section": "Part C (10 marks)",
+   "expected_answer_contains": [
+    "ID3"
+   ]
+  },
+  {
+   "id": "oos01",
+   "intent": "out-of-scope/social",
+   "question": "Hello, how are you today?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos02",
+   "intent": "out-of-scope/social",
+   "question": "Can you write me a poem about the sea?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos03",
+   "intent": "out-of-scope/social",
+   "question": "What is the capital of France?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos04",
+   "intent": "out-of-scope/social",
+   "question": "Tell me a joke.",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos05",
+   "intent": "out-of-scope/social",
+   "question": "What is the weather forecast for tomorrow?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos06",
+   "intent": "out-of-scope/social",
+   "question": "Can you book me a flight to Beijing?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos07",
+   "intent": "out-of-scope/social",
+   "question": "Who won the football World Cup in 2022?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos08",
+   "intent": "out-of-scope/social",
+   "question": "Can you grant me an extension on my submission deadline?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos09",
+   "intent": "out-of-scope/social",
+   "question": "I am feeling really stressed about my exams, what should I do?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos10",
+   "intent": "out-of-scope/social",
+   "question": "What is a good recipe for dinner tonight?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  },
+  {
+   "id": "oos11",
+   "intent": "out-of-scope/social",
+   "question": "Can you write my project report for me?",
+   "expected_source_doc": null,
+   "expected_slide_or_section": null
+  }
  ]
 }

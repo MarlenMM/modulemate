@@ -56,8 +56,21 @@ def read_interactive_latency(results_dir: Path) -> float | None:
     return float(m.group(1)) if m else None
 
 
-def scorecard(s: dict, interactive: float | None = None) -> list[tuple[str, str, str, str, str, str]]:
+def read_document_hit(results_dir: Path) -> float | None:
+    """Document-level hit@3 from scripts/analyse_retrieval.py, if it has run."""
+    path = results_dir / "retrieval_analysis.md"
+    if not path.exists():
+        return None
+    import re
+    m = re.search(r"\|\s*`ALL`\s*\|[^|]*\|[^|]*\|[^|]*\|\s*([0-9.]+)\s*\|",
+                  path.read_text())
+    return float(m.group(1)) if m else None
+
+
+def scorecard(s: dict, interactive: float | None = None,
+              results_dir: Path | None = None) -> list[tuple[str, str, str, str, str, str]]:
     """(NFR, aspect, target, measured, verdict, note)"""
+    results_dir = results_dir or Path('results')
     rows = []
 
     # NFR1 is reported under both conditions, because they differ by an order
@@ -88,6 +101,17 @@ def scorecard(s: dict, interactive: float | None = None) -> list[tuple[str, str,
         "Share of in-scope gold questions whose expected chunk appears in the "
         "top 3 retrieved passages.",
     ))
+
+    doc_hit = s.get("hit_at_3_document") or read_document_hit(results_dir)
+    if doc_hit:
+        rows.append((
+            "NFR2", "Retrieval hit@3 — document level", "informational",
+            f"{doc_hit:.3f}", "—",
+            "Same questions, scored on whether the expected document appears "
+            "in the top 3 at all. The gap against exact hit@3 is locator-level "
+            "misses and questions the corpus answers correctly in more than "
+            "one place — see `retrieval_analysis.md`.",
+        ))
 
     cite = s["citation_correctness"]
     rows.append((
@@ -194,7 +218,8 @@ def main() -> None:
     png = results_dir / "confusion_matrix.png"
     plot_confusion(labels, matrix, png)
 
-    rows = scorecard(s, read_interactive_latency(results_dir))
+    results_dir_g = results_dir
+    rows = scorecard(s, read_interactive_latency(results_dir), results_dir)
     n_fail = sum(1 for r in rows if r[4] == FAIL)
 
     lines: list[str] = []

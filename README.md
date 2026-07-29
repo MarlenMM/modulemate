@@ -1,13 +1,27 @@
 # ModuleMate
 
-A retrieval-grounded course assistant for the HIT Summer Course 2026
-"Artificial Intelligence and Machine Learning" module.
+A retrieval-grounded course assistant for the **HIT Global Summer School 2026**.
 
-ModuleMate answers student questions using **only** the module's own teaching
-materials — the eight lecture decks, the teaching schedule and the assessment
-brief. Every substantive answer cites the document and slide (or section) it
-came from, and when the corpus does not support an answer the system says so
-and redirects to the tutor rather than guessing.
+ModuleMate answers student questions using **only** material issued by the
+programme. Every substantive answer cites the document and slide, page, section
+or cell it came from, and when the corpus does not support an answer the system
+says so and redirects to the tutor rather than guessing.
+
+**Corpus** — 51 staff-issued documents across five formats:
+
+| Source | Contents |
+|---|---|
+| AI & Machine Learning module | 8 lecture decks, teaching schedule, assignment brief, project brief |
+| Week 1 Machine Learning | 8 lecture PDFs, 4 assignment briefs, 8 lab notebooks, readmes |
+| Intelligent Software Engineering | code-review lab guide, course-introduction lecture |
+| Programme level | Global Summer School brochure and academic theme list |
+| Announcements | 5 course group-chat exports |
+
+The corpus is declared in [`corpus_sources.yaml`](corpus_sources.yaml), not in
+code. It contains **course-issued material only**: the student's own reports,
+plans, answered assignments and projects are excluded by explicit rule *and* by
+an authorship guard that rejects any file whose opening pages carry the
+student's name or ID.
 
 ```
 question
@@ -45,19 +59,30 @@ editing `config.yaml` alone — no code change.
 
 ## Build the index
 
-The corpus ships as legacy binary Office files and the decks are largely
-images, so ingestion has three stages. Run them in order:
+Sources arrive in six formats, several of them legacy binaries, and the Week 2
+decks are largely images — so ingestion runs in four stages. Run them in order:
 
 ```bash
-./scripts/convert_corpus.sh          # .ppt/.doc -> .pptx/.docx  (LibreOffice)
-.venv/bin/python scripts/ocr_slides.py   # OCR the image-only slides (macOS Vision)
-.venv/bin/python index.py                # chunk -> embed -> FAISS index
+.venv/bin/python scripts/collect_corpus.py   # apply corpus_sources.yaml -> corpus/raw
 ```
 
-`index.py` is the single-command rebuild required by FR9 — it is idempotent and
-regenerates everything downstream of the converted corpus. To refresh the
-corpus, drop a new file into `corpus/raw/` and re-run the three commands. No
-code change is needed.
+```bash
+./scripts/convert_corpus.sh                  # .ppt/.doc/.rtf -> .pptx/.docx/.txt
+```
+
+```bash
+.venv/bin/python scripts/ocr_slides.py       # OCR image-only slides (macOS Vision)
+```
+
+```bash
+.venv/bin/python index.py                    # chunk -> embed -> FAISS index
+```
+
+`index.py` is the single-command rebuild required by FR9 — idempotent, and it
+regenerates everything downstream of the converted corpus. To change what is
+indexed, edit `corpus_sources.yaml` and re-run the four commands; no code
+change is needed. `collect_corpus.py` prints a full audit of what it included,
+skipped, de-duplicated and rejected.
 
 ## Run the app
 
@@ -87,8 +112,9 @@ Supporting measurements:
 ## Configuration
 
 Everything tunable lives in `config.yaml` — retrieval `k`, the refusal
-similarity threshold, and every model name. No module hardcodes these
-(NFR5). The refusal threshold is not a guess: it is derived from measured
+similarity threshold, source-authority weights, and every model name. No module
+hardcodes these (NFR5). *What* is indexed lives separately in
+`corpus_sources.yaml`. The refusal threshold is not a guess: it is derived from measured
 in-scope versus out-of-scope similarity distributions by
 `scripts/calibrate_threshold.py`, and the derivation is written to
 `results/threshold_calibration.md`.
@@ -97,7 +123,9 @@ in-scope versus out-of-scope similarity distributions by
 
 | Path | Purpose |
 |---|---|
-| `ingest.py` | M1 — extraction, OCR merge, metadata-preserving chunking |
+| `corpus_sources.yaml` | Declares which source files enter the corpus, and why |
+| `scripts/collect_corpus.py` | Applies the manifest; de-dupes; authorship guard |
+| `ingest.py` | M1 — extraction (pptx/docx/pdf/ipynb/txt), OCR merge, chunking |
 | `index.py` | M2 — embedding + persistent FAISS index (also the FR9 rebuild) |
 | `retrieve.py` | M3/M5 — top-k retrieval and the similarity refusal gate |
 | `classify.py` | M6 — four-class intent router (the sole trained artefact) |

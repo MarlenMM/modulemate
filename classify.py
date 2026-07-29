@@ -62,6 +62,23 @@ TRAINING_UTTERANCES: dict[str, list[str]] = {
         "What topics can I choose from for the project?",
         "When does the course start and finish?",
         "What is covered in the teaching schedule this week?",
+        # Programme-level administration. The corpus now spans the whole
+        # summer school, not one module, but these utterances originally
+        # covered only AI & ML coursework. Measured consequence: "Where is the
+        # HIT Global Summer School held?" routed to out-of-scope/social and was
+        # refused outright, despite the programme brochure answering it.
+        "Where is the summer school held?",
+        "Which city and university host the programme?",
+        "What are the dates of the summer school?",
+        "What language are the lectures taught in?",
+        "What English proficiency do I need for the programme?",
+        "Who lectures the Intelligent Software Engineering course?",
+        "How do I check in when I arrive?",
+        "What accommodation is provided for students?",
+        "Which projects can I choose from in the summer school?",
+        "How are teams formed for the group project?",
+        "When is the mid-term review?",
+        "What do I need to submit for the code review experiments?",
     ],
     CONCEPTUAL: [
         "What is machine learning?",
@@ -178,6 +195,12 @@ TRAINING_UTTERANCES: dict[str, list[str]] = {
 # Held-out probes for the policy sub-population, used only to measure whether
 # the router generalises beyond its training phrasings. Never trained on, and
 # deliberately worded differently from both the training set and the gold set.
+PROGRAMME_PROBES: list[str] = [
+    "Whereabouts does the summer programme actually take place?",
+    "Do I need to prove my English level before attending?",
+    "What time should I arrive to register on the first day?",
+]
+
 METRIC_PROBES: list[str] = [
     "In what situation is Manhattan distance equivalent to Hamming distance?",
     "What characteristics does a good dissimilarity measure need?",
@@ -326,3 +349,13 @@ if __name__ == "__main__":
         print(f"  {'OK ' if ok else 'ERR'}  {p.label:22s} {p.confidence:.2f}  {q}")
     print(f"\n  metric generalisation: {ok_metric}/{len(METRIC_PROBES)} "
           f"= {ok_metric / len(METRIC_PROBES):.1%}")
+
+    ok_prog = 0
+    print("\nHeld-out programme-admin probes (never trained on):")
+    for q in PROGRAMME_PROBES:
+        p = clf.predict(q)
+        ok = p.label == ADMIN
+        ok_prog += ok
+        print(f"  {'OK ' if ok else 'ERR'}  {p.label:22s} {p.confidence:.2f}  {q}")
+    print(f"\n  programme generalisation: {ok_prog}/{len(PROGRAMME_PROBES)} "
+          f"= {ok_prog / len(PROGRAMME_PROBES):.1%}")
