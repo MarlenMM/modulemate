@@ -16,7 +16,16 @@ index:
   # Budget expressed in words, converted to tokens at ~1.3 tokens/word.
   chunk_target_words: 230        # ~300 tokens — mid-point of the 200-400 target
   chunk_overlap_words: 45        # ~20% overlap, preserves context across splits
+  # The assessment brief is prose whose sections list independent facts, so it
+  # chunks line-wise at a tighter budget — see ingest.chunk_lines for the
+  # measurement that motivated splitting it out from the slide budget.
+  chunk_target_words_docx: 55
   min_chunk_chars: 40            # drop title-only / decorative fragments
+  # OCR noise filter — see ingest.is_informative. Chart axis labels and stray
+  # glyphs embed as real vectors and compete for retrieval slots, so chunks
+  # that are mostly digits/symbols or carry too few real words are discarded.
+  min_alpha_ratio: 0.55
+  min_word_tokens: 6
 
 embedding:
   model_name: sentence-transformers/all-MiniLM-L6-v2
