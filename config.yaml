@@ -1,0 +1,71 @@
+# ModuleMate — single source of truth for tunable parameters.
+#
+# NFR5 (Maintainability): k, the similarity threshold and all model names live
+# here. No module hardcodes any of these three values; every consumer reads
+# them through config.load(). A tutor refreshing the corpus or retuning the
+# refusal gate never edits Python.
+
+corpus:
+  raw_dir: corpus/raw            # legacy .ppt/.doc as shipped by the module
+  converted_dir: corpus/converted # .pptx/.docx produced by scripts/convert_corpus.sh
+  ocr_dir: corpus/ocr            # per-deck OCR text from scripts/ocr_slides.py
+
+index:
+  dir: index_store               # persisted FAISS index + chunk metadata
+  # Chunking. Slides are short; only dense slides are split.
+  # Budget expressed in words, converted to tokens at ~1.3 tokens/word.
+  chunk_target_words: 230        # ~300 tokens — mid-point of the 200-400 target
+  chunk_overlap_words: 45        # ~20% overlap, preserves context across splits
+  min_chunk_chars: 40            # drop title-only / decorative fragments
+
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  normalize: true                # unit vectors => FAISS inner product == cosine
+  batch_size: 64
+
+retrieval:
+  k: 5                           # top-k passages retrieved (FR5)
+  # Refusal gate (M5/FR7). Calibrated empirically — see
+  # scripts/calibrate_threshold.py and results/threshold_calibration.md.
+  # A query whose best chunk scores below this is refused, not answered.
+  similarity_threshold: 0.30
+
+generation:
+  # Swappable generator interface (R3/R4 mitigation). backend is one of:
+  #   openai_compatible  — OpenAI, Groq, DeepSeek, or any /v1-compatible host
+  #   anthropic          — Claude models
+  backend: openai_compatible
+  api_key_env: GROQ_API_KEY
+  base_url: https://api.groq.com/openai/v1
+  model: llama-3.3-70b-versatile
+  rewrite_model: llama-3.3-70b-versatile  # query rewriting (FR4) — same model
+  temperature: 0.0               # determinism (NFR7)
+  max_tokens: 600                # capped token budget (R3)
+  timeout_seconds: 30
+
+conversation:
+  history_turns: 4               # turns of memory used for query rewriting (S1)
+
+refusal:
+  message: >-
+    I can't answer that from the module materials I have. My knowledge is
+    limited to the AI & ML lecture decks, the teaching schedule and the
+    assessment brief for this module. Please ask your tutor, Dr. Guanglei
+    YANG, or check the module handbook directly.
+
+intents:
+  labels:
+    - admin/logistics
+    - conceptual
+    - code-help
+    - out-of-scope/social
+  # Intents that bypass retrieval and generation entirely (FR7).
+  short_circuit:
+    - out-of-scope/social
+  model_path: index_store/intent_clf.joblib
+
+evaluation:
+  results_dir: results
+  gold_set: eval/gold_set.json
+  hit_at_k: 3                    # NFR2 measures hit@3
+  seed: 42                       # NFR7 reproducibility
