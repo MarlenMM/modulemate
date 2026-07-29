@@ -34,10 +34,16 @@ embedding:
 
 retrieval:
   k: 5                           # top-k passages retrieved (FR5)
-  # Refusal gate (M5/FR7). Calibrated empirically — see
+  # Refusal gate (M5/FR7). Calibrated empirically, not guessed — see
   # scripts/calibrate_threshold.py and results/threshold_calibration.md.
   # A query whose best chunk scores below this is refused, not answered.
-  similarity_threshold: 0.30
+  # 0.35 maximises Youden's J over the gold set: in-scope top-1 similarity
+  # bottoms out at 0.386, topically unrelated out-of-scope questions top out
+  # at 0.302, and the cut-off sits in that gap. It retains 100% of in-scope
+  # questions and rejects 81.8% of out-of-scope ones on similarity alone; the
+  # two it cannot reject are about corpus topics but out of scope by policy,
+  # and the intent router short-circuits those before retrieval.
+  similarity_threshold: 0.35
 
 generation:
   # Swappable generator interface (R3/R4 mitigation). backend is one of:
