@@ -1,9 +1,22 @@
 # ModuleMate — pinned dependencies (NFR7: reproducibility)
 # Python 3.12.x
+#
+# External (not pip-installable) prerequisites:
+#   LibreOffice   — legacy .ppt/.doc -> .pptx/.docx conversion
+#                   macOS: brew install --cask libreoffice
+#   poppler       — pdftoppm, rasterises slides for OCR
+#                   macOS: brew install poppler
 
 # --- Ingestion (FR1) ---
 python-pptx==1.0.2
 python-docx==1.1.2
+
+# --- OCR of image-only slides (macOS Vision framework) ---
+# Only needed to regenerate corpus/ocr/. On a non-macOS host, substitute
+# another OCR engine in scripts/ocr_slides.py; the rest of the pipeline is
+# platform-independent and reads the cached JSON.
+pyobjc-framework-Vision==12.2.1
+pyobjc-framework-Quartz==12.2.1
 
 # --- Embedding + vector index (FR2) ---
 sentence-transformers==3.3.1
@@ -13,6 +26,7 @@ numpy==1.26.4
 
 # --- Intent classifier (FR3) + evaluation (FR10) ---
 scikit-learn==1.5.2
+joblib==1.4.2
 matplotlib==3.9.2
 
 # --- Generation backend (FR6) — OpenAI-compatible client covers Groq/DeepSeek/OpenAI ---
@@ -24,4 +38,6 @@ streamlit==1.41.1
 # --- Config + env (NFR5) ---
 PyYAML==6.0.2
 python-dotenv==1.0.1
-joblib==1.4.2
+
+# --- Tests ---
+pytest==8.3.4

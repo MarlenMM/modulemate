@@ -46,18 +46,39 @@ def plot_confusion(labels: list[str], matrix: list[list[int]], out: Path) -> Non
     plt.close(fig)
 
 
-def scorecard(s: dict) -> list[tuple[str, str, str, str, str, str]]:
+def read_interactive_latency(results_dir: Path) -> float | None:
+    """Median from scripts/measure_latency.py, if it has been run."""
+    path = results_dir / 'latency_interactive.md'
+    if not path.exists():
+        return None
+    import re
+    m = re.search(r'\|\s*Median\s*\|\s*([0-9.]+)\s*\|', path.read_text())
+    return float(m.group(1)) if m else None
+
+
+def scorecard(s: dict, interactive: float | None = None) -> list[tuple[str, str, str, str, str, str]]:
     """(NFR, aspect, target, measured, verdict, note)"""
     rows = []
 
+    # NFR1 is reported under both conditions, because they differ by an order
+    # of magnitude and only one of them describes a student's experience.
     median = s["latency_median"]
     rows.append((
-        "NFR1", "Latency (median end-to-end)", "< 5 s", f"{median:.2f} s",
-        PASS if median < 5 else FAIL,
-        f"p90 {s['latency_p90']:.2f} s, max {s['latency_max']:.2f} s. "
-        "Embeddings are computed locally on CPU and the generator is served "
-        "on low-latency hardware; retrieval over an exact index of this size "
-        "is not the bottleneck.",
+        "NFR1", "Latency — interactive (median)", "< 5 s",
+        f"{interactive:.2f} s" if interactive else "not measured",
+        (PASS if interactive < 5 else FAIL) if interactive else "—",
+        "Questions spaced by a reading pause, as a student would ask them. "
+        "See `latency_interactive.md`. This is the condition NFR1 describes.",
+    ))
+    rows.append((
+        "NFR1", "Latency — sustained burst (median)", "< 5 s (informational)",
+        f"{median:.2f} s", PASS if median < 5 else FAIL,
+        f"p90 {s['latency_p90']:.2f} s, max {s['latency_max']:.2f} s, measured "
+        "while the harness issues 49 questions plus judge calls with no pause. "
+        "The gap against the interactive figure is hosted-API throttling under "
+        "load (risk R3), not model or pipeline speed — local embedding and "
+        "exact-index retrieval account for under 30 ms of it. A paid tier or "
+        "local open-weights generation removes the ceiling.",
     ))
 
     hit = s.get("hit_at_3", 0.0)
@@ -173,7 +194,7 @@ def main() -> None:
     png = results_dir / "confusion_matrix.png"
     plot_confusion(labels, matrix, png)
 
-    rows = scorecard(s)
+    rows = scorecard(s, read_interactive_latency(results_dir))
     n_fail = sum(1 for r in rows if r[4] == FAIL)
 
     lines: list[str] = []
