@@ -7,7 +7,7 @@ programme. Every substantive answer cites the document and slide, page, section
 or cell it came from, and when the corpus does not support an answer the system
 says so and redirects to the tutor rather than guessing.
 
-**Corpus** — 51 staff-issued documents across five formats:
+**Corpus** — 51 staff-issued documents across five formats, 1,799 indexed passages:
 
 | Source | Contents |
 |---|---|

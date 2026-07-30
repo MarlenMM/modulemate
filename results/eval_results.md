@@ -1,6 +1,6 @@
 # ModuleMate — Evaluation Results
 
-Gold set: **63 questions** (52 in-scope, 11 out-of-scope). Evaluation wall-clock 667.4 s.
+Gold set: **63 questions** (52 in-scope, 11 out-of-scope). Evaluation wall-clock 671.7 s.
 
 Index: **1799 chunks** from 51 documents, built 2026-07-29 10:20:11. Embeddings `sentence-transformers/all-MiniLM-L6-v2`; generation `llama-3.1-8b-instant` via `openai_compatible`; k=5, refusal threshold 0.48.
 
@@ -9,8 +9,8 @@ Index: **1799 chunks** from 51 documents, built 2026-07-29 10:20:11. Embeddings 
 
 | ID | Aspect | Target | Measured | Verdict | Notes |
 |---|---|---|---|---|---|
-| NFR1 | Latency — interactive (median) | < 5 s | **0.63 s** | PASS | Questions spaced by a reading pause, as a student would ask them. See `latency_interactive.md`. This is the condition NFR1 describes. |
-| NFR1 | Latency — sustained burst (median) | < 5 s (informational) | **10.93 s** | **FAIL** | p90 16.91 s, max 22.93 s, measured while the harness issues 49 questions plus judge calls with no pause. The gap against the interactive figure is hosted-API throttling under load (risk R3), not model or pipeline speed — local embedding and exact-index retrieval account for under 30 ms of it. A paid tier or local open-weights generation removes the ceiling. |
+| NFR1 | Latency — interactive (median) | < 5 s | **1.18 s** | PASS | Questions spaced by a reading pause, as a student would ask them. See `latency_interactive.md`. This is the condition NFR1 describes. |
+| NFR1 | Latency — sustained burst (median) | < 5 s (informational) | **11.05 s** | **FAIL** | p90 16.07 s, max 22.37 s, measured while the harness issues 49 questions plus judge calls with no pause. The gap against the interactive figure is hosted-API throttling under load (risk R3), not model or pipeline speed — local embedding and exact-index retrieval account for under 30 ms of it. A paid tier or local open-weights generation removes the ceiling. |
 | NFR2 | Retrieval hit@3 | >= 0.85 | **0.788** | **FAIL** | Share of in-scope gold questions whose expected chunk appears in the top 3 retrieved passages. |
 | NFR2 | Retrieval hit@3 — document level | informational | **0.942** | — | Same questions, scored on whether the expected document appears in the top 3 at all. The gap against exact hit@3 is locator-level misses and questions the corpus answers correctly in more than one place — see `retrieval_analysis.md`. |
 | NFR2 | Citation correctness (exact doc + slide/section) | >= 0.90 | **0.820** | **FAIL** | Document-level correctness alone is 0.920; the gap is answers citing an adjacent slide within the correct deck. |
@@ -41,10 +41,10 @@ Index: **1799 chunks** from 51 documents, built 2026-07-29 10:20:11. Embeddings 
 | `refusal_rate_out_of_scope` | 1.0 |
 | `false_refusal_rate_in_scope` | 0.0385 |
 | `intent_accuracy` | 0.8571 |
-| `latency_median` | 10.931 |
-| `latency_mean` | 9.963 |
-| `latency_p90` | 16.906 |
-| `latency_max` | 22.933 |
+| `latency_median` | 11.051 |
+| `latency_mean` | 9.766 |
+| `latency_p90` | 16.072 |
+| `latency_max` | 22.368 |
 | `n_answered` | 50 |
 
 ## Refusals by cause
@@ -105,66 +105,66 @@ Rows are the true intent, columns the predicted intent.
 
 | ID | Intent | Refused | hit@3 | Citation ok | Grounded | Latency (s) |
 |---|---|---|---|---|---|---|
-| `adm01` | `admin/logistics` | no | yes | yes | yes | 5.836 |
-| `adm02` | `admin/logistics` | no | yes | yes | yes | 0.422 |
-| `adm03` | `admin/logistics` | no | yes | yes | yes | 0.415 |
-| `adm04` | `admin/logistics` | no | yes | yes | yes | 0.412 |
-| `adm05` | `admin/logistics` | no | no | yes | no | 0.417 |
-| `adm06` | `admin/logistics` | no | yes | yes | yes | 10.815 |
-| `adm07` | `admin/logistics` | no | yes | no | yes | 9.872 |
-| `adm08` | `admin/logistics` | no | yes | yes | yes | 9.79 |
-| `adm09` | `admin/logistics` | no | yes | yes | yes | 3.566 |
-| `adm10` | `admin/logistics` | yes | no | — | — | 13.758 |
-| `adm11` | `admin/logistics` | no | yes | yes | yes | 9.722 |
-| `adm12` | `admin/logistics` | no | yes | yes | yes | 8.746 |
-| `adm13` | `admin/logistics` | no | yes | yes | yes | 8.79 |
-| `con01` | `conceptual` | no | yes | yes | yes | 15.068 |
-| `con02` | `conceptual` | no | yes | yes | yes | 19.899 |
-| `con03` | `conceptual` | no | yes | yes | yes | 15.022 |
-| `con04` | `conceptual` | no | yes | yes | yes | 13.944 |
-| `con05` | `conceptual` | no | yes | yes | yes | 19.026 |
-| `con06` | `conceptual` | no | yes | yes | yes | 19.876 |
-| `con07` | `conceptual` | no | yes | yes | yes | 15.867 |
-| `con08` | `conceptual` | no | yes | yes | yes | 14.805 |
-| `con09` | `conceptual` | no | yes | yes | yes | 13.916 |
-| `con10` | `conceptual` | no | yes | yes | yes | 13.922 |
-| `con11` | `conceptual` | no | no | no | yes | 13.81 |
-| `con12` | `conceptual` | no | yes | yes | yes | 15.762 |
-| `con13` | `conceptual` | no | yes | yes | yes | 13.915 |
-| `con14` | `conceptual` | no | yes | yes | yes | 16.906 |
-| `cod01` | `code-help` | no | no | no | yes | 12.779 |
-| `cod02` | `code-help` | no | yes | yes | yes | 13.789 |
-| `cod03` | `code-help` | no | yes | yes | yes | 11.789 |
-| `cod04` | `code-help` | no | yes | yes | yes | 12.722 |
-| `cod05` | `code-help` | no | yes | yes | yes | 7.807 |
-| `cod06` | `code-help` | no | yes | yes | yes | 11.831 |
-| `cod07` | `code-help` | no | no | no | yes | 11.88 |
-| `cod08` | `code-help` | no | yes | yes | yes | 12.959 |
-| `cod09` | `code-help` | no | yes | yes | yes | 16.958 |
-| `cod10` | `code-help` | no | yes | yes | yes | 10.745 |
-| `cod11` | `code-help` | no | yes | yes | yes | 13.808 |
-| `con15` | `conceptual` | no | yes | yes | no | 11.162 |
-| `con16` | `conceptual` | no | no | no | yes | 8.784 |
-| `con17` | `conceptual` | no | no | no | yes | 11.878 |
-| `con18` | `conceptual` | no | yes | yes | yes | 9.84 |
-| `cod12` | `code-help` | no | yes | yes | yes | 19.06 |
-| `cod13` | `code-help` | no | yes | yes | yes | 18.946 |
-| `cod14` | `code-help` | no | yes | yes | yes | 11.795 |
-| `cod15` | `code-help` | no | yes | yes | yes | 9.795 |
-| `adm14` | `admin/logistics` | no | no | no | yes | 22.933 |
-| `adm15` | `admin/logistics` | yes | no | — | — | 0.027 |
-| `adm16` | `admin/logistics` | no | yes | no | yes | 10.931 |
-| `adm17` | `admin/logistics` | no | yes | yes | yes | 8.778 |
-| `adm18` | `admin/logistics` | no | no | no | no | 10.872 |
-| `cod16` | `code-help` | no | no | yes | yes | 11.891 |
-| `oos01` | `out-of-scope/social` | yes | — | — | — | 0.022 |
-| `oos02` | `out-of-scope/social` | yes | — | — | — | 0.009 |
-| `oos03` | `out-of-scope/social` | yes | — | — | — | 0.01 |
-| `oos04` | `out-of-scope/social` | yes | — | — | — | 0.013 |
-| `oos05` | `out-of-scope/social` | yes | — | — | — | 0.01 |
-| `oos06` | `out-of-scope/social` | yes | — | — | — | 0.011 |
-| `oos07` | `out-of-scope/social` | yes | — | — | — | 0.019 |
-| `oos08` | `out-of-scope/social` | yes | — | — | — | 9.688 |
-| `oos09` | `out-of-scope/social` | yes | — | — | — | 0.021 |
-| `oos10` | `out-of-scope/social` | yes | — | — | — | 0.007 |
-| `oos11` | `out-of-scope/social` | yes | — | — | — | 9.783 |
+| `adm01` | `admin/logistics` | no | yes | yes | yes | 9.865 |
+| `adm02` | `admin/logistics` | no | yes | yes | yes | 0.817 |
+| `adm03` | `admin/logistics` | no | yes | yes | yes | 1.049 |
+| `adm04` | `admin/logistics` | no | yes | yes | yes | 0.537 |
+| `adm05` | `admin/logistics` | no | no | yes | no | 0.889 |
+| `adm06` | `admin/logistics` | no | yes | yes | yes | 0.773 |
+| `adm07` | `admin/logistics` | no | yes | no | yes | 9.599 |
+| `adm08` | `admin/logistics` | no | yes | yes | yes | 9.743 |
+| `adm09` | `admin/logistics` | no | yes | yes | yes | 8.587 |
+| `adm10` | `admin/logistics` | yes | no | — | — | 13.339 |
+| `adm11` | `admin/logistics` | no | yes | yes | yes | 9.675 |
+| `adm12` | `admin/logistics` | no | yes | yes | yes | 8.266 |
+| `adm13` | `admin/logistics` | no | yes | yes | yes | 11.929 |
+| `con01` | `conceptual` | no | yes | yes | yes | 15.099 |
+| `con02` | `conceptual` | no | yes | yes | yes | 20.413 |
+| `con03` | `conceptual` | no | yes | yes | yes | 14.341 |
+| `con04` | `conceptual` | no | yes | yes | yes | 15.233 |
+| `con05` | `conceptual` | no | yes | yes | yes | 17.521 |
+| `con06` | `conceptual` | no | yes | yes | yes | 20.828 |
+| `con07` | `conceptual` | no | yes | yes | yes | 13.547 |
+| `con08` | `conceptual` | no | yes | yes | yes | 14.363 |
+| `con09` | `conceptual` | no | yes | yes | yes | 15.477 |
+| `con10` | `conceptual` | no | yes | yes | yes | 12.407 |
+| `con11` | `conceptual` | no | no | no | yes | 14.194 |
+| `con12` | `conceptual` | no | yes | yes | yes | 15.644 |
+| `con13` | `conceptual` | no | yes | yes | yes | 13.95 |
+| `con14` | `conceptual` | no | yes | yes | yes | 16.401 |
+| `cod01` | `code-help` | no | no | no | yes | 7.073 |
+| `cod02` | `code-help` | no | yes | yes | yes | 12.687 |
+| `cod03` | `code-help` | no | yes | yes | yes | 12.752 |
+| `cod04` | `code-help` | no | yes | yes | yes | 11.517 |
+| `cod05` | `code-help` | no | yes | yes | yes | 7.432 |
+| `cod06` | `code-help` | no | yes | yes | yes | 11.52 |
+| `cod07` | `code-help` | no | no | no | yes | 11.966 |
+| `cod08` | `code-help` | no | yes | yes | yes | 13.057 |
+| `cod09` | `code-help` | no | yes | yes | yes | 16.072 |
+| `cod10` | `code-help` | no | yes | yes | yes | 10.345 |
+| `cod11` | `code-help` | no | yes | yes | yes | 13.775 |
+| `con15` | `conceptual` | no | yes | yes | no | 11.681 |
+| `con16` | `conceptual` | no | no | no | yes | 7.984 |
+| `con17` | `conceptual` | no | no | no | yes | 12.456 |
+| `con18` | `conceptual` | no | yes | yes | yes | 8.059 |
+| `cod12` | `code-help` | no | yes | yes | yes | 18.969 |
+| `cod13` | `code-help` | no | yes | yes | yes | 19.723 |
+| `cod14` | `code-help` | no | yes | yes | yes | 11.725 |
+| `cod15` | `code-help` | no | yes | yes | yes | 8.253 |
+| `adm14` | `admin/logistics` | no | no | no | yes | 22.368 |
+| `adm15` | `admin/logistics` | yes | no | — | — | 0.036 |
+| `adm16` | `admin/logistics` | no | yes | no | yes | 11.051 |
+| `adm17` | `admin/logistics` | no | yes | yes | yes | 8.353 |
+| `adm18` | `admin/logistics` | no | no | no | no | 10.083 |
+| `cod16` | `code-help` | no | no | yes | yes | 12.291 |
+| `oos01` | `out-of-scope/social` | yes | — | — | — | 0.028 |
+| `oos02` | `out-of-scope/social` | yes | — | — | — | 0.007 |
+| `oos03` | `out-of-scope/social` | yes | — | — | — | 0.007 |
+| `oos04` | `out-of-scope/social` | yes | — | — | — | 0.011 |
+| `oos05` | `out-of-scope/social` | yes | — | — | — | 0.009 |
+| `oos06` | `out-of-scope/social` | yes | — | — | — | 0.01 |
+| `oos07` | `out-of-scope/social` | yes | — | — | — | 0.017 |
+| `oos08` | `out-of-scope/social` | yes | — | — | — | 9.242 |
+| `oos09` | `out-of-scope/social` | yes | — | — | — | 0.03 |
+| `oos10` | `out-of-scope/social` | yes | — | — | — | 0.008 |
+| `oos11` | `out-of-scope/social` | yes | — | — | — | 10.202 |
