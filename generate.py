@@ -5,10 +5,12 @@ in the locked risk register): retrieval, refusal and the UI never import a
 vendor SDK, so the backend can be swapped — Groq, OpenAI, DeepSeek, Anthropic,
 or a local open-weights server — by editing config.yaml alone.
 
-Grounding is enforced in three places, not one:
-  1. the system prompt confines the model to the supplied passages;
-  2. the passages are the only corpus text in the context window;
-  3. the refusal gate (retrieve.py) can stop generation before it starts.
+Grounding is enforced in four places, not one:
+  1. the corpus manifest decides what may be cited at all;
+  2. the system prompt confines the model to the supplied passages, and names
+     the exact citation label it must copy;
+  3. the passages are the only corpus text in the context window;
+  4. the refusal gate (retrieve.py) can stop generation before it starts.
 """
 from __future__ import annotations
 

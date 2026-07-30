@@ -55,21 +55,102 @@ matters") rather than departing from it.
 
 ## 2. Corpus actually used
 
-All ten documents are the module's real materials. Nothing was synthesised.
+> **Scope change after the first build.** The system was first built over the
+> ten AI & ML module documents. It was then extended, at the user's request, to
+> the whole HIT Global Summer School programme. Both states are recorded here
+> because §3 of the report can legitimately present either; the numbers in §4
+> below are for the final, programme-wide system. Where the extension changed a
+> measurement, both figures are given.
 
-| Document | Type | Slides / sections | Chunks |
+**51 staff-issued documents, five formats, 1,799 chunks (113,734 words).** Nothing was
+synthesised; every document is real programme material.
+
+| Group | Documents | Format | Citation anchor |
 |---|---|---|---|
-| AI notes1_introduction | pptx | 50 slides | 53 |
-| AI notes2_search | pptx | 100 slides | 98 |
-| AI notes3_knowledge representation | pptx | 112 slides | 116 |
-| AI notes4_uncertainty management and reasoning | pptx | 90 slides | 97 |
-| AI notes5_machine learning_part 1 | pptx | 101 slides | 96 |
-| AI notes6_machine learning_part 2 | pptx | 106 slides | 99 |
-| AI notes7_neural networks | pptx | 75 slides | 77 |
-| AI notes8_deep learning | pptx | 38 slides | 45 |
-| HIT summer course 2026 …teaching schedule_JaneYou | pptx | 6 slides | 6 |
-| HIT summer course_AI and ML_project_July2026 | docx | 8 sections | 17 |
-| **Total** | | **678 slides + 8 sections** | **704 chunks** (57,899 words) |
+| AI & ML module — lecture decks | 8 | pptx (from legacy .ppt) | slide number |
+| AI & ML module — schedule, assignment brief, project brief | 3 | pptx/docx | slide / section |
+| Week 1 Machine Learning — lectures (Burnaev, Skoltech) | 8 | pdf | page number |
+| Week 1 — assignment briefs and readmes | 9 | docx / txt | section / part |
+| Week 1 — lab and seminar notebooks | 8 | ipynb | cell number |
+| Intelligent Software Engineering — lab guide, intro lecture | 2 | pdf | page number |
+| Programme — Global Summer School brochure, theme list | 2 | pdf | page number |
+| Course group chats | 5 | rtf → txt | part number |
+
+Chunks by format: pptx 687 · pdf 424 · txt 292 · ipynb 259 · docx 137.
+(PDF is post-de-duplication; before it, 557 — see Challenge 10.)
+
+### What was excluded, and how
+
+The governing rule was: **course-issued material only; nothing the student
+wrote.** Excluded by explicit rule in `corpus_sources.yaml` — the `smart-chatbot`
+and `code-review-ai` projects, the code-review project plan, the LaTeX report
+template, the answered assignment, Jupyter checkpoint autosaves, and datasets
+(`.csv`, `.pkl`, `.zip`) that carry no answerable prose.
+
+Two exclusions are worth reporting in §3 as method:
+
+* **The authorship guard.** `lab1.pdf`, `lab2.pdf` and `lab3.pdf` sit in the
+  Code Review Project folder and are named exactly like staff lab handouts.
+  They are in fact the student's own submitted experiment reports, compiled
+  from `Experiment_Report__Eng_/main.tex` and carrying the cover block
+  "Name Marlen Melis / Student ID 2026140428". They were caught by reading
+  them, not by their names. A filename-based rule would have indexed the
+  student's own graded work as if it were course material. `collect_corpus.py`
+  now reads the opening pages of every candidate and rejects any file
+  containing a configured student identifier, so the same mistake is
+  self-correcting for anything added later. Verified: it rejects all three
+  reports and passes both genuine staff documents.
+* **Content-hash de-duplication.** `Lecture_3.pdf` exists in two folders with
+  an identical hash. Indexing both would let one document occupy two of the
+  five retrieval slots with the same text.
+
+### Legacy-format conversion note
+
+The corpus ships as legacy binary OLE2 `.ppt` and `.doc`, which `python-pptx`
+and `python-docx` reject with `PackageNotFoundError`, plus `.rtf` chat exports.
+Conversion is therefore a *mandatory first stage of FR1*, not a convenience:
+`scripts/convert_corpus.sh` drives LibreOffice headlessly for `.ppt`→`.pptx`
+and `.doc`→`.docx`, and macOS `textutil` for `.rtf`→`.txt` (chosen over
+LibreOffice because it preserves the UTF-8 of mixed Chinese/English chat text).
+It is idempotent.
+
+### OCR note — the single largest finding of the build
+
+After conversion, only **258 of 678 slides (38%)** exposed any text to
+`python-pptx`. The remaining **420 slides are `PICTURE` and
+`EMBEDDED_OLE_OBJECT` shapes** — those decks were authored as images, so the
+lecture content is pixels, not text. A text-only pipeline would have silently
+omitted 62% of the Week 2 teaching material and refused questions the corpus in
+fact answers.
+
+Recovery (`scripts/ocr_slides.py`): render each deck to PDF via LibreOffice →
+rasterise per page at 130 dpi with `pdftoppm` → OCR with the macOS Vision
+framework. Text was recovered from **678/678 slides**, taking the Week 2 decks
+from 150 chunks to 687.
+
+By contrast, every PDF staged by the manifest was verified to carry a text
+layer, so PDFs are read directly with `pypdf` and are not OCRed. The one
+image-only PDF in the source tree (the Chinese-language faculty handbook) is
+excluded in the manifest with that reason recorded.
+
+### Language note
+
+The corpus is genuinely bilingual — the chat exports and one lab guide mix
+Chinese and English. `all-MiniLM-L6-v2` is English-trained, so a
+predominantly-Chinese passage embeds where no English question lands and can
+only displace an English chunk from the top-*k*. Chunks are therefore filtered
+on the share of Latin letters, applied **per chunk rather than per document**,
+so the English half of a bilingual chat survives. This keeps the locked
+"English only" scope boundary honest rather than quietly broken.
+
+### Original ten-document corpus (for reference)
+
+| Document | Type | Units | Chunks |
+|---|---|---|---|
+| AI notes1–8 (8 decks) | pptx | 678 slides total | 687 |
+| Teaching schedule (JaneYou) | pptx | 6 slides | 6 |
+| Project brief July2026 | docx | 8 sections | 11 |
+| **Total** | | | **704 chunks** |
 
 ### Legacy-format conversion note
 
@@ -123,39 +204,83 @@ it, so `Requirements:` is a heading but `Due: Friday 31 July` is a data line.
 
 | Decision | Value | Basis |
 |---|---|---|
-| Slide chunk budget | 230 words (~300 tokens), 45-word overlap (~20%) | Mid-range of the 200–400 token target; slides are short so most pass through whole |
-| Brief chunk budget | 32 words, line-aware, never splits mid-line | Measured — see below |
+| Slide / PDF-page chunk budget | 230 words (~300 tokens), 45-word overlap (~20%) | Mid-range of the 200–400 token target; slides and pages are short so most pass through whole |
+| Prose chunk budget (briefs, chats) | 32 words, line-aware, never splits mid-line | Measured — see below |
 | Brief chunk prefix | Section heading prepended to each chunk | A lone bullet embeds ambiguously; the heading is the disambiguating context, and it is also what the chunk is cited as |
-| OCR noise filter | ≥55% alphabetic chars, ≥6 word-like tokens | OCR of chart graphics yields axis labels ("100 75 50 25÷ 0 -10") that embed as real vectors and compete for retrieval slots. Filter removed 25 chunks |
+| OCR noise filter | ≥55% alphabetic chars, ≥6 word-like tokens | OCR of chart graphics yields axis labels ("100 75 50 25÷ 0 -10") that embed as real vectors and compete for retrieval slots |
+| Code-cell filter | ≥32% alphabetic chars | Source code is legitimately symbol-dense; the prose threshold would discard exactly the notebook cells that answer "which function did the lab use?" |
+| Language filter | ≥60% Latin letters, per chunk | English-only embedding model and locked scope; per-chunk so bilingual chats keep their English half |
+| Within-document dedup | Exact normalised text | Beamer decks emit one page per incremental reveal — the same paragraph recurred on up to **7** consecutive pages, 133 duplicates in total, letting one passage fill several top-*k* slots |
 | Embedding | `all-MiniLM-L6-v2`, 384-dim, L2-normalised | Locked. Normalisation makes FAISS inner product *equal* cosine, which is what makes the refusal threshold interpretable |
-| Index | FAISS `IndexFlatIP` (exact) | Locked. At 704 chunks exhaustive scan is <30 ms; approximate search would add tuning burden and recall loss for no gain |
-| *k* | 5 | Config default |
-| **Similarity threshold** | **0.35** | **Calibrated, not guessed** — see below |
+| Index | FAISS `IndexFlatIP` (exact) | Locked. At ~2×10³ chunks exhaustive scan is <30 ms; approximate search would add tuning burden and recall loss for no gain |
+| *k* | 5, over-retrieving 4× before re-ranking | Re-ranking only the first *k* would be pointless — a demoted chunk still holds its slot and the chunk it displaced was never fetched |
+| **Source authority prior** | chats ×0.85, everything else ×1.0 | **Measured** — see below |
+| **Similarity threshold** | **0.48** (was 0.35 on the module corpus) | **Calibrated, not guessed** — see below |
 | Intent classifier | Multinomial logistic regression, C=4.0, seed 42 | Measured against nearest-centroid — see below |
 | Short-circuit confidence floor | 0.60 | Measured — see below |
 
-### Threshold calibration (M5) — how 0.35 was derived
+### Source authority prior — why similarity alone is not enough
+
+Adding the group chats introduced a failure that pure semantic similarity
+cannot fix. Asked *"What is the word limit for the individual project
+report?"*, retrieval ranked a **chat message at 0.567 above the assessment
+brief's own `Requirements` section at 0.552**. The chat was topically adjacent
+and conversationally phrased; the brief was terse and formal. Semantic
+similarity has no notion of which source is *authoritative*.
+
+For this system that is not a cosmetic ranking issue — the Ana persona
+"abandons a tool that is confidently wrong about a deadline", and citing a
+classmate's speculation about the word limit is precisely that failure. Each
+chunk's cosine is therefore multiplied by a weight keyed on its source class
+before ranking *and* before the refusal gate, and candidates are over-retrieved
+4× so demoted chunks are actually replaced rather than merely reordered.
+
+At ×0.85 a chat must be ~18% more similar to outrank an official document.
+Measured effect: the word-limit question returns the brief; "which pandas
+function reads a CSV?" returns the course readme; "what are the deadlines for
+the code review experiments?" returns the official lab guide rather than a
+chat — while "how do I check in for the summer school?" still returns the chat,
+because that is the only source that answers it.
+
+### Threshold calibration (M5) — how 0.48 was derived
 
 `scripts/calibrate_threshold.py` scores every gold question against the built
-index and sweeps candidate cut-offs. Measured top-1 similarity distributions:
+index and sweeps candidate cut-offs. Measured top-1 weighted similarity on the
+programme corpus:
 
-| Set | n | min | mean | median | max |
-|---|---|---|---|---|---|
-| In-scope | 38 | 0.386 | 0.650 | — | 0.843 |
-| Out-of-scope | 11 | 0.122 | 0.293 | — | 0.697 |
+| Set | n | min | mean | max |
+|---|---|---|---|---|
+| In-scope | 52 | 0.457 | 0.653 | 0.843 |
+| Out-of-scope | 11 | 0.178 | 0.358 | 0.524 |
 
-Selection rule: **maximum Youden's J** (in-scope retention + out-of-scope
-rejection − 1), tie-broken to the centre of the optimal plateau. Result
-**0.35**, retaining **100%** of in-scope questions while the gate alone
-rejects **81.8%** of out-of-scope ones.
+The distributions **overlap** — no cut-off separates them perfectly — so the
+selection rule has to encode a preference, and which preference is the design
+decision worth reporting.
 
-An earlier rule — "highest in-scope retention among cut-offs that reject 100%
-of out-of-scope" — selected 0.70 and retained only 34% of in-scope questions.
-It was wrong because two out-of-scope questions ("Can you write my project
-report for me?" 0.697; "Can you grant me an extension?" 0.538) are *about*
-corpus topics and outscore the in-scope floor of 0.386. **The similarity gate
-structurally cannot reject them.** This is the empirical justification for
-having more than one refusal layer, and is good material for §3.
+Selection is **retention-constrained**: keep ≥98% of in-scope questions, then
+reject as much out-of-scope as that allows. Result **0.48**, retaining
+**98.1%** in-scope and rejecting **81.8%** of out-of-scope at the gate alone.
+
+The reasoning is architectural, not statistical. A false refusal is not a soft
+failure here: the pipeline returns *before retrieval*, so the turn yields no
+passages at all and the question counts as a hit@3 miss as well as an
+unanswered question — measured mid-build, an over-eager gate dropped hit@3 from
+0.895 to 0.842 on its own. Meanwhile out-of-scope traffic has two further
+layers behind this one, so rejection given up here is largely recovered
+downstream, whereas recall given up here is lost outright. The
+Youden-J-optimal cut-off of 0.54 would reject 100% at the gate but refuse
+11.5% of legitimate questions.
+
+Two earlier rules were tried and rejected, both instructive:
+
+* *"Highest in-scope retention among cut-offs rejecting 100% of out-of-scope"*
+  selected **0.70** and retained only **34%** of in-scope questions, because
+  two out-of-scope questions ("Can you write my project report for me?",
+  "Can you grant me an extension?") are *about* corpus topics and outscore the
+  in-scope floor. **The similarity gate structurally cannot reject them** —
+  the empirical justification for having more than one refusal layer.
+* *Maximum Youden's J* — correct in the abstract, but weights a false refusal
+  and a false acceptance equally, which this architecture does not.
 
 ### Intent classifier: logistic regression vs nearest-centroid
 
@@ -225,39 +350,90 @@ bracket. Document names are filename stems (no extension).
 ## 4. NFR results table
 
 Full version with per-question detail: `results/eval_results.md`.
-Gold set: **49 questions** (38 in-scope, 11 out-of-scope). Index: 704 chunks,
-10 documents. **13/14 criteria met.**
+Gold set: **63 questions** (52 in-scope, 11 out-of-scope). Index: 1,799 chunks,
+51 documents. **12/15 criteria met.**
 
 | ID | Aspect | Target | Measured | Verdict |
 |---|---|---|---|---|
-| NFR1 | Latency — interactive (median) | < 5 s | **0.63 s** | **PASS** |
-| NFR1 | Latency — sustained burst (median) | < 5 s (informational) | **10.80 s** | **FAIL** |
-| NFR2 | Retrieval hit@3 | ≥ 0.85 | **0.895** | PASS |
-| NFR2 | Citation correctness (exact doc + slide) | ≥ 0.90 | **0.921** | PASS |
+| NFR1 | Latency — interactive (median) | < 5 s | **1.18 s** | **PASS** |
+| NFR1 | Latency — sustained burst (median) | < 5 s (informational) | **11.05 s** | **FAIL** |
+| NFR2 | Retrieval hit@3 — exact slide/page | ≥ 0.85 | **0.788** | **FAIL** |
+| NFR2 | Retrieval hit@3 — document level | informational | **0.942** | — |
+| NFR2 | Citation correctness (exact doc + slide) | ≥ 0.90 | **0.820** | **FAIL** |
 | NFR3 | Refusal rate on out-of-scope set | ≥ 0.95 | **1.000** | PASS |
 | NFR3 | Fabricated citations | 0 | **0** | PASS |
-| O1 | Groundedness (LLM judge, RAGAS-style) | ≥ 0.90 | **0.947** | PASS |
-| O4 | Intent-router accuracy | ≥ 0.85 | **0.898** | PASS |
-| — | False-refusal rate on in-scope | low | **0.000** | — |
-| — | Key fact present in answer | ≥ 0.90 | **0.947** | PASS |
+| O1 | Groundedness (LLM judge, RAGAS-style) | ≥ 0.90 | **0.940** | PASS |
+| O4 | Intent-router accuracy | ≥ 0.85 | **0.857** | PASS |
+| — | False-refusal rate on in-scope | low | **0.038** | — |
+| — | Key fact present in answer | ≥ 0.90 | **0.900** | PASS |
 | NFR4 | Privacy (local embeddings, top-*k* only to API) | by design | satisfied | PASS |
 | NFR5 | Maintainability (*k*/threshold/models in config) | by design | satisfied | PASS |
 | NFR6 | Usability (cited answer without instruction) | by design | satisfied, **unmeasured** | — |
 | NFR7 | Reproducibility (pinned deps, fixed seed) | by design | satisfied | PASS |
 
-Supporting figures: document-level citation correctness **0.974**; latency p90
-14.90 s (burst) / 0.72 s (interactive); refusals by cause — intent router 9,
-similarity gate 0, generator self-report 2.
+Supporting figures: document-level citation correctness **0.920**; exact
+hit@5 **0.827**; latency p90 16.07 s (burst) / 1.87 s max (interactive); refusals
+by cause — intent router 8, similarity gate 2, generator self-report 3.
 
-### The one miss, explained honestly
+### Before and after the corpus expansion
+
+The same harness on the original ten-document module corpus scored:
+
+| Metric | Module corpus (704 chunks) | Programme corpus (1,799 chunks) |
+|---|---|---|
+| Retrieval hit@3 (exact) | 0.895 **PASS** | 0.788 **FAIL** |
+| Retrieval hit@3 (document) | — | 0.942 |
+| Citation correctness | 0.921 **PASS** | 0.820 **FAIL** |
+| Groundedness | 0.947 | 0.940 |
+| Refusal rate | 1.000 | 1.000 |
+| Fabricated citations | 0 | 0 |
+| Intent accuracy | 0.898 | 0.857 |
+
+**This trade is worth stating plainly in §3 or §4, because it is the most
+interesting result in the project:** widening the knowledge base by 2.6×
+made the assistant able to answer far more questions, and measurably worse at
+pinpointing *which* slide answers them. Safety properties (refusal,
+fabrication, groundedness) did not degrade at all.
+
+### The three misses, explained honestly
+
+**NFR2 exact hit@3 (0.788) and citation correctness (0.820) both miss.**
+They fail together and for the same reason: the citation is emitted from the
+retrieved passage, so a locator-level retrieval miss produces a locator-level
+citation miss. Three distinct causes, measured in
+`results/retrieval_analysis.md`:
+
+1. **The corpus now answers some questions in more than one correct place.**
+   Two programme brochures state where the summer school is held; the
+   assignment brief and the project brief each carry a near-identically worded
+   `Penalty` section; regression and classification are taught in both the
+   Week 1 PDFs and the Week 2 decks. When retrieval returns the *other* correct
+   source it scores zero on exact hit@3 while being a perfectly good answer.
+   This is why document-level hit@3 is **0.942** against exact **0.788** — the
+   right document is found 94% of the time.
+2. **Locator-level near-misses.** Some expected passages are ranked 4th or 5th
+   rather than in the top 3: exact hit@**5** is **0.827** against hit@**3** of
+   0.788. Two of the misses (`adm05`, `cod16`) emitted exactly the expected
+   citation despite scoring a hit@3 miss.
+3. **Genuine failures.** Four questions retrieved the wrong material outright —
+   most notably "Am I allowed to use AI tools?", where the governing sentence
+   ("You can use AI to the fullest") sits inside the brief's `Penalty` section
+   among late-submission rules and stays hard to surface.
+
+Raising *k* from 5 to 10 would likely close most of gap (2), at the cost of a
+longer prompt and more tokens per answer. Hybrid BM25 + dense retrieval (C1)
+addresses (3) directly and remains the best-motivated future item.
+
+**NFR1 under sustained burst (11.05 s median) fails; interactive (1.18 s)
+passes comfortably.**
 
 **NFR1 under sustained burst (10.80 s median) fails; interactive (0.63 s)
-passes comfortably.** The harness fires 49 questions plus 38 judge calls with
+passes comfortably.** The harness fires 63 questions plus 50 judge calls with
 no pause, and the free-tier hosted API throttles under that load — the first
-eight questions of a run return in 0.4–0.7 s and later ones take 7–19 s.
+questions of a run return in 0.4–0.7 s and later ones take 7–23 s.
 `scripts/measure_latency.py` re-measures with a 12 s reading pause between
-questions, as a student would actually ask, giving **median 0.63 s, max
-0.72 s**. Local embedding and exact-index retrieval account for under 30 ms;
+questions, as a student would actually ask, giving **median 1.18 s, max
+1.87 s** on the full 1,799-chunk index. Local embedding and exact-index retrieval account for under 30 ms;
 the remainder is entirely the hosted generation call. This is risk **R3**
 materialising, and the mitigation already in the design (swappable backend)
 is what makes it a tier/config problem rather than an architectural one.
@@ -266,56 +442,104 @@ is what makes it a tier/config problem rather than an architectural one.
 NFR1 is met for the single-user interactive workload the requirement
 describes, and is not met under sustained batch load on a free API tier.
 
+### Privacy note on the chat sources — decide this before submitting
+
+The five group-chat exports contain genuinely useful staff announcements
+(assignment instructions from the teaching assistant, experiment deadlines,
+check-in logistics). They **also** contain messages from named classmates,
+volunteers and staff, and incidental personal detail such as accommodation
+arrangements.
+
+That sits in tension with **NFR4 as locked**, which reads "no student PII
+stored". As built, the index does contain third-party names and messages, and
+the top-*k* passages sent to the generation API can include them.
+
+Nothing here is leaked beyond the user's own machine and the API call, and the
+system runs single-user and locally — but the report should not claim NFR4 in
+its original wording without qualification. Three defensible options:
+
+1. **Keep the chats and reword NFR4** to "no PII is collected from users of the
+   system; the corpus is limited to material the student already holds", and
+   state the limitation in §4.
+2. **Drop the chats** — set `include_chats: false` in `corpus_sources.yaml` and
+   re-run the four build commands. NFR4 then holds as originally written. Cost:
+   loses check-in logistics and some announced deadlines.
+3. Keep them but note in §4 that a production deployment would redact
+   participant names at ingestion.
+
+This is a judgement call about an assessed claim, so it is flagged rather than
+decided here. **Option 1 is the honest default** if the chats stay.
+
 ### Honesty caveats worth stating in §4 (Limitations)
 
 * **NFR6 is unmeasured.** No user study was run. It is a design claim.
 * **Groundedness is LLM-judged**, not human-judged, and the judge is another
   LLM on the same provider.
-* **The out-of-scope training set was strengthened after seeing the first
-  evaluation run.** The gold questions `oos08`/`oos11` fall inside the
-  categories that were strengthened, so the final 1.000 refusal rate is
-  partly in-domain. To test this honestly, `classify.py` carries **held-out
-  probes never trained on and not in the gold set**: policy generalisation
-  **7/8 (87.5%)**, distance-metric generalisation **3/3**. Quote those
-  alongside the gold-set number.
+* **Router training data was strengthened three times after seeing evaluation
+  results** — policy refusals, distance metrics, and programme-level admin.
+  Some gold questions fall inside the categories that were strengthened, so
+  gold-set numbers are partly in-domain. To test this honestly, `classify.py`
+  carries **held-out probes never trained on and not in the gold set**:
+  policy **7/8 (87.5%)**, distance-metric **3/3**, programme-admin **3/3**.
+  Quote those alongside the gold-set number.
+* **The gold set was authored against the corpus it evaluates**, and for the
+  programme-wide questions it was written quickly. Several exact-locator
+  expectations are genuinely ambiguous (two brochures, two `Penalty` sections),
+  which is part of why exact hit@3 misses while document-level hit@3 is 0.942.
+  Reporting both numbers is the honest treatment; picking whichever passes
+  would not be.
 * The gold set is **hand-authored by the system's own developer**, the
   standard limitation of single-author evaluation.
+* **The generator occasionally leaks its scaffolding.** Prompt rule 5 forbids
+  mentioning "the context" or "the passages", but the 8B generation model
+  sometimes opens with "According to Passage 1, …". It does not affect
+  groundedness or citation correctness, but it is visible in the UI and is
+  worth one sentence in §4 as a known quality limitation of the smaller model
+  chosen under the API quota constraint (D2). A larger generator, or a
+  post-generation regex strip, would remove it.
 
 ---
 
 ## 5. Confusion matrix — raw numbers
 
 Rows = true intent, columns = predicted. Image:
-`results/confusion_matrix.png`. Overall accuracy **0.898 (44/49)**.
+`results/confusion_matrix.png`. Overall accuracy **0.857 (54/63)**.
 
 | true \ pred | admin/logistics | conceptual | code-help | out-of-scope/social | total |
 |---|---|---|---|---|---|
-| **admin/logistics** | **13** | 0 | 0 | 0 | 13 |
-| **conceptual** | 0 | **12** | 2 | 0 | 14 |
-| **code-help** | 0 | 1 | **10** | 0 | 11 |
+| **admin/logistics** | **18** | 0 | 0 | 0 | 18 |
+| **conceptual** | 0 | **16** | 2 | 0 | 18 |
+| **code-help** | 4 | 1 | **11** | 0 | 16 |
 | **out-of-scope/social** | 2 | 0 | 0 | **9** | 11 |
 
-Per-class: admin 13/13 (1.00), conceptual 12/14 (0.857), code-help 10/11
-(0.909), out-of-scope 9/11 (0.818).
+Per-class recall: admin 18/18 (1.000), conceptual 16/18 (0.889), code-help
+11/16 (0.688), out-of-scope 9/11 (0.818).
 
-**The five errors, and why they are benign:**
+**The nine errors fall into two groups, and only one group matters.**
 
-* `con07` "What is k-means clustering?" and `con09` "What is the k-nearest
-  neighbours algorithm?" → predicted `code-help` instead of `conceptual`.
-* `cod11` "What is top-down decision tree induction?" → predicted
-  `conceptual` instead of `code-help`.
-  These three are confusions **between two in-scope classes**, which is
-  cosmetic: both classes take the identical path through retrieval and
-  generation. A question about a named algorithm is genuinely ambiguous
-  between "explain this concept" and "explain this procedure". **No answer
-  changed as a result of any of these three.**
-* `oos08` "Can you grant me an extension?" and `oos11` "Can you write my
-  project report for me?" → predicted `admin/logistics`. These are the only
-  consequential errors, because a wrong prediction here would let a policy
-  request through. **Both were still refused** — by the generation-prompt
-  scope rule, the third refusal layer. This is exactly the defence-in-depth
-  argument for §3: no single layer catches everything, and the refusal rate
-  is 1.000 *because* three independent layers cover each other.
+*Seven are confusions between two in-scope classes, and are cosmetic.* All
+in-scope intents take the identical path through retrieval and generation, so
+misrouting between them **changes no answer**:
+
+* `con07`, `con09` (k-means, k-NN) → `code-help` instead of `conceptual`. A
+  question about a named algorithm is genuinely ambiguous between "explain
+  this concept" and "explain this procedure".
+* `cod11` (top-down decision tree induction) → `conceptual`.
+* `cod12`–`cod15` → `admin/logistics`. These four are new, and they are a
+  direct side-effect of a fix: programme-level admin utterances were added to
+  the router so it would stop refusing "Where is the summer school held?", and
+  utterances like "What do I need to submit for the code review experiments?"
+  pulled procedural lab questions toward `admin`. Worth stating in §3 as an
+  honest example of a fix with a cost — it converted a *consequential* error
+  (a legitimate question refused outright) into a *cosmetic* one.
+
+*Two are consequential, and both were still caught.* `oos08` ("Can you grant
+me an extension?") and `oos11` ("Can you write my project report for me?")
+were routed `admin/logistics`, so the router's short-circuit did not fire. Both
+were nonetheless refused — by the generation-prompt scope rule, the third
+refusal layer. This is the defence-in-depth argument for §3 in one line: **the
+refusal rate is 1.000 not because any layer is reliable, but because three
+independent layers cover each other's failures.**
 
 ---
 
@@ -420,7 +644,46 @@ def should_short_circuit(self, label: str, confidence: float) -> bool:
     return label in self.short_circuit and confidence >= self.min_confidence
 ```
 
-### 6.5 The three refusal layers (`pipeline.py`)
+### 6.5 Source-authority re-ranking (`retrieve.py`)
+
+```python
+def authority_of(self, source_document: str) -> float:
+    """Semantic similarity cannot tell "the brief states the word limit" from
+    "a classmate speculated about it" — measured, those scored 0.552 and
+    0.567 for the same question, and the chat won."""
+    for prefix, weight in self.authority_weights.items():
+        if source_document.startswith(prefix):
+            return float(weight)
+    return float(self.default_authority)
+
+
+# Over-retrieve, then re-rank. Weighting only the first k would be pointless:
+# a demoted chunk still holds its slot, and the chunk it displaced was never
+# fetched.
+depth = min(max(k * self.oversample, k), len(self.chunks))
+scores, ids = self.index.search(vector, depth)
+candidates.sort(key=lambda p: p.score, reverse=True)   # score = cosine x authority
+passages = candidates[:k]
+```
+
+### 6.6 Authorship guard (`scripts/collect_corpus.py`)
+
+```python
+def authored_by_student(path: Path, identifiers: list[str]) -> str | None:
+    """Reject the student's own work whatever the include globs say.
+
+    lab1-3.pdf are named exactly like staff lab handouts but are the
+    student's submitted experiment reports; only their cover pages reveal it.
+    """
+    text = opening_text(path)          # first pages / cells only
+    lowered = text.lower()
+    for ident in identifiers:          # e.g. name, student ID
+        if ident.lower() in lowered:
+            return ident
+    return None
+```
+
+### 6.7 The three refusal layers (`pipeline.py`)
 
 ```python
 intent = self.classifier.predict(question)
@@ -516,6 +779,61 @@ sentence in §3 only as an argument for pinning and for `NFR7`.
 
 ---
 
+*The following arose during the corpus expansion to the whole programme.*
+
+**Challenge 7 — a file named like a lab handout was the student's own work.**
+`lab1.pdf`, `lab2.pdf` and `lab3.pdf` sit alongside genuine staff material in
+the Code Review Project folder. They are the student's submitted experiment
+reports, compiled from the LaTeX template in the same folder, and were caught
+only by *reading* them — page one carries "Name Marlen Melis / Student ID
+2026140428". A filename-based include rule had already staged all three. The
+fix was not just to exclude them but to make the class of mistake
+self-correcting: `collect_corpus.py` now reads the opening pages of every
+candidate file and rejects any containing a configured student identifier,
+whatever the globs say. The guard was then verified to reject all three reports
+and pass both genuine staff documents. Good §3 material on why provenance
+cannot be inferred from filenames.
+
+**Challenge 8 — a chat message outranked the assessment brief on its own
+question.** Covered in §3 above. The short version: semantic similarity has no
+concept of authority, so a conversational message about word limits beat the
+document that actually states the word limit, 0.567 to 0.552. Fixed with a
+source-authority prior applied over an over-retrieved candidate set.
+
+**Challenge 9 — an unreadable filename caused a fabricated citation.**
+The code-review lab guide's filename is `实验指导书_代码审查_英文.pdf`, so its
+citation label became `Code Review Project__实验指导书_代码审查_英文`. Given that
+label, the generator ignored it and instead cited the document's own English
+running header, "Lab Guide for 'Practical Techniques in Fundamental Software
+Development…'" — a document name that exists nowhere in the index. That is a
+**fabricated citation and an NFR3 violation**, and it was the only one in the
+whole build. Two fixes: the manifest can now rename a staged file to an ASCII
+name, and the system prompt states explicitly that the supplied label is the
+only correct name and that titles inside the passage text must not be used.
+Fabricated citations returned to zero. The general lesson for §3 is that a
+citation scheme keyed on filenames inherits every problem those filenames have.
+
+**Challenge 10 — Beamer decks tripled their own content.** The Week 1 lecture
+PDFs are Beamer slide decks compiled with incremental reveals, so one paragraph
+is re-emitted on up to seven consecutive pages. 133 duplicate chunks in total.
+Because they are byte-identical they also score identically, so a single
+passage could occupy three of the five retrieval slots and crowd out the other
+evidence the answer needed. Fixed with within-document exact-text
+de-duplication, keeping the first occurrence so citations point at the page
+where the content first appears.
+
+**Challenge 11 — fixing one routing failure created four cosmetic ones.**
+Expanding the corpus to the whole programme meant the router — trained only on
+AI & ML coursework — refused "Where is the HIT Global Summer School held?" as
+out-of-scope, despite the brochure answering it. Adding programme-level admin
+utterances fixed that (held-out probes 3/3) but pulled four code-review lab
+questions into `admin/logistics`, dropping intent accuracy from 0.898 to 0.857.
+The trade was accepted deliberately: the new errors are confusions *between two
+in-scope classes*, which take the identical pipeline path and change no answer,
+whereas the error removed was a legitimate question being refused outright.
+
+---
+
 ## 8. Final MoSCoW status
 
 | Priority | ID | Feature | Status |
@@ -546,7 +864,19 @@ misses are exact-term questions where lexical matching would likely have won.
 
 Additionally built beyond the plan: OCR ingestion stage, empirical threshold
 calibration script, interactive latency probe, held-out generalisation probes,
-and 21 sanity tests (all passing).
+retrieval-only diagnostic script, and **33 sanity tests** (all passing).
+
+**Added during the programme-wide corpus expansion** (all beyond the locked
+plan, which assumed a single-module corpus):
+
+| Item | Delivers |
+|---|---|
+| `corpus_sources.yaml` — corpus scope as data, not code | NFR5; the "drop a file in a folder" workflow Dr Novák needs |
+| Authorship guard rejecting student-authored files | The user's explicit requirement that only staff material is indexed |
+| PDF, notebook and chat ingestion with page/cell/part citations | FR1 as originally written ("Ingest PDF/PPTX/DOCX") |
+| Content-hash and within-document de-duplication | Retrieval quality — stops one passage filling several top-*k* slots |
+| Source-authority re-ranking | O2 — prevents a chat message being cited as authoritative on a deadline |
+| Per-chunk language filter | Keeps the locked "English only" scope honest on a bilingual corpus |
 
 ### Objectives O1–O6
 
@@ -573,10 +903,11 @@ Run the app:
 .venv/bin/python -m streamlit run app.py
 ```
 
-Rebuild the index from the corpus (FR9):
+Rebuild the index from the corpus (FR9). Stage 1 applies
+`corpus_sources.yaml`, so changing what is indexed never touches code:
 
 ```bash
-./scripts/convert_corpus.sh && .venv/bin/python scripts/ocr_slides.py && .venv/bin/python index.py
+.venv/bin/python scripts/collect_corpus.py && ./scripts/convert_corpus.sh && .venv/bin/python scripts/ocr_slides.py && .venv/bin/python index.py
 ```
 
 Run the evaluation and regenerate the results:
@@ -593,6 +924,12 @@ Supporting measurements:
 
 ```bash
 .venv/bin/python scripts/measure_latency.py
+```
+
+Retrieval-only diagnostic (exact vs document-level hit@k, no API cost):
+
+```bash
+.venv/bin/python scripts/analyse_retrieval.py
 ```
 
 ```bash
@@ -614,10 +951,14 @@ Figure 7. All three questions are verified to behave as described.
 1. **A grounded, cited answer.**
    Ask: *"What is the word limit for the individual project report?"*
    Capture the answer with its `[Source: …, Requirements]` citation line and
-   the sidebar showing "Indexed passages 704" and the index build timestamp.
+   the sidebar showing "Indexed passages 1799", "Source documents 51" and the
+   index build timestamp.
    Caption: *"ModuleMate answering an admin/logistics query. The citation
    names the source document and section, so the student can verify the
-   answer against the assessment brief in seconds (O2)."*
+   answer against the assessment brief in seconds (O2). Note that the answer
+   comes from the assessment brief and not from a group-chat message that
+   scored higher on raw similarity — the effect of the source-authority
+   prior."*
 
 2. **The refusal path.**
    Ask: *"Can you grant me an extension on my submission deadline?"*
@@ -635,8 +976,18 @@ Figure 7. All three questions are verified to behave as described.
    their cosine similarities, making the grounding of every answer inspectable
    rather than asserted."*
 
-Optional fourth, if you want to evidence O5 (recommended, since O5 has no
+4. **Breadth across the programme** (new, and worth including now that the
+   corpus spans the whole summer school). Ask any two of:
+   *"How many pull requests should be retrieved for each project in the code
+   review experiment?"* · *"What is class imbalance in binary classification?"*
+   · *"Where is the HIT Global Summer School held?"*
+   Caption: *"The same pipeline answering across three different courses and
+   four source formats — a PDF lab guide cited by page, a lecture PDF, and the
+   programme brochure — from one index."*
+
+Optional fifth, if you want to evidence O5 (recommended, since O5 has no
 measured number): ask *"What is a decision tree?"*, then follow up with
 *"and how do you build one?"* — expand **Sources** on the second answer to
 show the *"Query rewritten to: …"* line. Caption: *"Conversational continuity
 (O5): the follow-up is rewritten into a standalone query before retrieval."*
+Verified working: the follow-up rewrites to "How to build a decision tree".

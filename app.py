@@ -53,8 +53,7 @@ def main() -> None:
     with st.sidebar:
         st.header("ModuleMate")
         st.caption(
-            "Course assistant for the HIT Summer Course 2026 "
-            "AI & Machine Learning module."
+            "Course assistant for the HIT Global Summer School 2026."
         )
         st.divider()
         # R1 mitigation: corpus staleness is visible, not silent.
@@ -63,17 +62,21 @@ def main() -> None:
         st.caption(f"Index built: {manifest.get('built_at', 'unknown')}")
         st.divider()
         st.caption(
-            "ModuleMate answers **only** from the module's own lecture slides, "
-            "teaching schedule and assessment brief. Every answer names its "
-            "source. If the materials don't cover your question, it will say "
-            "so and point you to the tutor."
+            "ModuleMate answers **only** from material issued by the "
+            "programme — lecture slides and PDFs, lab notebooks, assignment "
+            "and project briefs, schedules and course announcements. Every "
+            "answer names its source. If the materials don't cover your "
+            "question, it will say so and point you to the tutor."
         )
         if st.button("Clear conversation"):
             st.session_state.messages = []
             st.rerun()
 
     st.title("🎓 ModuleMate")
-    st.caption("Ask about the module — admin, concepts, or how an algorithm works.")
+    st.caption(
+        "Ask about any course on the programme — admin, concepts, "
+        "or how an algorithm works."
+    )
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
