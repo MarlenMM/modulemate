@@ -26,21 +26,34 @@ student's name or ID.
 ```
 question
    │
-   ├─▶ intent router (4 classes)  ──▶ out-of-scope + confident ──▶ refusal
+   ├─▶ intent router (4 classes) ──▶ out-of-scope AND confident ─────▶ refusal
    │
    ├─▶ query rewriter (follow-ups → standalone)
    │
-   ├─▶ top-k dense retrieval (FAISS)
-   │        └─ best similarity < threshold ──────────────────────▶ refusal
+   ├─▶ retrieval
+   │     ├─ dense (FAISS, MiniLM)      ┐
+   │     ├─ lexical (BM25)             ├─ reciprocal rank fusion
+   │     ├─ cross-encoder re-rank      ┘
+   │     └─ source-authority prior
+   │        └─ best cosine < threshold ───────────────────────────▶ refusal
    │
-   └─▶ grounded generation ──▶ cited answer   (or INSUFFICIENT_CONTEXT ─▶ refusal)
+   └─▶ grounded generation ──▶ cited answer + suggested follow-ups
+          └─ INSUFFICIENT_CONTEXT / out-of-scope request ─────────▶ refusal
 ```
+
+Three independent refusal layers, because none of them catches everything:
+the router stops social and policy turns before any network call, the
+similarity gate stops topical drift before generation, and the generation
+prompt stops requests to act as the tutor. Measured refusal rate is 1.000
+*because* they cover each other's failures.
 
 ## Setup
 
 Requires **Python 3.12** and **LibreOffice** (for the legacy `.ppt`/`.doc`
 conversion). On macOS the OCR stage additionally uses the system Vision
-framework via `pyobjc`.
+framework via `pyobjc`. First run downloads two models (~350 MB): the
+sentence-transformer used for embeddings and the cross-encoder used for
+re-ranking.
 
 ```bash
 python3.12 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
@@ -103,9 +116,12 @@ groundedness judge and use the lexical fallback (halves token spend).
 Supporting measurements:
 
 ```bash
+.venv/bin/python scripts/ablation.py              # what each retrieval stage contributes
+.venv/bin/python scripts/analyse_retrieval.py     # exact vs document-level hit@k (no API cost)
 .venv/bin/python scripts/calibrate_threshold.py   # re-derive the refusal threshold
 .venv/bin/python scripts/measure_latency.py       # interactive (non-burst) latency
 .venv/bin/python classify.py                      # retrain router + generalisation probes
+.venv/bin/python feedback.py                      # summarise logged thumbs up/down
 .venv/bin/python -m pytest tests/ -q              # sanity tests
 ```
 
@@ -127,7 +143,8 @@ in-scope versus out-of-scope similarity distributions by
 | `scripts/collect_corpus.py` | Applies the manifest; de-dupes; authorship guard |
 | `ingest.py` | M1 — extraction (pptx/docx/pdf/ipynb/txt), OCR merge, chunking |
 | `index.py` | M2 — embedding + persistent FAISS index (also the FR9 rebuild) |
-| `retrieve.py` | M3/M5 — top-k retrieval and the similarity refusal gate |
+| `retrieve.py` | M3/M5/C1/C2 — hybrid retrieval, re-ranking, refusal gate |
+| `feedback.py` | C3 — thumbs up/down logging for post-hoc error analysis |
 | `classify.py` | M6 — four-class intent router (the sole trained artefact) |
 | `generate.py` | M4/S1 — swappable LLM backend, grounded prompt, query rewriting |
 | `pipeline.py` | end-to-end turn handling shared by the UI and the harness |

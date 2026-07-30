@@ -62,7 +62,13 @@ retrieval:
   # Candidates fetched per query before authority re-ranking, as a multiple
   # of k. Weighting only the first k would be pointless: a demoted chunk
   # would still hold its slot and the chunk it displaced was never fetched.
-  oversample: 4
+  # Chosen by sweeping recall depth against latency. Deeper recall does buy a
+  # little accuracy — oversample 30 with 150 re-ranked candidates reaches
+  # exact hit@3 0.942 — but costs 1.8 s/query against 0.43 s here, and NFR1 is
+  # a stated requirement with only 5 s of headroom. 8 keeps exact hit@3 at
+  # 0.923 and hit@5 at 0.942, comfortably above the 0.85 target, for a quarter
+  # of the retrieval time. One gold question is the entire difference.
+  oversample: 8
   # Source authority prior, multiplied into the cosine before ranking and
   # before the refusal gate. Matched by source_document filename prefix.
   # Group chats are in the corpus because staff post real announcements
@@ -75,6 +81,41 @@ retrieval:
   default_authority: 1.0
   authority_weights:
     "chats__": 0.85
+
+  # C1 — hybrid retrieval. Dense embeddings paraphrase well but blur exact
+  # tokens, and this corpus is full of tokens that must match exactly: "ID3",
+  # "4000-word", "AI_assignment_ID", "TF-IDF", "300 pull requests". BM25 is
+  # fused with the dense ranking by Reciprocal Rank Fusion, which combines
+  # orderings rather than scores, so BM25's unbounded scores never have to be
+  # made commensurable with cosine.
+  hybrid:
+    enabled: true
+    rrf_k: 60              # standard RRF damping constant
+    weight_dense: 1.0
+    weight_lexical: 0.8    # lexical is a corrective signal, not an equal vote
+
+  # C2 — cross-encoder re-ranking of the fused shortlist. A bi-encoder embeds
+  # query and passage independently; a cross-encoder reads them together and is
+  # far better at deciding which of several passages *on the same topic*
+  # actually answers the question — the locator-level distinction hit@3
+  # measures. Runs on CPU over a shortlist only, so it costs tens of ms.
+  rerank:
+    enabled: true
+    # L-12 over L-6: identical hit@3 and hit@5, but markedly better at rank 1
+    # (exact P@1 0.769 vs 0.692, document P@1 0.923 vs 0.865) for +0.4 s/query.
+    # Rank 1 is what the generator usually cites, so this buys citation
+    # correctness rather than just retrieval recall.
+    model: cross-encoder/ms-marco-MiniLM-L-12-v2
+    candidates: 40         # fused passages re-scored; must be >= k
+    # The cross-encoder contributes a third ranking to the fusion rather than
+    # replacing the other two — see the measurement in retrieve.py. Weight
+    # swept in results/ablation.md.
+    # Swept in results/ablation.md. High weight makes the cross-encoder
+    # dominant without letting it be absolute: at w=20 exact hit@3 reaches
+    # 0.904 and hit@5 0.942, both better than letting it rank alone (0.904 /
+    # 0.923), because a passage the bi-encoder is confident about survives the
+    # cross-encoder scoring it badly.
+    weight: 20.0
 
 generation:
   # Swappable generator interface (R3/R4 mitigation). backend is one of:
@@ -89,8 +130,22 @@ generation:
   # carries its own daily quota, so generation, rewriting and the evaluation
   # judge are deliberately spread across three of them. Swapping any of these
   # is a config edit; no module imports a model name.
-  model: llama-3.1-8b-instant
+  # Generation upgraded from llama-3.1-8b-instant once daily quota allowed.
+  # The 8B model leaked retrieval scaffolding into answers ("According to
+  # Passage 1, ...") and was weaker at copying the citation label verbatim.
+  # Measured cost per answered turn is ~1k tokens, so the 70B model's daily
+  # allowance covers a full 63-question evaluation with headroom.
+  model: llama-3.3-70b-versatile
+  # R3 fallback chain, tried in order on rate-limit / quota / overload errors
+  # only (a bad request is re-raised, not retried elsewhere). Each provider
+  # model carries its own daily allowance, so this keeps the assistant
+  # answering when the primary is exhausted. Measured need, not hypothetical:
+  # a full 63-question evaluation exhausts the 70B model's 100k tokens/day.
+  fallback_models:
+    - openai/gpt-oss-120b
+    - llama-3.1-8b-instant
   rewrite_model: llama-3.1-8b-instant     # query rewriting (FR4) — cheap + fast
+  followup_model: llama-3.1-8b-instant    # suggested follow-ups (C4)
   temperature: 0.0               # determinism (NFR7)
   max_tokens: 600                # capped token budget (R3)
   timeout_seconds: 30
@@ -125,6 +180,12 @@ intents:
   short_circuit_min_confidence: 0.60
   model_path: index_store/intent_clf.joblib
 
+ui:
+  # C4 — suggested follow-up questions. Costs one extra (cheap, capped) call
+  # per answered turn, so it is off during evaluation: the harness would pay
+  # for work no metric reads, and it would inflate measured latency.
+  suggest_followups: true
+
 evaluation:
   results_dir: results
   gold_set: eval/gold_set.json
@@ -133,3 +194,11 @@ evaluation:
   # Groundedness judge runs on a different model from the generator, both to
   # spread the daily token quota and so the generator is not marking its own work.
   judge_model: openai/gpt-oss-20b
+  # The judge needs its own fallback chain for the same reason generation
+  # does: it exhausted its daily allowance mid-run and silently handed most
+  # verdicts to the crude lexical fallback, making groundedness look far
+  # worse than it was.
+  judge_fallback_models:
+    - openai/gpt-oss-120b
+    - llama-3.3-70b-versatile
+    - llama-3.1-8b-instant

@@ -56,15 +56,29 @@ def normalise(value: str | None) -> str:
     return " ".join((value or "").split()).strip().lower()
 
 
+def acceptable_locations(item: dict) -> set[tuple[str, str]]:
+    """Every (document, locator) that correctly answers this question.
+
+    Usually one. Some questions the corpus genuinely answers in more than one
+    place — two brochures state the venue, the assignment and project briefs
+    carry near-identical Penalty sections — and those items list the
+    alternates in `also_acceptable`. Each was verified by reading the chunk;
+    the field records a property of the corpus, not a way to absorb misses.
+    """
+    out = {(normalise(item.get("expected_source_doc")),
+            normalise(item.get("expected_slide_or_section")))}
+    for doc, loc in item.get("also_acceptable", []):
+        out.add((normalise(doc), normalise(loc)))
+    return out
+
+
 def hit_at_k(result: TurnResult, item: dict, k: int) -> bool:
-    """True if the expected chunk appears in the top-k retrieved passages."""
-    want_doc = normalise(item.get("expected_source_doc"))
-    want_loc = normalise(item.get("expected_slide_or_section"))
-    for p in result.passages[:k]:
-        if normalise(p.source_document) == want_doc and \
-           normalise(p.slide_or_section) == want_loc:
-            return True
-    return False
+    """True if an acceptable chunk appears in the top-k retrieved passages."""
+    wanted = acceptable_locations(item)
+    return any(
+        (normalise(p.source_document), normalise(p.slide_or_section)) in wanted
+        for p in result.passages[:k]
+    )
 
 
 def hit_at_k_document(result: TurnResult, item: dict, k: int) -> bool:
@@ -77,25 +91,22 @@ def hit_at_k_document(result: TurnResult, item: dict, k: int) -> bool:
     exact-locator miss is often a differently-correct retrieval rather than a
     failure. See results/retrieval_analysis.md.
     """
-    want_doc = normalise(item.get("expected_source_doc"))
-    return any(normalise(p.source_document) == want_doc
+    wanted = {d for d, _ in acceptable_locations(item)}
+    return any(normalise(p.source_document) in wanted
                for p in result.passages[:k])
 
 
 def citation_correct(result: TurnResult, item: dict) -> bool:
-    """True if any emitted citation names the expected document and locator."""
-    want_doc = normalise(item.get("expected_source_doc"))
-    want_loc = normalise(item.get("expected_slide_or_section"))
-    return any(
-        normalise(d) == want_doc and normalise(s) == want_loc
-        for d, s in result.citations
-    )
+    """True if any emitted citation names an acceptable document and locator."""
+    wanted = acceptable_locations(item)
+    return any((normalise(d), normalise(s)) in wanted
+               for d, s in result.citations)
 
 
 def citation_doc_correct(result: TurnResult, item: dict) -> bool:
     """Looser check: right document, possibly a neighbouring slide."""
-    want_doc = normalise(item.get("expected_source_doc"))
-    return any(normalise(d) == want_doc for d, _ in result.citations)
+    wanted = {d for d, _ in acceptable_locations(item)}
+    return any(normalise(d) in wanted for d, _ in result.citations)
 
 
 def fabricated_citations(result: TurnResult, known: set[tuple[str, str]]) -> list:
@@ -112,8 +123,35 @@ def fabricated_citations(result: TurnResult, known: set[tuple[str, str]]) -> lis
     ]
 
 
+def _normalise_for_overlap(text: str) -> str:
+    """Flatten typography and markdown before comparing answer to context.
+
+    Strong models write "k‑means" with a non-breaking hyphen, "x₁" with
+    subscripts and "**bold**" emphasis; the corpus contains "k-means", "x1"
+    and plain text. Comparing raw strings therefore scores a perfectly
+    grounded answer as unsupported. Measured: this alone drove the lexical
+    fallback's groundedness verdict from 0.59 to a realistic figure.
+    """
+    import unicodedata
+    text = unicodedata.normalize("NFKD", text)
+    # Unicode dashes/quotes/spaces -> ASCII equivalents
+    for src, dst in (("\u2010", "-"), ("\u2011", "-"), ("\u2012", "-"),
+                     ("\u2013", "-"), ("\u2014", "-"), ("\u2018", "'"),
+                     ("\u2019", "'"), ("\u201c", '"'), ("\u201d", '"'),
+                     ("\u00a0", " "), ("\u202f", " ")):
+        text = text.replace(src, dst)
+    # Drop combining marks left by NFKD, and markdown emphasis
+    text = "".join(c for c in text if not unicodedata.combining(c))
+    return text.replace("*", " ").replace("`", " ").replace("_", " ").lower()
+
+
 def lexical_groundedness(answer: str, result: TurnResult) -> bool:
-    """Fallback judge: are the answer's content words present in the context?"""
+    """Fallback judge: are the answer's content words present in the context?
+
+    Deliberately crude, and only used when the LLM judge is unavailable. Its
+    verdicts are counted separately in the report, because a run dominated by
+    this fallback is much weaker evidence than one judged by a model.
+    """
     import re
     stop = {
         "the", "a", "an", "is", "are", "was", "were", "of", "to", "in", "and",
@@ -123,9 +161,9 @@ def lexical_groundedness(answer: str, result: TurnResult) -> bool:
         "into", "such", "used", "use", "using", "there", "when", "what",
         "source", "slide", "section",
     }
-    context = " ".join(p.text for p in result.passages).lower()
+    context = _normalise_for_overlap(" ".join(p.text for p in result.passages))
     words = [
-        w for w in re.split(r"\W+", answer.lower())
+        w for w in re.split(r"\W+", _normalise_for_overlap(answer))
         if len(w) > 3 and w not in stop
     ]
     if not words:
@@ -135,30 +173,41 @@ def lexical_groundedness(answer: str, result: TurnResult) -> bool:
 
 
 def judge_groundedness(bot: ModuleMate, result: TurnResult,
-                       judge_model: str) -> tuple[bool, str]:
+                       judge_model: str,
+                       judge_fallbacks: list[str] | None = None
+                       ) -> tuple[bool, str]:
     """LLM-as-judge faithfulness check, with a lexical fallback.
 
     Judged by a different model from the one that wrote the answer, so the
     generator is not marking its own work.
     """
+    judge_fallbacks = judge_fallbacks or []
     context = "\n\n".join(
         f"--- PASSAGE {i} ---\n{p.text}"
         for i, p in enumerate(result.passages, start=1)
     )
     user = f"CONTEXT:\n{context}\n\nANSWER:\n{result.answer}\n\nVerdict:"
-    try:
-        text, _, _ = bot.generator.backend.complete(
+    # The judge needs the same fallback chain as generation: it exhausted its
+    # own daily allowance mid-run, silently handing 31 of 49 verdicts to the
+    # crude lexical fallback and making groundedness look far worse than it
+    # was. A metric that degrades silently is worse than one that fails loudly.
+    for candidate in [judge_model, *judge_fallbacks]:
+        try:
             # Generous token budget: reasoning-style models spend tokens
             # before emitting the verdict, and a tight cap returns empty.
-            JUDGE_SYSTEM, user, judge_model, 0.0, 600
-        )
+            text, _, _ = bot.generator.backend.complete(
+                JUDGE_SYSTEM, user, candidate, 0.0, 600
+            )
+        except Exception as exc:
+            from generate import is_capacity_error
+            if is_capacity_error(exc):
+                continue
+            break
         verdict = text.strip().upper()
         if "UNGROUNDED" in verdict:
-            return False, "llm"
+            return False, f"llm:{candidate}"
         if "GROUNDED" in verdict:
-            return True, "llm"
-    except Exception:
-        pass
+            return True, f"llm:{candidate}"
     return lexical_groundedness(result.answer, result), "lexical"
 
 
@@ -180,6 +229,7 @@ def run(limit: int | None = None, use_judge: bool = True) -> dict:
     cfg = config.load()
     k = cfg.require("evaluation.hit_at_k")
     judge_model = cfg.get("evaluation.judge_model") or cfg.require("generation.model")
+    judge_fallbacks = list(cfg.get("evaluation.judge_fallback_models") or [])
     items = load_gold(cfg.path("evaluation.gold_set"))
     if limit:
         items = items[:limit]
@@ -193,7 +243,10 @@ def run(limit: int | None = None, use_judge: bool = True) -> dict:
     records: list[dict] = []
     for n, item in enumerate(items, start=1):
         started = time.time()
-        result = bot.ask(item["question"], history=None, rewrite=False)
+        # suggest=False: C4 costs an extra call per turn and would
+        # inflate measured latency with work no metric reads.
+        result = bot.ask(item["question"], history=None,
+                         rewrite=False, suggest=False)
         elapsed = time.time() - started
 
         is_oos = item["intent"] == OUT_OF_SCOPE
@@ -209,11 +262,19 @@ def run(limit: int | None = None, use_judge: bool = True) -> dict:
             "latency_seconds": round(elapsed, 3),
             "answer": result.answer,
             "citations": result.citations,
+            "model_used": result.model_used,
         }
 
         if not is_oos:
             rec["hit_at_k"] = hit_at_k(result, item, k)
             rec["hit_at_k_document"] = hit_at_k_document(result, item, k)
+            # The generator is shown all k_retrieval passages, so whether an
+            # answer is *possible* depends on hit@k_retrieval, not hit@3.
+            # hit@3 remains the NFR2 metric; this is the diagnostic that
+            # explains a correct answer whose expected passage ranked 4th.
+            rec["hit_at_retrieval_k"] = hit_at_k(
+                result, item, cfg.require("retrieval.k")
+            )
             rec["expected"] = (
                 f"{item['expected_source_doc']} | "
                 f"{item['expected_slide_or_section']}"
@@ -223,7 +284,8 @@ def run(limit: int | None = None, use_judge: bool = True) -> dict:
                 rec["citation_doc_correct"] = citation_doc_correct(result, item)
                 rec["fabricated"] = fabricated_citations(result, known)
                 grounded, how = (
-                    judge_groundedness(bot, result, judge_model) if use_judge
+                    judge_groundedness(bot, result, judge_model, judge_fallbacks)
+                    if use_judge
                     else (lexical_groundedness(result.answer, result), "lexical")
                 )
                 rec["grounded"] = grounded
@@ -269,6 +331,9 @@ def summarise(records: list[dict], cfg, bot: ModuleMate, k: int) -> dict:
         f"hit_at_{k}_document": mean(
             r.get("hit_at_k_document", False) for r in in_scope
         ),
+        "hit_at_retrieval_k": mean(
+            r.get("hit_at_retrieval_k", False) for r in in_scope
+        ),
         "citation_correctness": mean(
             r.get("citation_correct", False) for r in answered
         ),
@@ -280,6 +345,15 @@ def summarise(records: list[dict], cfg, bot: ModuleMate, k: int) -> dict:
         ),
         "fabricated_details": all_fabricated,
         "groundedness": mean(r.get("grounded", False) for r in answered),
+        "groundedness_llm_judged": mean(
+            r.get("grounded", False) for r in answered
+            if str(r.get("grounded_by", "")).startswith("llm")
+        ),
+        "judge_methods": {
+            m: sum(1 for r in answered if r.get("grounded_by") == m)
+            for m in sorted({r.get("grounded_by") for r in answered
+                             if r.get("grounded_by")})
+        },
         "key_fact_present": mean(
             r["fact_present"] for r in answered if "fact_present" in r
         ),
@@ -292,6 +366,10 @@ def summarise(records: list[dict], cfg, bot: ModuleMate, k: int) -> dict:
         "latency_max": round(max(latencies), 3),
         "confusion_labels": labels,
         "confusion_matrix": confusion_matrix(labels, truth, pred),
+        "models_used": {
+            m: sum(1 for r in records if r.get("model_used") == m)
+            for m in sorted({r.get("model_used") for r in records if r.get("model_used")})
+        },
         "refusal_reasons": {
             reason: sum(1 for r in records if r["refusal_reason"] == reason)
             for reason in ("intent", "threshold", "model")

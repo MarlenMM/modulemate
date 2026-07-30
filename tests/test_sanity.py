@@ -354,3 +354,149 @@ def test_no_staged_file_is_the_students_own_work():
         if p.is_file() and authored_by_student(p, identifiers)
     ]
     assert not offenders, f"student-authored files staged: {offenders}"
+
+
+# --------------------------------------------------------------------------
+# Multi-citation parsing — regression tests from real model output
+# --------------------------------------------------------------------------
+
+@pytest.mark.parametrize("answer,expected", [
+    # The format the prompt asks for.
+    ("Text. [Source: A, slide 8] [Source: A, slide 11]",
+     [("A", "slide 8"), ("A", "slide 11")]),
+    # What a strong model actually emitted: two citations, one bracket,
+    # comma-separated. Previously parsed as one citation with a nonsense
+    # locator, which the fabrication check then reported as an invented
+    # source — four false NFR3 violations.
+    ("[Source: AI notes6, slide 62, Lab Guide, page 7]",
+     [("AI notes6", "slide 62"), ("Lab Guide", "page 7")]),
+    # Same, but the locator and the next document run together with no comma.
+    ("[Source: AI notes6, slide 18 AI notes6, slide 22]",
+     [("AI notes6", "slide 18"), ("AI notes6", "slide 22")]),
+])
+def test_multi_citation_formats(answer, expected):
+    assert parse_citations(answer) == expected
+
+
+def test_section_titles_with_dashes_and_brackets_survive():
+    """Locators are section headings as often as they are numbers, and some
+    contain punctuation that must not be mistaken for a field separator."""
+    assert parse_citations("[Source: brief, Assessment – Individual Project]") \
+        == [("brief", "Assessment – Individual Project")]
+    assert parse_citations("[Source: brief, Part C (10 marks)]") \
+        == [("brief", "Part C (10 marks)")]
+
+
+def test_parser_never_emits_a_locator_containing_a_document_name():
+    """The failure signature of the old parser: a locator that swallowed the
+    rest of the bracket. Guard against any regression to it."""
+    parsed = parse_citations("[Source: A, slide 62, B, page 7]")
+    for _doc, loc in parsed:
+        assert "," not in loc
+        assert len(loc) < 60
+
+
+# --------------------------------------------------------------------------
+# R3 — generation fallback chain
+# --------------------------------------------------------------------------
+
+def test_capacity_errors_are_distinguished_from_bad_requests():
+    """Only capacity errors may be retried on another model. Retrying a
+    malformed request elsewhere would turn one bug into three."""
+    from generate import is_capacity_error
+
+    class RateLimitError(Exception):
+        pass
+
+    class BadRequestError(Exception):
+        pass
+
+    assert is_capacity_error(RateLimitError("429 rate limit reached"))
+    assert is_capacity_error(Exception("Error code: 429 - tokens per day"))
+    assert is_capacity_error(Exception("service is over capacity"))
+    assert not is_capacity_error(BadRequestError("invalid model parameter"))
+    assert not is_capacity_error(ValueError("unknown backend"))
+
+
+def test_fallback_walks_the_chain_then_gives_up():
+    from generate import Generator, ModelUnavailable
+
+    class FlakyBackend:
+        def __init__(self, working=None):
+            self.working = working
+            self.tried = []
+
+        def complete(self, system, user, model, temperature, max_tokens):
+            self.tried.append(model)
+            if model == self.working:
+                return "ok", 1, 1
+            raise Exception("Error code: 429 - rate_limit_exceeded")
+
+    cfg = config.load(reload=True)
+
+    backend = FlakyBackend(working="llama-3.1-8b-instant")
+    gen = Generator(cfg, backend)
+    gen.model = "primary-model"
+    gen.fallback_models = ["secondary-model", "llama-3.1-8b-instant"]
+    text, _, _, used = gen._complete_with_fallback("s", "u", gen.model, 0.0, 10)
+    assert text == "ok"
+    assert used == "llama-3.1-8b-instant"
+    assert backend.tried == ["primary-model", "secondary-model",
+                             "llama-3.1-8b-instant"]
+
+    dead = FlakyBackend(working=None)
+    gen2 = Generator(cfg, dead)
+    gen2.model = "a"
+    gen2.fallback_models = ["b"]
+    with pytest.raises(ModelUnavailable):
+        gen2._complete_with_fallback("s", "u", "a", 0.0, 10)
+
+
+# --------------------------------------------------------------------------
+# Groundedness fallback judge — typography must not fake a hallucination
+# --------------------------------------------------------------------------
+
+def test_lexical_judge_normalises_typography_and_markdown():
+    """A model writing "k‑means" (non-breaking hyphen), "x₁" and "**bold**"
+    is still quoting a corpus that writes "k-means", "x1" and plain text.
+    Before normalisation this drove the fallback judge to mark 31 of 49
+    grounded answers as unsupported."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "eval"))
+    from harness import _normalise_for_overlap, lexical_groundedness
+
+    assert "k-means" in _normalise_for_overlap("k‑means")
+    assert "bold" in _normalise_for_overlap("**bold**")
+    assert "x1" in _normalise_for_overlap("x₁")
+
+    passage = Retrieved(
+        1, 0.8, "c1", "AI notes6", "slide 79",
+        "k-means clustering partitions n observations into k clusters "
+        "in which each observation belongs to the cluster with the nearest mean",
+    )
+
+    class Result:
+        passages = [passage]
+
+    stylised = (
+        "k‑means clustering **partitions** n observations into k clusters "
+        "where each observation belongs to the cluster with the nearest mean."
+    )
+    assert lexical_groundedness(stylised, Result())
+
+
+def test_lexical_judge_still_rejects_unsupported_claims():
+    """Normalisation must not make the fallback judge accept anything."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "eval"))
+    from harness import lexical_groundedness
+
+    passage = Retrieved(1, 0.8, "c1", "doc", "slide 1",
+                        "The report must be 4000 words long.")
+
+    class Result:
+        passages = [passage]
+
+    assert not lexical_groundedness(
+        "Neural networks employ backpropagation across convolutional layers "
+        "trained with stochastic gradient descent on imbalanced datasets.",
+        Result(),
+    )

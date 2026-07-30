@@ -4,21 +4,29 @@
   "n_in_scope": 52,
   "n_out_of_scope": 11,
   "n_answered": 50,
-  "hit_at_3": 0.7885,
-  "hit_at_3_document": 0.9423,
-  "citation_correctness": 0.82,
-  "citation_document_correctness": 0.92,
+  "hit_at_3": 0.9231,
+  "hit_at_3_document": 1.0,
+  "hit_at_retrieval_k": 0.9423,
+  "citation_correctness": 0.94,
+  "citation_document_correctness": 0.98,
   "fabricated_citation_count": 0,
   "fabricated_details": [],
-  "groundedness": 0.94,
-  "key_fact_present": 0.9,
+  "groundedness": 0.96,
+  "groundedness_llm_judged": 0.96,
+  "judge_methods": {
+   "llm:llama-3.1-8b-instant": 30,
+   "llm:llama-3.3-70b-versatile": 1,
+   "llm:openai/gpt-oss-120b": 16,
+   "llm:openai/gpt-oss-20b": 3
+  },
+  "key_fact_present": 0.96,
   "refusal_rate_out_of_scope": 1.0,
   "false_refusal_rate_in_scope": 0.0385,
   "intent_accuracy": 0.8571,
-  "latency_median": 11.051,
-  "latency_mean": 9.766,
-  "latency_p90": 16.072,
-  "latency_max": 22.368,
+  "latency_median": 10.825,
+  "latency_mean": 9.075,
+  "latency_p90": 16.231,
+  "latency_max": 24.15,
   "confusion_labels": [
    "admin/logistics",
    "conceptual",
@@ -51,6 +59,10 @@
     9
    ]
   ],
+  "models_used": {
+   "llama-3.1-8b-instant": 36,
+   "openai/gpt-oss-120b": 17
+  },
   "refusal_reasons": {
    "intent": 8,
    "threshold": 2,
@@ -69,13 +81,13 @@
   "config": {
    "k": 5,
    "similarity_threshold": 0.48,
-   "generation_model": "llama-3.1-8b-instant",
+   "generation_model": "llama-3.3-70b-versatile",
    "judge_model": "openai/gpt-oss-20b",
    "rewrite_model": "llama-3.1-8b-instant",
    "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
    "backend": "openai_compatible"
   },
-  "wall_clock_seconds": 671.7
+  "wall_clock_seconds": 1028.0
  },
  "records": [
   {
@@ -87,22 +99,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5521,
-   "latency_seconds": 9.865,
-   "answer": "The word limit for the individual project report is 4000 words. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Requirements]",
+   "latency_seconds": 11.577,
+   "answer": "The individual project report must be 4000 words.  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Requirements]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Requirements"
     ]
    ],
-   "hit_at_k": true,
+   "model_used": "openai/gpt-oss-120b",
+   "hit_at_k": false,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Requirements",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-20b",
    "fact_present": true
   },
   {
@@ -114,26 +128,28 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6347,
-   "latency_seconds": 0.817,
-   "answer": "The individual project is worth 60% of the overall assessment. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]",
+   "latency_seconds": 3.771,
+   "answer": "The individual project is worth 60 % of the overall assessment.  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project] [Source: Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 4]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Assessment – Individual Project"
     ],
     [
-     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
-     "Assessment – Individual Project"
+     "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
+     "slide 4"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -145,26 +161,28 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6574,
-   "latency_seconds": 1.049,
-   "answer": "The individual project is due on Friday, 31 July, 2026, at 11:55 p.m. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]\n[Source: chats__HIT 2026 Summer Course AI and ML, part 4]",
+   "latency_seconds": 2.851,
+   "answer": "The individual project is due on 31 July 2026, by 23:55 (11:55 pm).  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project] [Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Assessment – Individual Project"
     ],
     [
-     "chats__HIT 2026 Summer Course AI and ML",
-     "part 4"
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+     "The submission"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Assessment – Individual Project",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -176,26 +194,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6779,
-   "latency_seconds": 0.537,
-   "answer": "For each day of late submission after the deadline, there is a 10% deduction. No submission will be accepted after 2 days of the deadline without any justified reasons. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Penalty] [Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Penalty]",
+   "latency_seconds": 1.829,
+   "answer": "The penalty is a 10 % deduction for each day the report is submitted after the deadline, and no submission will be accepted after 2 days past the deadline unless you have a justified reason.  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Penalty]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Penalty"
-    ],
-    [
-     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
-     "Penalty"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Penalty",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -206,27 +222,25 @@
    "intent_confidence": 0.826,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.5812,
-   "latency_seconds": 0.889,
-   "answer": "A submission will still be accepted 2 days after the deadline without any justified reasons. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Penalty] [Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Penalty]",
+   "top_score": 0.5254,
+   "latency_seconds": 1.845,
+   "answer": "Submissions can still be accepted up to 2 days after the deadline (after that they are not accepted without a justified reason).  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Penalty]",
    "citations": [
-    [
-     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
-     "Penalty"
-    ],
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Penalty"
     ]
    ],
-   "hit_at_k": false,
+   "model_used": "openai/gpt-oss-120b",
+   "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Penalty",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
-   "grounded": false,
-   "grounded_by": "llm",
+   "grounded": true,
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -238,22 +252,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5829,
-   "latency_seconds": 0.773,
-   "answer": "You should submit your completed project report to Dr. Guanglei YANG. He will tell you how to make your submission before the deadline. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
+   "latency_seconds": 1.691,
+   "answer": "You should submit your completed project report to Dr. Guanglei YANG.  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "The submission"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | The submission",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -265,22 +281,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5123,
-   "latency_seconds": 9.599,
-   "answer": "According to PASSAGE 5, the filenames should be named as follows: \nIndividual Assignment: AI_assignment_StudentID.xxx\nIndividual Project Report: AI_project_StudentID.xxx\n\nFor example, if your student ID is 123456, the filenames should be:\nAI_assignment_123456.pdf\nAI_project_123456.pdf\n\n[Source: chats__HIT 2026 Summer Course AI and ML, part 6]",
+   "latency_seconds": 10.386,
+   "answer": "Name the file using your student ID in the format AI_assignment_ID.xxx (where ID is your student number) and save it as a .pdf, .doc or .docx file.  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
    "citations": [
     [
-     "chats__HIT 2026 Summer Course AI and ML",
-     "part 6"
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+     "The submission"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | The submission",
-   "citation_correct": false,
-   "citation_doc_correct": false,
+   "citation_correct": true,
+   "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -292,26 +310,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5199,
-   "latency_seconds": 9.743,
-   "answer": "The accepted file formats for the report submission are PDF (.pdf), Microsoft Word (.doc or .docx). \n\n[Source: chats__HIT 2026 Summer Course AI and ML, part 5] [Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
+   "latency_seconds": 9.212,
+   "answer": "Accepted file formats are PDF (.pdf) and Microsoft Word documents (.doc or .docx).  \n[Source: chats__HIT 2026 Summer Course AI and ML, part 5]",
    "citations": [
     [
      "chats__HIT 2026 Summer Course AI and ML",
      "part 5"
-    ],
-    [
-     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
-     "The submission"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | The submission",
-   "citation_correct": true,
-   "citation_doc_correct": true,
+   "citation_correct": false,
+   "citation_doc_correct": false,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -322,23 +338,25 @@
    "intent_confidence": 0.812,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.5943,
-   "latency_seconds": 8.587,
-   "answer": "The literature survey is worth 10% of the marks in the report. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment scheme]",
+   "top_score": 0.5598,
+   "latency_seconds": 9.885,
+   "answer": "The literature survey component is worth 10 marks.  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment scheme]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Assessment scheme"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Assessment scheme",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
-   "grounded": true,
-   "grounded_by": "llm",
+   "grounded": false,
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -350,11 +368,13 @@
    "refused": true,
    "refusal_reason": "model",
    "top_score": 0.5163,
-   "latency_seconds": 13.339,
+   "latency_seconds": 11.347,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
    "citations": [],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": false,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": false,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Penalty"
   },
   {
@@ -366,22 +386,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6335,
-   "latency_seconds": 9.675,
-   "answer": "The report should be around 25 pages with proper diagrams. \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Requirements]",
+   "latency_seconds": 10.071,
+   "answer": "The report should be roughly 25 pages.  \n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Requirements]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
      "Requirements"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_project_July2026 | Requirements",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -393,22 +415,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6157,
-   "latency_seconds": 8.266,
-   "answer": "Class attendance is worth 10% of the assessment.\n\n[Source: Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 4]",
+   "latency_seconds": 9.998,
+   "answer": "Class attendance counts for 10 % of the overall assessment.  \n[Source: Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 4]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
      "slide 4"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 4",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -420,22 +444,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.4996,
-   "latency_seconds": 11.929,
-   "answer": "The lectures run from 08:30am to 11:45am in the EE Building 40025 (电机楼40025). \n\n[Source: Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 3]",
+   "latency_seconds": 17.819,
+   "answer": "The lectures run each day from 08:30 am to 11:45 am and are held in the Campus Electrical Engineering Building, room 40025.  \n[Source: Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou, slide 3]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou",
      "slide 3"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course 2026_AI and machine learning_teaching schedule_JaneYou | slide 3",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -447,22 +473,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7888,
-   "latency_seconds": 15.099,
-   "answer": "A decision tree is a decision support tool that uses a tree-like model of decisions and their possible consequences, including chance event outcomes, resource costs, and utility. It is also a non-parametric supervised learning algorithm, which is utilized for both classification and regression tasks. It has a hierarchical, tree structure, which consists of a root node, branches, internal nodes and leaf nodes.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 7]",
+   "latency_seconds": 13.727,
+   "answer": "A decision tree is a decision‑support tool that models choices and their possible consequences in a tree‑like graph. It is a non‑parametric supervised learning algorithm used for both classification and regression, organized hierarchically with a root node, internal (test) nodes that split on attribute values, branches representing outcomes, and leaf (terminal) nodes that hold the final class label or decision. Each internal node denotes a test on an attribute, and the structure makes the learned rules easy for humans to understand.  \n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 7]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 7"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 7",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -474,22 +502,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.679,
-   "latency_seconds": 20.413,
-   "answer": "A convolutional neural network (CNN) is a class of artificial neural network most commonly applied to analyze visual imagery. It uses a mathematical operation called convolution in place of general matrix multiplication in at least one of its layers. CNNs are specifically designed to process pixel data and are used in image recognition and processing.\n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 8]",
+   "latency_seconds": 17.221,
+   "answer": "A convolutional neural network (CNN) is a class of artificial neural network most commonly applied to analyze visual imagery. It uses the convolution operation instead of general matrix multiplication in at least one layer, employing shared‑weight filters that slide across input features to produce translation‑equivariant feature maps. CNNs are designed to process pixel data with little pre‑processing, learning the filters automatically rather than relying on hand‑engineered features.  \n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 8]",
    "citations": [
     [
      "Lectures Week 2__AI notes8_deep learning",
      "slide 8"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes8_deep learning | slide 8",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -501,26 +531,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7525,
-   "latency_seconds": 14.341,
-   "answer": "Clustering in machine learning is the act of organizing similar objects into groups within a machine learning algorithm. It involves assigning related objects into clusters, which is beneficial for AI models. Clustering has many uses in data science, such as image processing, knowledge discovery in data, unsupervised learning, and various other applications.\n\nClustering is essentially an approach to discover a useful summary of the data, and it aims to find classes (clusters) of objects such that some standard of quality is met. It involves organizing data into classes with high intra-class similarity and low inter-class similarity.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 66] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 68]",
+   "latency_seconds": 15.069,
+   "answer": "Clustering is the process of organizing similar objects into groups within a machine‑learning algorithm. It seeks to create clusters that have high similarity among members of the same cluster (high intra‑class similarity) and low similarity between different clusters (low inter‑class similarity). Unlike classification, clustering discovers the class labels and the number of classes directly from the data, providing natural groupings of unlabeled items.  \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 66]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 66"
-    ],
-    [
-     "Lectures Week 2__AI notes6_machine learning_part 2",
-     "slide 68"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 66",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": true
   },
   {
@@ -532,27 +560,29 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7121,
-   "latency_seconds": 15.233,
-   "answer": "Supervised learning assumes the existence of a teacher, some fitness measure, or other external method of classifying training instances, whereas unsupervised learning eliminates the teacher and requires that the learners form and evaluate concepts on their own. Supervised learning trains a model on known input and output data to predict future outputs, whereas unsupervised learning finds hidden patterns or intrinsic structures in input data.\n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 25] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 67]",
+   "latency_seconds": 13.811,
+   "answer": "Supervised learning trains a model on labeled input‑output pairs, using a training dataset to learn how to predict future outputs (e.g., classification or regression). Unsupervised learning receives only raw, unlabeled inputs, finds hidden patterns or structures, and is used for analysis tasks such as clustering, density estimation, or dimensionality reduction.  \n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 25] [Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 26]",
    "citations": [
     [
      "Lectures Week 2__AI notes5_machine learning_part 1",
      "slide 25"
     ],
     [
-     "Lectures Week 2__AI notes6_machine learning_part 2",
-     "slide 67"
+     "Lectures Week 2__AI notes5_machine learning_part 1",
+     "slide 26"
     ]
    ],
+   "model_used": "openai/gpt-oss-120b",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 67",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
-   "fact_present": true
+   "grounded_by": "llm:llama-3.1-8b-instant",
+   "fact_present": false
   },
   {
    "id": "con05",
@@ -563,22 +593,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.8427,
-   "latency_seconds": 17.521,
-   "answer": "A neural network is a network or circuit of biological neurons, or, in a modern sense, an artificial neural network, composed of artificial neurons or nodes. It is either a biological neural network, made up of biological neurons, or an artificial neural network, used for solving artificial intelligence (AI) problems. A neural network is also a type of machine learning process that uses interconnected nodes or neurons in a layered structure that resembles the human brain.\n\n[Source: Lectures Week 2__AI notes7_neural networks, slide 9]",
+   "latency_seconds": 1.436,
+   "answer": "A neural network is a network or circuit of biological neurons, or, in a modern sense, an artificial neural network, composed of artificial neurons or nodes. It is either a biological neural network, made up of biological neurons, or an artificial neural network, used for solving artificial intelligence (AI) problems.\n\n[Source: Lectures Week 2__AI notes7_neural networks, slide 9]",
    "citations": [
     [
      "Lectures Week 2__AI notes7_neural networks",
      "slide 9"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes7_neural networks | slide 9",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -590,22 +622,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7747,
-   "latency_seconds": 20.828,
-   "answer": "Artificial Intelligence (AI) is a machine's ability to perform cognitive functions as humans do, such as perceiving, learning, reasoning, and solving problems. It is also described as the intelligence of a machine or computer that enables it to imitate or mimic human capabilities. Additionally, AI is the use of computer systems to perform tasks normally associated with human intelligence.\n\n[Source: Lectures Week 2__AI notes1_introduction, slide 6]",
+   "latency_seconds": 18.021,
+   "answer": "Artificial Intelligence (AI) is a machine's ability to perform cognitive functions as humans do, such as perceiving, learning, reasoning, and solving problems. The benchmark for AI is the human level concerning in teams of reasoning, speech, and vision. It is also the intelligence of a machine or computer that enables it to imitate or mimic human capabilities.\n\n[Source: Lectures Week 2__AI notes1_introduction, slide 6]",
    "citations": [
     [
      "Lectures Week 2__AI notes1_introduction",
      "slide 6"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes1_introduction | slide 6",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -617,7 +651,7 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.8183,
-   "latency_seconds": 13.547,
+   "latency_seconds": 17.837,
    "answer": "K-means clustering is a method of vector quantization that aims to partition n observations into k clusters in which each observation belongs to the cluster with the nearest mean (cluster centers or cluster centroid). It is an unsupervised learning technique to classify unlabeled data by grouping them by features, rather than pre-defined categories.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 79]",
    "citations": [
     [
@@ -625,14 +659,16 @@
      "slide 79"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 79",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -644,22 +680,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5747,
-   "latency_seconds": 14.363,
-   "answer": "A Support Vector Machine (SVM) maps training examples to points in space so as to maximise the width of the gap between the two categories. New examples are then mapped into that same space and predicted to belong to a category based on which side of the gap they fall. SVMs can also perform non-linear classification using the kernel trick, implicitly mapping their inputs into high-dimensional feature spaces.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 62]",
+   "latency_seconds": 19.026,
+   "answer": "A Support Vector Machine (SVM) maps training examples to points in space so as to maximise the width of the gap between the two categories. New examples are then mapped into that same space and predicted to belong to a category based on which side of the gap they fall. SVMs can efficiently perform a non-linear classification using the kernel trick, implicitly mapping their inputs into high-dimensional feature spaces.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 62]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 62"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 62",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -671,26 +709,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6705,
-   "latency_seconds": 15.477,
-   "answer": "The k-nearest neighbors algorithm (k-NN) is a non-parametric supervised learning method that is a type of classification where the function is only approximated locally and all computation is deferred until function evaluation. It is used to rank objects based on their proximity to a new data point, and the class of the new data point is determined by the most popular class among its k nearest neighbors.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 60] [Source: Lectures Week 1__Lecture_3_Classification, page 33]",
+   "latency_seconds": 16.231,
+   "answer": "The k-nearest neighbors algorithm (k-NN) is a non-parametric supervised learning method that is a type of classification where the function is only approximated locally and all computation is deferred until function evaluation.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 60]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 60"
-    ],
-    [
-     "Lectures Week 1__Lecture_3_Classification",
-     "page 33"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 60",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -702,8 +738,8 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7318,
-   "latency_seconds": 12.407,
-   "answer": "A naive Bayes classifier is a family of simple \"probabilistic classifiers\" based on applying Bayes' theorem with strong (naive) independence assumptions between the features. It is a conditional probability model that assigns probabilities for each of K possible classes given an object to be classified, represented by features x = (x1,...,x d). \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 61] [Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 58]",
+   "latency_seconds": 16.132,
+   "answer": "A naive Bayes classifier is a family of simple \"probabilistic classifiers\" based on applying Bayes' theorem with strong (naive) independence assumptions between the features. It is a conditional probability model that assigns probabilities for each of K possible classes given an object to be classified, represented by features x = (x1,...,x d).\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 61] [Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 58]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
@@ -714,14 +750,16 @@
      "page 58"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 61",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -733,22 +771,28 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6624,
-   "latency_seconds": 14.194,
-   "answer": "According to Passage 4, the main types of machine learning are:\n\n1. Supervised Learning\n2. Unsupervised Learning\n3. Reinforcement Learning\n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 22]",
+   "latency_seconds": 15.229,
+   "answer": "There are two main types of machine learning mentioned: Supervised and Unsupervised. Additionally, Reinforcement learning is also mentioned as a type of machine learning, but it is not clear if it is one of the main types. \n\nSupervised learning is further divided into Task Driven (Classification/Regression) and Data Driven (Clustering), and Unsupervised learning is mentioned as helping to find unknown patterns in data. \n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 22]\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 24]",
    "citations": [
     [
      "Lectures Week 2__AI notes5_machine learning_part 1",
      "slide 22"
+    ],
+    [
+     "Lectures Week 2__AI notes5_machine learning_part 1",
+     "slide 24"
     ]
    ],
-   "hit_at_k": false,
+   "model_used": "llama-3.1-8b-instant",
+   "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes5_machine learning_part 1 | slide 8",
    "citation_correct": false,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.3-70b-versatile",
    "fact_present": true
   },
   {
@@ -760,7 +804,7 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6908,
-   "latency_seconds": 15.644,
+   "latency_seconds": 5.099,
    "answer": "A convolutional neural network consists of an input layer, hidden layers, and an output layer. The hidden layers include one or more layers that perform convolutions. \n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 11]",
    "citations": [
     [
@@ -768,14 +812,16 @@
      "slide 11"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes8_deep learning | slide 11",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -787,23 +833,25 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.806,
-   "latency_seconds": 13.95,
-   "answer": "Uninformed or blind search is a type of search algorithm that uses no information other than the initial state, the search operator, and a test for a solution. It is characterized by the order in which it expands the nodes, which can have a dramatic effect on how well the search performs.\n\n[Source: Lectures Week 2__AI notes2_search, slide 23]",
+   "latency_seconds": 14.997,
+   "answer": "Uninformed or blind search is a type of search algorithm that uses no information other than the initial state, the search operator, and a test for a solution. It only distinguishes between goal state and non-goal state.\n\n[Source: Lectures Week 2__AI notes2_search, slide 23]",
    "citations": [
     [
      "Lectures Week 2__AI notes2_search",
      "slide 23"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes2_search | slide 23",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
-   "fact_present": false
+   "grounded_by": "llm:llama-3.1-8b-instant",
+   "fact_present": true
   },
   {
    "id": "con14",
@@ -813,23 +861,29 @@
    "intent_confidence": 0.822,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.7046,
-   "latency_seconds": 16.401,
-   "answer": "An artificial neural network (ANN) uses fully connected layers and can be used only for small images, considering the entire image for learning patterns. In contrast, a convolutional neural network (CNN) uses partially connected layers, can be used for any image, and considers only the part of the image within the receptive field. Additionally, CNNs have fewer parameters and are more efficient for images compared to ANNs.\n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 20]",
+   "top_score": 0.6352,
+   "latency_seconds": 1.61,
+   "answer": "An artificial neural network (ANN) uses fully connected layers and considers the entire image for learning patterns, whereas a convolutional neural network (CNN) uses partially connected layers, considers only a part of the image, and has fewer parameters. Additionally, CNNs are more efficient for images and learn spatial hierarchies of patterns, whereas ANNs are not very efficient for images and don't learn spatial hierarchies.\n\n[Source: Lectures Week 2__AI notes8_deep learning, slide 20] [Source: Lectures Week 2__AI notes8_deep learning, slide 20]",
    "citations": [
+    [
+     "Lectures Week 2__AI notes8_deep learning",
+     "slide 20"
+    ],
     [
      "Lectures Week 2__AI notes8_deep learning",
      "slide 20"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes8_deep learning | slide 20",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -841,23 +895,29 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7612,
-   "latency_seconds": 7.073,
-   "answer": "Building a decision tree involves two steps: Tree construction and Tree pruning. Tree construction involves recursively splitting the tree according to selected attributes (conditions), while Tree pruning involves identifying and removing irrelevant branches to increase classification accuracy.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 18]",
+   "latency_seconds": 12.494,
+   "answer": "To construct a decision tree, you first test all attributes and select the one that will function as the best root. Then, break up the training set into subsets based on the branches of the root node. Next, test the remaining attributes to see which ones fit best underneath the branches of the root node. Finally, continue this process for all other branches until the tree is complete.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 22] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 18]",
    "citations": [
+    [
+     "Lectures Week 2__AI notes6_machine learning_part 2",
+     "slide 22"
+    ],
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 18"
     ]
    ],
-   "hit_at_k": false,
+   "model_used": "llama-3.1-8b-instant",
+   "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 22",
-   "citation_correct": false,
+   "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
-   "fact_present": false
+   "grounded_by": "llm:openai/gpt-oss-120b",
+   "fact_present": true
   },
   {
    "id": "cod02",
@@ -867,23 +927,29 @@
    "intent_confidence": 0.483,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.6622,
-   "latency_seconds": 12.687,
-   "answer": "The two stages involved in building a decision tree are Tree construction and Tree pruning. Tree construction involves recursively splitting the tree according to selected attributes (conditions), while Tree pruning involves identifying and removing irrelevant branches to increase classification accuracy.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 18]",
+   "top_score": 0.6545,
+   "latency_seconds": 11.002,
+   "answer": "The two stages involved in building a decision tree are tree construction and tree pruning. \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 18] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 18]",
    "citations": [
+    [
+     "Lectures Week 2__AI notes6_machine learning_part 2",
+     "slide 18"
+    ],
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 18"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 18",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-20b",
    "fact_present": true
   },
   {
@@ -895,22 +961,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6647,
-   "latency_seconds": 12.752,
-   "answer": "The breadth-first search algorithm explores a graph by exploring outward from the root in all possible directions, adding nodes one \"layer\" at a time. It expands all nodes at level 1 before entering level 2, and continues this process until it reaches the goal state. Specifically, it expands all nodes at level j before entering level j+1.\n\n[Source: Lectures Week 2__AI notes2_search, slide 25]",
+   "latency_seconds": 1.914,
+   "answer": "The breadth-first search algorithm explores a graph by exploring outward from the root in all possible directions, adding nodes one \"layer\" at a time. It does this by expanding all nodes at level 1 before entering level 2, and so on, until it reaches the goal state. This is done by adding the root with the initial state to a queue, tree, and visited list, then dequeuing a node from the queue and checking if it has the goal state. If not, it adds the child nodes to the queue, tree, and visited list if they have not been visited.\n\n[Source: Lectures Week 2__AI notes2_search, slide 25]",
    "citations": [
     [
      "Lectures Week 2__AI notes2_search",
      "slide 25"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes2_search | slide 25",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -922,22 +990,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5957,
-   "latency_seconds": 11.517,
-   "answer": "The two key steps in the generate and test search procedure are:\n\nStep 1. Generate a possible state\nStep 2. Test to see if it is a goal state (found a solution)\n\n[Source: Lectures Week 2__AI notes2_search, slide 22]",
+   "latency_seconds": 5.64,
+   "answer": "The two key steps in the generate and test search procedure are:\n\n1. Generate a possible state\n2. Test to see if it is a goal state (found a solution)\n\n[Source: Lectures Week 2__AI notes2_search, slide 22]",
    "citations": [
     [
      "Lectures Week 2__AI notes2_search",
      "slide 22"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes2_search | slide 22",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -949,22 +1019,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5851,
-   "latency_seconds": 7.432,
-   "answer": "The Euclidean distance between two vectors x and y is calculated as the square root of the sum of the squared differences between their corresponding components. This is expressed as d(x, y) = √(x1 - y1)² + (x2 - y2)² + ... + (xd - yd)². \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 75]",
+   "latency_seconds": 14.378,
+   "answer": "The Euclidean distance is calculated as the square root of the sum of the squared differences between corresponding elements of the two vectors. This is expressed as d(x, y) = √(x1 - y1)² + (x2 - y2)² + ... + (xd - yd)².\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 75]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 75"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 75",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -976,7 +1048,7 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7032,
-   "latency_seconds": 11.52,
+   "latency_seconds": 13.036,
    "answer": "Manhattan distance is called Hamming distance when all features are binary. \n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 77]",
    "citations": [
     [
@@ -984,14 +1056,16 @@
      "slide 77"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 77",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1003,23 +1077,25 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5853,
-   "latency_seconds": 11.966,
-   "answer": "Edit distance is not mentioned in the context as a method for measuring similarity. However, Levenshtein distance is mentioned as a string metric for measuring the difference between two sequences, which is the minimum number of single-character edits (insertions, deletions or substitutions) required to change one word into the other. \n\n[Source: Lectures Week 1__Lecture_3_Classification, page 30]",
+   "latency_seconds": 13.073,
+   "answer": "Edit distance measures the similarity of two objects by transforming one of the objects into the other and measuring how much effort it takes. It does this by considering the cost of deletion, substitution, and insertion operations. \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 78]",
    "citations": [
     [
-     "Lectures Week 1__Lecture_3_Classification",
-     "page 30"
+     "Lectures Week 2__AI notes6_machine learning_part 2",
+     "slide 78"
     ]
    ],
-   "hit_at_k": false,
+   "model_used": "llama-3.1-8b-instant",
+   "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 78",
-   "citation_correct": false,
-   "citation_doc_correct": false,
+   "citation_correct": true,
+   "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
-   "fact_present": false
+   "grounded_by": "llm:llama-3.1-8b-instant",
+   "fact_present": true
   },
   {
    "id": "cod08",
@@ -1029,27 +1105,29 @@
    "intent_confidence": 0.733,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.6678,
-   "latency_seconds": 13.057,
-   "answer": "A search algorithm is evaluated based on the following criteria: \n- Completeness: Does the algorithm always find a solution (via tracking a path)?\n- Speed (worst time complexity): What is the highest number of nodes that may need to be created?\n- Memory (worst space complexity): What are the largest amounts of nodes that may need to be stored?\n- Optimality: A \"best\" solution is the one that requires the least cost to reach a goal state from the initial state.\n- Time Complexity: How long does it take to find a solution?\n- Space Complexity: How much memory does it take to perform the search?\n- Completeness: Is the strategy guaranteed to find a solution (before the resource exhausted)?\n\n[Source: Lectures Week 2__AI notes2_search, slide 16] [Source: Lectures Week 2__AI notes2_search, slide 24]",
+   "top_score": 0.6331,
+   "latency_seconds": 15.099,
+   "answer": "A search algorithm is evaluated using the following criteria: Completeness, Speed (worst time complexity), Memory (worst space complexity), and Optimality. These criteria are mentioned in PASSAGE 4 and PASSAGE 1.\n\n[Source: Lectures Week 2__AI notes2_search, slide 8] [Source: Lectures Week 2__AI notes2_search, slide 24]",
    "citations": [
     [
      "Lectures Week 2__AI notes2_search",
-     "slide 16"
+     "slide 8"
     ],
     [
      "Lectures Week 2__AI notes2_search",
      "slide 24"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes2_search | slide 24",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1061,8 +1139,8 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7687,
-   "latency_seconds": 16.072,
-   "answer": "The k-means algorithm identifies k number of centroids, and then allocates every data point to the nearest cluster, while keeping the centroids as small as possible. The centroids are used as the center point of each cluster, and each point is assigned to the cluster with the closest centroid. The centroids are also used to compute the new centroid (mean) of each cluster.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 80] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 81]",
+   "latency_seconds": 14.198,
+   "answer": "The k-means algorithm identifies k number of centroids and then allocates every data point to the nearest cluster, while keeping the centroids as small as possible. The centroids are used as the center point of each cluster. \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 80] [Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 82]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
@@ -1070,17 +1148,19 @@
     ],
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
-     "slide 81"
+     "slide 82"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 80",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1092,22 +1172,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.4872,
-   "latency_seconds": 10.345,
-   "answer": "A dissimilarity function should have the following properties: symmetry, positive separability, and the triangular inequality. \n\nSymmetry: d(x, y) = d(y,x)\nPositive separability: d(x, y) = 0, if and only if x = y\nTriangular inequality: d(x, y) ≤ d(x,z) + d(z,y)\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 74]",
+   "latency_seconds": 17.331,
+   "answer": "A dissimilarity function should have the following properties: symmetry, positive separability, and triangular inequality. \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 74]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 74"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 74",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "lexical",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1119,22 +1201,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.7829,
-   "latency_seconds": 13.775,
-   "answer": "Top-down decision tree induction is a process where, from any property, we may partition the training set into disjoint subsets, and recursively construct a subtree for each partition. This process starts from the top of the tree and moves down to the leaves.\n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 30]",
+   "latency_seconds": 15.008,
+   "answer": "Top-down decision tree induction is the process of recursively partitioning the training set into disjoint subsets from any property, and then constructing a subtree for each partition. This process continues until a decision is made or a stopping criterion is met. \n\n[Source: Lectures Week 2__AI notes6_machine learning_part 2, slide 30]",
    "citations": [
     [
      "Lectures Week 2__AI notes6_machine learning_part 2",
      "slide 30"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__AI notes6_machine learning_part 2 | slide 30",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "lexical",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1146,22 +1230,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6561,
-   "latency_seconds": 11.681,
-   "answer": "In binary classification, class imbalance occurs when the dataset has a \"natural\" imbalance, where one class (the minor class) is of prime interest but has a much smaller number of instances compared to the other class (the major class). This can lead to biased results from standard classifiers, which are designed to treat both classes equally. As a result, the classifier may perform poorly on the minor class, even if its overall accuracy is good.\n\n[Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 5]",
+   "latency_seconds": 12.063,
+   "answer": "Class imbalance in binary classification occurs when the dataset has a \"natural\" imbalance between the minor class (of prime interest) and the major class. For example, in the classification of \"cancerous\" vs. \"healthy\" mammography images, the minor class (cancerous) is much less frequent than the major class (healthy). This can lead to biased results towards the major class, poor prediction of the minor class, and a high average quality of classification.\n\n[Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 5]",
    "citations": [
     [
      "Lectures Week 1__Lecture_4_Imbalanced_Multiclass",
      "page 5"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 1__Lecture_4_Imbalanced_Multiclass | page 5",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
-   "grounded": false,
-   "grounded_by": "lexical",
+   "grounded": true,
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1173,22 +1259,28 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6205,
-   "latency_seconds": 7.984,
-   "answer": "The two document representations used for retrieving Wikipedia articles are word counts and TF-IDF.\n\n[Source: Programming_Exercise_Clustering, Retrieving Wikipedia articles]",
+   "latency_seconds": 10.019,
+   "answer": "The two document representations used for retrieving Wikipedia articles are word counts and TF-IDF.\n\n[Source: Programming_Exercise_Clustering, Retrieving Wikipedia articles]\n[Source: Programming_Exercise_Clustering, What you will do]",
    "citations": [
     [
      "Programming_Exercise_Clustering",
      "Retrieving Wikipedia articles"
+    ],
+    [
+     "Programming_Exercise_Clustering",
+     "What you will do"
     ]
    ],
-   "hit_at_k": false,
+   "model_used": "llama-3.1-8b-instant",
+   "hit_at_k": true,
    "hit_at_k_document": true,
-   "expected": "Programming_Exercise_Clustering | What you will do",
-   "citation_correct": false,
+   "hit_at_retrieval_k": true,
+   "expected": "Programming_Exercise_Clustering | Retrieving Wikipedia articles",
+   "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1199,28 +1291,30 @@
    "intent_confidence": 0.673,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.5527,
-   "latency_seconds": 12.456,
-   "answer": "The regression problem is defined as finding the relationship between explanatory variables (or independent variables) and our variable of interest (or dependent variable). This is also mentioned as a type of supervised learning problem where the output is a real value.\n\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 54]\n[Source: Lectures Week 2__AI notes5_machine learning_part 1, slide 27]",
+   "top_score": 0.4966,
+   "latency_seconds": 14.222,
+   "answer": "The regression problem is defined as finding a hypothesis ˆf : X →R in H with small generalization error w.r.t. target f, where the training data is a sample drawn i.i.d. from set X according to some distribution D, denoted as S = {(x1,y1),..., (xm,ym)}∈ X×Y.\n\n[Source: Lectures Week 1__Lecture_2_Regression, page 6] [Source: Lectures Week 1__Lecture_2_Regression, page 6]",
    "citations": [
     [
-     "Lectures Week 2__AI notes5_machine learning_part 1",
-     "slide 54"
+     "Lectures Week 1__Lecture_2_Regression",
+     "page 6"
     ],
     [
-     "Lectures Week 2__AI notes5_machine learning_part 1",
-     "slide 27"
+     "Lectures Week 1__Lecture_2_Regression",
+     "page 6"
     ]
    ],
-   "hit_at_k": false,
-   "hit_at_k_document": false,
+   "model_used": "llama-3.1-8b-instant",
+   "hit_at_k": true,
+   "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 1__Lecture_2_Regression | page 6",
-   "citation_correct": false,
-   "citation_doc_correct": false,
+   "citation_correct": true,
+   "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
-   "fact_present": false
+   "grounded_by": "llm:llama-3.1-8b-instant",
+   "fact_present": true
   },
   {
    "id": "con18",
@@ -1231,26 +1325,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6677,
-   "latency_seconds": 8.059,
-   "answer": "The purpose of analyzing product sentiment in the classification assignment is to explore the application of classifiers further, training a sentiment analysis model using a set of key polarizing words, and comparing the results with those of a classifier using all words. This is done to understand the types of errors a classifier makes and to verify the weights learned to each of these words.\n\n[Source: Classification_simple__Analyzing_Product_Sentiment, Analyzing product sentiment]\n[Source: Classification_simple__Analyzing_Product_Sentiment, Analyzing product sentiment]",
+   "latency_seconds": 10.825,
+   "answer": "The purpose of analyzing product sentiment in the classification assignment is to explore the application of sentiment analysis, train a model using key polarizing words, verify the weights learned, and compare the results with a more complex classifier. \n\n[Source: Classification_simple__Analyzing_Product_Sentiment, Analyzing product sentiment]",
    "citations": [
-    [
-     "Classification_simple__Analyzing_Product_Sentiment",
-     "Analyzing product sentiment"
-    ],
     [
      "Classification_simple__Analyzing_Product_Sentiment",
      "Analyzing product sentiment"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Classification_simple__Analyzing_Product_Sentiment | Analyzing product sentiment",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1262,22 +1354,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6063,
-   "latency_seconds": 18.969,
-   "answer": "According to Passage 1, Step 1 of the Experimental Procedure, you need to retrieve 300 pull requests (PRs) for each project.\n\n[Source: Code Review Project__Lab Guide_Code Review_English, page 4]",
+   "latency_seconds": 1.509,
+   "answer": "According to the lab guide, 300 pull requests should be retrieved for each project. \n\n[Source: Code Review Project__Lab Guide_Code Review_English, page 4]",
    "citations": [
     [
      "Code Review Project__Lab Guide_Code Review_English",
      "page 4"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Code Review Project__Lab Guide_Code Review_English | page 4",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1289,22 +1383,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6577,
-   "latency_seconds": 19.723,
-   "answer": "The GitHub API is used to retrieve pull request data in the code review lab. This is mentioned in Passage 2, Step 1: Retrieve Pull Requests, where it says \"use the GitHub API to retrieve 300 pull requests (PRs) for each project.\"\n\n[Source: Code Review Project__Lab Guide_Code Review_English, page 4]",
+   "latency_seconds": 16.079,
+   "answer": "The GitHub API is used to retrieve pull request data in the code review lab. \n\n[Source: Code Review Project__Lab Guide_Code Review_English, page 4]",
    "citations": [
     [
      "Code Review Project__Lab Guide_Code Review_English",
      "page 4"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Code Review Project__Lab Guide_Code Review_English | page 4",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1316,7 +1412,7 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6509,
-   "latency_seconds": 11.725,
+   "latency_seconds": 12.901,
    "answer": "There are three approaches to increase the importance of the minor class in imbalanced classification: adapting a probability threshold for classifiers, modifying a loss function by assigning more weight to the minor class error, and resampling a dataset to soften or remove class imbalance.\n\n[Source: Lectures Week 1__Lecture_4_Imbalanced_Multiclass, page 9]",
    "citations": [
     [
@@ -1324,14 +1420,16 @@
      "page 9"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 1__Lecture_4_Imbalanced_Multiclass | page 9",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1343,8 +1441,8 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.6935,
-   "latency_seconds": 8.253,
-   "answer": "The product sentiment notebook uses Pandas, Matplotlib, and scikit-learn. \n\n[Source: Classification_simple__FND03-NB01, cell 1] [Source: Classification_simple__Analyzing_Product_Sentiment, The data and starter code]",
+   "latency_seconds": 10.834,
+   "answer": "The product sentiment notebook uses Pandas, Matplotlib, and scikit-learn. \n[Source: Classification_simple__FND03-NB01, cell 1] [Source: Classification_simple__Analyzing_Product_Sentiment, The data and starter code]",
    "citations": [
     [
      "Classification_simple__FND03-NB01",
@@ -1355,14 +1453,16 @@
      "The data and starter code"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Classification_simple__FND03-NB01 | cell 1",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1374,8 +1474,8 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5966,
-   "latency_seconds": 22.368,
-   "answer": "The HIT Global Summer School is held at Harbin Institute of Technology in Harbin, P.R. China.\n\n[Source: 2026 HIT Global Summer School, page 1]\n[Source: 2026 HIT Global Summer School Academic theme list, page 2]\n[Source: 2026 HIT Global Summer School Academic theme list, page 7]\n[Source: 2026 HIT Global Summer School Academic theme list, page 6]",
+   "latency_seconds": 24.15,
+   "answer": "The HIT Global Summer School is held at Harbin Institute of Technology (HIT) in Harbin, P.R. China.\n\n[Source: 2026 HIT Global Summer School, page 1]\n[Source: 2026 HIT Global Summer School Academic theme list, page 2]\n[Source: 2026 HIT Global Summer School Academic theme list, page 16]\n[Source: 2026 HIT Global Summer School Academic theme list, page 21]\n[Source: 2026 HIT Global Summer School Academic theme list, page 11]",
    "citations": [
     [
      "2026 HIT Global Summer School",
@@ -1387,21 +1487,27 @@
     ],
     [
      "2026 HIT Global Summer School Academic theme list",
-     "page 7"
+     "page 16"
     ],
     [
      "2026 HIT Global Summer School Academic theme list",
-     "page 6"
+     "page 21"
+    ],
+    [
+     "2026 HIT Global Summer School Academic theme list",
+     "page 11"
     ]
    ],
-   "hit_at_k": false,
+   "model_used": "llama-3.1-8b-instant",
+   "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "2026 HIT Global Summer School Academic theme list | page 1",
-   "citation_correct": false,
+   "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1412,12 +1518,14 @@
    "intent_confidence": 0.871,
    "refused": true,
    "refusal_reason": "threshold",
-   "top_score": 0.4572,
-   "latency_seconds": 0.036,
+   "top_score": 0.4388,
+   "latency_seconds": 0.531,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
    "citations": [],
+   "model_used": "",
    "hit_at_k": false,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": false,
    "expected": "2026 HIT Global Summer School Academic theme list | page 1"
   },
   {
@@ -1429,22 +1537,28 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.71,
-   "latency_seconds": 11.051,
-   "answer": "Jiakun Liu from the School of Computing at Harbin Institute of Technology teaches the Intelligent Software Engineering laboratory course.\n\n[Source: Code Review Project__Experiment_Eng_1st, page 2]",
+   "latency_seconds": 11.142,
+   "answer": "The Intelligent Software Engineering laboratory course is taught by Jiakun Liu from the School of Computing at Harbin Institute of Technology.\n\n[Source: Code Review Project__Experiment_Eng_1st, page 1]\n[Source: Code Review Project__Experiment_Eng_1st, page 27]",
    "citations": [
     [
      "Code Review Project__Experiment_Eng_1st",
-     "page 2"
+     "page 1"
+    ],
+    [
+     "Code Review Project__Experiment_Eng_1st",
+     "page 27"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Code Review Project__Experiment_Eng_1st | page 1",
-   "citation_correct": false,
+   "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1456,22 +1570,24 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.8113,
-   "latency_seconds": 8.353,
-   "answer": "The penalty for plagiarism is a zero mark for the submission.\n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Penalty]",
+   "latency_seconds": 9.665,
+   "answer": "The penalty for any plagiarism found in the submission is a zero mark.\n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Penalty]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
      "Penalty"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": true,
    "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026 | Penalty",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:openai/gpt-oss-20b",
    "fact_present": true
   },
   {
@@ -1483,26 +1599,28 @@
    "refused": false,
    "refusal_reason": null,
    "top_score": 0.5826,
-   "latency_seconds": 10.083,
-   "answer": "The individual assignment is due on Friday, 31 July, 2026 (23:55 Sunday), but the project report is due at 11:55 p.m. on the same day. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, Assessment – Individual Project]\n[Source: chats__HIT 2026 Summer Course AI and ML, part 4]",
+   "latency_seconds": 1.535,
+   "answer": "The individual assignment is due on Friday, 31 July, 2026 (23:55 Sunday), but the project report is due on the same day and time. However, the project report submission details are different, and it must be submitted to Dr. Guanglei YANG by 11:55pm on the same day.\n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Individual Assignment]\n[Source: Lectures Week 2__HIT summer course_AI and ML_project_July2026, The submission]",
    "citations": [
     [
-     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
-     "Assessment – Individual Project"
+     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+     "Individual Assignment"
     ],
     [
-     "chats__HIT 2026 Summer Course AI and ML",
-     "part 4"
+     "Lectures Week 2__HIT summer course_AI and ML_project_July2026",
+     "The submission"
     ]
    ],
+   "model_used": "llama-3.1-8b-instant",
    "hit_at_k": false,
-   "hit_at_k_document": false,
+   "hit_at_k_document": true,
+   "hit_at_retrieval_k": false,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026 | The submission",
    "citation_correct": false,
-   "citation_doc_correct": false,
+   "citation_doc_correct": true,
    "fabricated": [],
    "grounded": false,
-   "grounded_by": "lexical",
+   "grounded_by": "llm:openai/gpt-oss-120b",
    "fact_present": false
   },
   {
@@ -1513,23 +1631,25 @@
    "intent_confidence": 0.599,
    "refused": false,
    "refusal_reason": null,
-   "top_score": 0.637,
-   "latency_seconds": 12.291,
-   "answer": "The assignment asks to build a decision tree using the ID3 algorithm.\n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Part C (10 marks)]",
+   "top_score": 0.5856,
+   "latency_seconds": 1.481,
+   "answer": "The assignment in Part C asks you to use the ID3 algorithm to build a decision tree. \n\n[Source: Lectures Week 2__HIT summer course_AI and ML_assignment_July2026, Part C (10 marks)]",
    "citations": [
     [
      "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
      "Part C (10 marks)"
     ]
    ],
-   "hit_at_k": false,
-   "hit_at_k_document": false,
+   "model_used": "llama-3.1-8b-instant",
+   "hit_at_k": true,
+   "hit_at_k_document": true,
+   "hit_at_retrieval_k": true,
    "expected": "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026 | Part C (10 marks)",
    "citation_correct": true,
    "citation_doc_correct": true,
    "fabricated": [],
    "grounded": true,
-   "grounded_by": "llm",
+   "grounded_by": "llm:llama-3.1-8b-instant",
    "fact_present": true
   },
   {
@@ -1541,9 +1661,10 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.028,
+   "latency_seconds": 0.023,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos02",
@@ -1554,9 +1675,10 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.007,
+   "latency_seconds": 0.012,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos03",
@@ -1567,9 +1689,10 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.007,
+   "latency_seconds": 0.008,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos04",
@@ -1580,9 +1703,10 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.011,
+   "latency_seconds": 0.013,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos05",
@@ -1593,9 +1717,10 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.009,
+   "latency_seconds": 0.011,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos06",
@@ -1606,9 +1731,10 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.01,
+   "latency_seconds": 0.014,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos07",
@@ -1618,10 +1744,11 @@
    "intent_confidence": 0.596,
    "refused": true,
    "refusal_reason": "threshold",
-   "top_score": 0.1783,
-   "latency_seconds": 0.017,
+   "top_score": 0.1634,
+   "latency_seconds": 0.414,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos08",
@@ -1632,9 +1759,10 @@
    "refused": true,
    "refusal_reason": "model",
    "top_score": 0.5148,
-   "latency_seconds": 9.242,
+   "latency_seconds": 2.488,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": "llama-3.1-8b-instant"
   },
   {
    "id": "oos09",
@@ -1645,9 +1773,10 @@
    "refused": true,
    "refusal_reason": "intent",
    "top_score": 0.0,
-   "latency_seconds": 0.03,
+   "latency_seconds": 0.023,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos10",
@@ -1660,7 +1789,8 @@
    "top_score": 0.0,
    "latency_seconds": 0.008,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": ""
   },
   {
    "id": "oos11",
@@ -1670,10 +1800,11 @@
    "intent_confidence": 0.586,
    "refused": true,
    "refusal_reason": "model",
-   "top_score": 0.5237,
-   "latency_seconds": 10.202,
+   "top_score": 0.4883,
+   "latency_seconds": 10.856,
    "answer": "I can't answer that from the course materials I have. My knowledge is limited to material issued by the HIT Global Summer School — lecture slides and PDFs, lab notebooks, assignment and project briefs, schedules and course announcements. Please ask your tutor or check the course handbook directly.",
-   "citations": []
+   "citations": [],
+   "model_used": "llama-3.1-8b-instant"
   }
  ]
 }

@@ -22,7 +22,16 @@ from dataclasses import dataclass
 import config
 from retrieve import Retrieved
 
-CITATION_RE = re.compile(r"\[Source:\s*([^,\]]+?)\s*,\s*([^\]]+?)\s*\]")
+# One [Source: ...] bracket, whose contents are parsed by parse_citations.
+CITATION_BLOCK_RE = re.compile(r"\[Source:\s*([^\]]+?)\s*\]", re.I)
+
+# A locator is "slide 12" / "page 7" / "cell 3" / "part 9", or a section title.
+_LOCATOR_RE = re.compile(r"^(slide|page|cell|part)\s+\d+$", re.I)
+# The same, but with a document name run on after it — the shape produced when
+# a model space-joins two citations inside one bracket.
+_LOCATOR_THEN_DOC_RE = re.compile(
+    r"^((?:slide|page|cell|part)\s+\d+)\s+(\S.*)$", re.I
+)
 
 SYSTEM_PROMPT = """\
 You are ModuleMate, a course assistant for the HIT Global Summer School 2026.
@@ -53,8 +62,12 @@ supplied label cannot be resolved and counts as fabricated. Do not invent a \
 slide or page number. If you drew on two passages, give both citations on \
 that line separated by a space.
 4. Be concise: two to five sentences unless the question needs a list.
-5. Write for a student on the module. Do not mention "the context" or "the \
-passages" — just answer.
+5. Write for a student, in your own voice. The retrieval machinery is \
+invisible to them, so never refer to it: no "the context", "the passages", \
+"Passage 1", "the provided text", "according to the document". State the fact \
+directly and let the citation line carry the provenance. Write "The report \
+must be 4000 words", not "According to Passage 1, the report must be 4000 \
+words".
 6. You explain what the module materials say. You are not the tutor and hold \
 no authority over the course. If the student asks you to act on their behalf \
 or to exercise the tutor's judgement — granting an extension, waiving or \
@@ -89,6 +102,7 @@ class Generation:
     latency_seconds: float
     prompt_tokens: int = 0
     completion_tokens: int = 0
+    model_used: str = ""      # which model actually served it (see R3 fallback)
 
 
 # --------------------------------------------------------------------------
@@ -155,6 +169,23 @@ class AnthropicBackend(LLMBackend):
         return text, resp.usage.input_tokens, resp.usage.output_tokens
 
 
+class ModelUnavailable(RuntimeError):
+    """Every model in the fallback chain refused the request."""
+
+
+def is_capacity_error(exc: Exception) -> bool:
+    """True for rate-limit / quota / overload errors, which a different model
+    can serve, as opposed to bad-request errors, which it cannot."""
+    name = type(exc).__name__
+    if name in ("RateLimitError", "InternalServerError", "APITimeoutError",
+                "APIConnectionError"):
+        return True
+    text = str(exc).lower()
+    return any(t in text for t in
+               ("rate limit", "quota", "429", "over capacity", "overloaded",
+                "503", "502"))
+
+
 def make_backend(cfg=None) -> LLMBackend:
     """Construct the backend named in config.yaml."""
     cfg = cfg or config.load()
@@ -199,7 +230,16 @@ def build_user_prompt(question: str, passages: list[Retrieved]) -> str:
 
 
 class Generator:
-    """Grounded answer generation and conversational query rewriting."""
+    """Grounded answer generation and conversational query rewriting.
+
+    Calls go through `_complete_with_fallback`, which walks a chain of models
+    on capacity errors. This is risk R3 in the register — "LLM API cost,
+    latency or unavailability" — implemented rather than merely documented.
+    It is not hypothetical: a full evaluation exhausted the primary model's
+    100,000 tokens/day allowance twice during this build, and each provider
+    model carries its own separate quota, so falling through to the next one
+    keeps the assistant answering instead of failing the turn.
+    """
 
     def __init__(self, cfg=None, backend: LLMBackend | None = None):
         self.cfg = cfg or config.load()
@@ -208,10 +248,48 @@ class Generator:
         self.rewrite_model = self.cfg.get(
             "generation.rewrite_model", self.model
         )
+        self.followup_model = self.cfg.get(
+            "generation.followup_model", self.rewrite_model
+        )
         self.temperature = self.cfg.get("generation.temperature", 0.0)
         self.max_tokens = self.cfg.get("generation.max_tokens", 600)
+        self.fallback_models = list(
+            self.cfg.get("generation.fallback_models") or []
+        )
+        # Which model served the last call, so the harness and the UI can
+        # report when the primary was unavailable rather than hiding it.
+        self.last_model_used: str = self.model
         self.refusal_message = " ".join(
             self.cfg.require("refusal.message").split()
+        )
+
+    def _complete_with_fallback(self, system: str, user: str, model: str,
+                                temperature: float, max_tokens: int
+                                ) -> tuple[str, int, int, str]:
+        """Try `model`, then each fallback, on capacity errors only.
+
+        Returns (text, prompt_tokens, completion_tokens, model_actually_used).
+        A bad-request error is re-raised immediately: no other model will
+        handle a malformed request any better, and silently retrying would
+        turn a bug into four bugs.
+        """
+        errors: list[str] = []
+        for candidate in [model, *self.fallback_models]:
+            if candidate is None:
+                continue
+            try:
+                text, p_tok, c_tok = self.backend.complete(
+                    system, user, candidate, temperature, max_tokens
+                )
+                self.last_model_used = candidate
+                return text, p_tok, c_tok, candidate
+            except Exception as exc:
+                if not is_capacity_error(exc):
+                    raise
+                errors.append(f"{candidate}: {type(exc).__name__}")
+                continue
+        raise ModelUnavailable(
+            "all generation models unavailable — " + "; ".join(errors)
         )
 
     def answer(self, question: str, passages: list[Retrieved]) -> Generation:
@@ -222,7 +300,7 @@ class Generator:
         if not passages:
             return Generation(self.refusal_message, True, time.time() - started)
 
-        text, p_tok, c_tok = self.backend.complete(
+        text, p_tok, c_tok, used = self._complete_with_fallback(
             SYSTEM_PROMPT,
             build_user_prompt(question, passages),
             self.model,
@@ -233,12 +311,45 @@ class Generator:
         # The model's own escape hatch — treated as a refusal, not an answer.
         if "INSUFFICIENT_CONTEXT" in text.upper():
             return Generation(
-                self.refusal_message, True, time.time() - started, p_tok, c_tok
+                self.refusal_message, True, time.time() - started,
+                p_tok, c_tok, used
             )
 
         return Generation(
-            text, False, time.time() - started, p_tok, c_tok
+            text, False, time.time() - started, p_tok, c_tok, used
         )
+
+    def suggest_followups(self, question: str,
+                          passages: list[Retrieved]) -> list[str]:
+        """C4 — up to three follow-ups the corpus can actually answer.
+
+        Grounded in the retrieved passages rather than generated freely, so a
+        suggestion never sends the student into a refusal. Runs on the cheap
+        model with a tight token cap; failures are swallowed because a missing
+        suggestion is a non-event, and returns [] when the turn was refused.
+        """
+        if not passages:
+            return []
+        excerpts = "\n\n".join(
+            f"[{p.source_document} — {p.slide_or_section}]\n{p.text[:400]}"
+            for p in passages[:4]
+        )
+        user = (
+            f"QUESTION JUST ASKED: {question}\n\n"
+            f"RETRIEVED EXCERPTS:\n{excerpts}\n\nFollow-up questions:"
+        )
+        try:
+            text, _, _ = self.backend.complete(
+                FOLLOWUP_PROMPT, user, self.followup_model, 0.3, 120
+            )
+        except Exception:
+            return []
+        out: list[str] = []
+        for line in text.splitlines():
+            line = line.strip().lstrip("-*0123456789. ").strip()
+            if len(line) > 8 and line.lower() != question.strip().lower():
+                out.append(line)
+        return out[:3]
 
     def rewrite_query(self, question: str,
                       history: list[tuple[str, str]]) -> str:
@@ -269,12 +380,66 @@ class Generator:
         return cleaned or question
 
 
+FOLLOWUP_PROMPT = """\
+You suggest what a student might reasonably ask next.
+
+You are given the question they just asked and excerpts from the course
+materials that were retrieved for it. Propose up to three short follow-up
+questions that those same materials can actually answer.
+
+Rules:
+* Each must be answerable from the excerpts shown. Never invent a topic the
+  excerpts do not cover — a suggestion the assistant would then refuse is
+  worse than no suggestion.
+* Keep each under twelve words, phrased as a student would type it.
+* Do not repeat the question already asked.
+* Output one question per line, nothing else. No numbering, no preamble.
+"""
+
+
 def parse_citations(text: str) -> list[tuple[str, str]]:
     """Extract [(document, slide_or_section)] from an answer.
 
-    The eval harness parses this exact bracket to score citation correctness.
+    The harness scores citation correctness against this, so the parser has to
+    survive the formats models actually emit rather than only the one the
+    prompt asks for. Measured on real output, a strong model reliably produced
+    two citations inside a single bracket:
+
+        [Source: AI notes6..., slide 62, Lab Guide..., page 7]
+        [Source: AI notes6..., slide 18 AI notes6..., slide 22]
+
+    A regex that treats a bracket as exactly one (document, locator) pair reads
+    those as one citation with a nonsense locator — which the fabrication check
+    then reports as an invented source. That is a measurement bug, not a model
+    failure, and it cost four false NFR3 violations before it was found.
+
+    So: split each bracket on commas, then walk the fields pairing document
+    with locator, handling the case where a locator and the next document are
+    run together without a comma.
     """
-    return [(d.strip(), s.strip()) for d, s in CITATION_RE.findall(text)]
+    out: list[tuple[str, str]] = []
+    for block in CITATION_BLOCK_RE.findall(text):
+        fields: list[str] = []
+        for raw in block.split(","):
+            field = raw.strip()
+            if not field:
+                continue
+            # "slide 18 AI notes6_machine learning" -> ["slide 18", "AI notes6…"]
+            run_on = _LOCATOR_THEN_DOC_RE.match(field)
+            if run_on and fields:
+                fields.append(run_on.group(1))
+                fields.append(run_on.group(2).strip())
+            else:
+                fields.append(field)
+
+        # Pair them up: document, locator, document, locator, ...
+        i = 0
+        while i + 1 < len(fields):
+            doc, loc = fields[i], fields[i + 1]
+            if doc and loc:
+                out.append((doc, loc))
+            i += 2
+    return out
 
 
 if __name__ == "__main__":

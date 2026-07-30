@@ -45,24 +45,27 @@ def main() -> None:
     rows = []
 
     for item in items:
-        want_doc = norm(item["expected_source_doc"])
-        want_loc = norm(item["expected_slide_or_section"])
+        wanted = {(norm(item["expected_source_doc"]),
+                   norm(item["expected_slide_or_section"]))}
+        for d, l in item.get("also_acceptable", []):
+            wanted.add((norm(d), norm(l)))
+        want_docs = {d for d, _ in wanted}
         res = retriever.retrieve(item["question"], k=5)
 
-        exact3 = any(
-            norm(p.source_document) == want_doc and norm(p.slide_or_section) == want_loc
-            for p in res.passages[:3]
-        )
-        exact5 = any(
-            norm(p.source_document) == want_doc and norm(p.slide_or_section) == want_loc
-            for p in res.passages[:5]
-        )
-        doc3 = any(norm(p.source_document) == want_doc for p in res.passages[:3])
+        def hit_within(n: int) -> bool:
+            return any(
+                (norm(p.source_document), norm(p.slide_or_section)) in wanted
+                for p in res.passages[:n]
+            )
+
+        exact3, exact5 = hit_within(3), hit_within(5)
+        doc3 = any(norm(p.source_document) in want_docs for p in res.passages[:3])
 
         intent = item["intent"]
-        for key, hit in (("exact@3", exact3), ("exact@5", exact5), ("doc@3", doc3)):
-            stats[intent][key] += int(hit)
-            stats["ALL"][key] += int(hit)
+        for key, was_hit in (("exact@3", exact3), ("exact@5", exact5),
+                             ("doc@3", doc3)):
+            stats[intent][key] += int(was_hit)
+            stats["ALL"][key] += int(was_hit)
         stats[intent]["n"] += 1
         stats["ALL"]["n"] += 1
 

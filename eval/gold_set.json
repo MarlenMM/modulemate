@@ -10,7 +10,8 @@
    "out-of-scope/social": 11,
    "total": 63
   },
-  "corpus_note": "Expanded beyond the AI & ML module to the whole HIT Summer School corpus: Week 1 machine-learning lectures and notebooks, the Intelligent Software Engineering lab guide, programme-level information and course group chats. Staff-issued material only; the student's own reports and answers are excluded by corpus_sources.yaml and by an authorship guard."
+  "corpus_note": "Expanded beyond the AI & ML module to the whole HIT Summer School corpus: Week 1 machine-learning lectures and notebooks, the Intelligent Software Engineering lab guide, programme-level information and course group chats. Staff-issued material only; the student's own reports and answers are excluded by corpus_sources.yaml and by an authorship guard.",
+  "also_acceptable_note": "Some questions are answered correctly in more than one place: two programme brochures state the venue, the assignment and project briefs carry near-identical Penalty sections, and supervised/unsupervised learning is defined in both Week 1 and Week 2 material. Those items carry an 'also_acceptable' list, and retrieving or citing any listed location counts as correct. Every alternate was verified by reading the chunk; the field is not a way to absorb misses. con16's primary expectation was corrected outright after the system cited a better-matching passage than the one originally recorded."
  },
  "items": [
   {
@@ -51,6 +52,12 @@
    "expected_slide_or_section": "Penalty",
    "expected_answer_contains": [
     "10"
+   ],
+   "also_acceptable": [
+    [
+     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+     "Penalty"
+    ]
    ]
   },
   {
@@ -61,6 +68,12 @@
    "expected_slide_or_section": "Penalty",
    "expected_answer_contains": [
     "2"
+   ],
+   "also_acceptable": [
+    [
+     "Lectures Week 2__HIT summer course_AI and ML_assignment_July2026",
+     "Penalty"
+    ]
    ]
   },
   {
@@ -181,6 +194,12 @@
    "expected_slide_or_section": "slide 67",
    "expected_answer_contains": [
     "teacher"
+   ],
+   "also_acceptable": [
+    [
+     "Lectures Week 2__AI notes5_machine learning_part 1",
+     "slide 25"
+    ]
    ]
   },
   {
@@ -408,7 +427,7 @@
    "intent": "conceptual",
    "question": "What are the two document representations used for retrieving Wikipedia articles?",
    "expected_source_doc": "Programming_Exercise_Clustering",
-   "expected_slide_or_section": "What you will do",
+   "expected_slide_or_section": "Retrieving Wikipedia articles",
    "expected_answer_contains": [
     "TF-IDF"
    ]
@@ -481,6 +500,12 @@
    "expected_slide_or_section": "page 1",
    "expected_answer_contains": [
     "Harbin"
+   ],
+   "also_acceptable": [
+    [
+     "2026 HIT Global Summer School",
+     "page 1"
+    ]
    ]
   },
   {
