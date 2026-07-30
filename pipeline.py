@@ -41,6 +41,8 @@ class TurnResult:
     latency_seconds: float = 0.0
     prompt_tokens: int = 0
     completion_tokens: int = 0
+    followups: list[str] = field(default_factory=list)   # C4
+    model_used: str = ""      # which model served this turn (R3 fallback)
 
     @property
     def was_rewritten(self) -> bool:
@@ -58,6 +60,11 @@ class ModuleMate:
         self.refusal_message = " ".join(
             self.cfg.require("refusal.message").split()
         )
+        # C4 is off during evaluation: it costs an extra call per turn and
+        # would inflate the measured latency with work a metric never reads.
+        self.suggest_followups = bool(
+            self.cfg.get("ui.suggest_followups", False)
+        )
 
     @property
     def manifest(self) -> dict:
@@ -69,6 +76,7 @@ class ModuleMate:
         question: str,
         history: list[tuple[str, str]] | None = None,
         rewrite: bool = True,
+        suggest: bool | None = None,
     ) -> TurnResult:
         started = time.time()
         history = history or []
@@ -114,6 +122,14 @@ class ModuleMate:
         # --- Step 6: grounded generation (M4/FR6) ---
         gen: Generation = self.generator.answer(query, result.passages)
 
+        # --- Step 7: suggested follow-ups (C4), never on a refusal ---
+        want_suggestions = (
+            self.suggest_followups if suggest is None else suggest
+        )
+        followups: list[str] = []
+        if want_suggestions and not gen.is_refusal:
+            followups = self.generator.suggest_followups(query, result.passages)
+
         return TurnResult(
             question=question,
             rewritten_query=query,
@@ -128,4 +144,6 @@ class ModuleMate:
             latency_seconds=time.time() - started,
             prompt_tokens=gen.prompt_tokens,
             completion_tokens=gen.completion_tokens,
+            followups=followups,
+            model_used=gen.model_used,
         )

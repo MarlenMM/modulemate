@@ -22,6 +22,35 @@ import config  # noqa: E402
 
 PASS, FAIL = "PASS", "**FAIL**"
 
+BOOTSTRAP_SAMPLES = 10000
+SEED = 42
+
+
+def wilson_interval(successes: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """95% Wilson score interval for a proportion.
+
+    Reported because the gold set has 52 in-scope questions: one question is
+    worth 1.9 percentage points, so a metric quoted to three decimals implies
+    a precision the sample size does not support. Wilson rather than the normal
+    approximation because it stays inside [0,1] and behaves near the extremes,
+    which matters for metrics measured at 1.000.
+    """
+    if n == 0:
+        return (0.0, 0.0)
+    p = successes / n
+    d = 1 + z * z / n
+    centre = (p + z * z / (2 * n)) / d
+    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / d
+    return (max(0.0, centre - half), min(1.0, centre + half))
+
+
+def ci_text(value: float, n: int) -> str:
+    """Format a proportion with its 95% interval."""
+    if not n:
+        return f"{value:.3f}"
+    lo, hi = wilson_interval(round(value * n), n)
+    return f"{value:.3f} [{lo:.2f}–{hi:.2f}]"
+
 
 def plot_confusion(labels: list[str], matrix: list[list[int]], out: Path) -> None:
     m = np.array(matrix, dtype=float)
@@ -96,7 +125,7 @@ def scorecard(s: dict, interactive: float | None = None,
 
     hit = s.get("hit_at_3", 0.0)
     rows.append((
-        "NFR2", "Retrieval hit@3", ">= 0.85", f"{hit:.3f}",
+        "NFR2", "Retrieval hit@3", ">= 0.85", ci_text(hit, s["n_in_scope"]),
         PASS if hit >= 0.85 else FAIL,
         "Share of in-scope gold questions whose expected chunk appears in the "
         "top 3 retrieved passages.",
@@ -116,7 +145,7 @@ def scorecard(s: dict, interactive: float | None = None,
     cite = s["citation_correctness"]
     rows.append((
         "NFR2", "Citation correctness (exact doc + slide/section)", ">= 0.90",
-        f"{cite:.3f}", PASS if cite >= 0.90 else FAIL,
+        ci_text(cite, s["n_answered"]), PASS if cite >= 0.90 else FAIL,
         f"Document-level correctness alone is "
         f"{s['citation_document_correctness']:.3f}; the gap is answers citing "
         "an adjacent slide within the correct deck.",
@@ -125,7 +154,8 @@ def scorecard(s: dict, interactive: float | None = None,
     refusal = s["refusal_rate_out_of_scope"]
     rows.append((
         "NFR3", "Refusal rate on out-of-scope set", ">= 0.95",
-        f"{refusal:.3f}", PASS if refusal >= 0.95 else FAIL,
+        ci_text(refusal, s["n_out_of_scope"]),
+        PASS if refusal >= 0.95 else FAIL,
         f"Refusals by cause — intent router {s['refusal_reasons']['intent']}, "
         f"similarity gate {s['refusal_reasons']['threshold']}, generator "
         f"self-report {s['refusal_reasons']['model']}.",
@@ -143,14 +173,15 @@ def scorecard(s: dict, interactive: float | None = None,
     ground = s["groundedness"]
     rows.append((
         "O1", "Groundedness (LLM judge, RAGAS-style)", ">= 0.90",
-        f"{ground:.3f}", PASS if ground >= 0.90 else FAIL,
+        ci_text(ground, s["n_answered"]), PASS if ground >= 0.90 else FAIL,
         "Share of answers whose every factual claim is supported by the "
         "retrieved passages.",
     ))
 
     acc = s["intent_accuracy"]
     rows.append((
-        "O4", "Intent-router accuracy", ">= 0.85", f"{acc:.3f}",
+        "O4", "Intent-router accuracy", ">= 0.85",
+        ci_text(acc, s["n_total"]),
         PASS if acc >= 0.85 else FAIL,
         "Measured on the gold set, which is disjoint from the router's "
         "hand-authored training utterances.",
@@ -219,6 +250,7 @@ def main() -> None:
     plot_confusion(labels, matrix, png)
 
     results_dir_g = results_dir
+    results_dir_ref = results_dir
     rows = scorecard(s, read_interactive_latency(results_dir), results_dir)
     n_fail = sum(1 for r in rows if r[4] == FAIL)
 
@@ -247,7 +279,8 @@ def main() -> None:
     w("\n## Retrieval and generation detail\n")
     w("| Metric | Value |")
     w("|---|---|")
-    for key in ("hit_at_3", "citation_correctness",
+    for key in ("hit_at_3", "hit_at_3_document", "hit_at_retrieval_k",
+                "citation_correctness",
                 "citation_document_correctness", "groundedness",
                 "key_fact_present", "fabricated_citation_count",
                 "refusal_rate_out_of_scope", "false_refusal_rate_in_scope",
@@ -255,6 +288,26 @@ def main() -> None:
                 "latency_p90", "latency_max", "n_answered"):
         if key in s:
             w(f"| `{key}` | {s[key]} |")
+
+    models = s.get("models_used") or {}
+    if len(models) > 1:
+        w("\n## Generation models actually used (R3 fallback)\n")
+        w("The primary model exhausted its daily token allowance during this "
+          "run and the fallback chain took over automatically, mid-evaluation, "
+          "with no configuration change and no failed turn.\n")
+        w("| Model | Turns served |")
+        w("|---|---|")
+        for name, n in sorted(models.items(), key=lambda kv: -kv[1]):
+            w(f"| `{name}` | {n} |")
+        w("")
+
+    w("\n## Retrieval ablation (C1, C2)\n")
+    abl = results_dir_ref / "ablation.md"
+    if abl.exists():
+        body = abl.read_text().split("## Stage contributions", 1)
+        if len(body) > 1:
+            w(body[1].split("##")[0].strip())
+        w(f"\nFull sweep: [`{abl.name}`]({abl.name})\n")
 
     w("\n## Refusals by cause\n")
     w("| Cause | Count | Meaning |")
@@ -266,6 +319,27 @@ def main() -> None:
       f"the calibrated similarity threshold. |")
     w(f"| `model` | {rr['model']} | Generator returned `INSUFFICIENT_CONTEXT` "
       f"despite passing the gate. |")
+
+    # Per-intent breakdown: an aggregate hides that admin questions are
+    # answered near-perfectly while code-help carries most of the error.
+    w("\n## Per-intent breakdown\n")
+    w("| Intent | n | hit@3 | citation ok | grounded | refused |")
+    w("|---|---|---|---|---|---|")
+    for intent in labels:
+        group = [r for r in records if r["intent_true"] == intent]
+        if not group:
+            continue
+        answered_g = [r for r in group if not r["refused"]]
+
+        def frac(key, rows_):
+            vals = [r[key] for r in rows_ if key in r]
+            return f"{sum(vals) / len(vals):.3f}" if vals else "—"
+
+        w(f"| `{intent}` | {len(group)} | {frac('hit_at_k', group)} "
+          f"| {frac('citation_correct', answered_g)} "
+          f"| {frac('grounded', answered_g)} "
+          f"| {sum(r['refused'] for r in group)}/{len(group)} |")
+    w("")
 
     w("\n## Intent-router confusion matrix (S3)\n")
     w(f"![Confusion matrix]({png.name})\n")
