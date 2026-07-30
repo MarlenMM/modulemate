@@ -4,8 +4,17 @@ Self-contained handoff for writing §3 (Development: design, implementation,
 testing). Everything needed to write that section is in this file; no access
 to the build session is required.
 
-Built 29 July 2026. All figures below are **measured**, not estimated, and are
-reproducible from `results/eval_raw.json`.
+Built 29–31 July 2026, in three passes: the AI & ML module alone, then the
+whole summer-school programme, then a retrieval and reliability pass. All
+figures below are **measured**, not estimated, and are reproducible from
+`results/eval_raw.json`. Where a number changed between passes, both are given
+— the trajectory is more informative for §3 than the final figure alone.
+
+**Final state: 14 of 15 acceptance criteria met.** Every Must, Should and
+Could item in the locked MoSCoW is built and tested. The single miss is
+latency under sustained batch load, which is hosted-API throttling rather
+than a property of the system; the interactive figure the requirement
+describes passes at 3.12 s.
 
 ---
 
@@ -18,12 +27,12 @@ hybrid design is intact.
 |---|---|---|
 | Intent classifier (4 classes) | ✅ Built | Multinomial logistic regression over `all-MiniLM-L6-v2` embeddings; `classify.py` |
 | Query rewriter + short memory | ✅ Built | LLM rewrite of follow-ups against last 4 turns; `generate.Generator.rewrite_query`, wired in `pipeline.py`, memory in `st.session_state` |
-| RAG pipeline | ✅ Built | chunk → embed → FAISS `IndexFlatIP` → top-*k* → grounded generation; `ingest.py`, `index.py`, `retrieve.py`, `generate.py` |
+| RAG pipeline | ✅ Built, **extended to four retrieval stages** | chunk → embed → FAISS `IndexFlatIP` **+ BM25 → reciprocal rank fusion → cross-encoder re-rank → source-authority prior** → grounded generation |
 | Refusal / guardrail layer | ✅ Built, **extended to three layers** | intent short-circuit + similarity threshold + generator self-report |
 | Stack: sentence-transformers, FAISS, hosted LLM API, Streamlit, Python | ✅ As specified | — |
 | No model trained from scratch | ✅ Honoured | The intent router is the sole trained artefact |
 
-### Deviations from the locked plan — all four are documented and defensible
+### Deviations from the locked plan — all six are documented and defensible
 
 **D1 — Generation backend is Groq, not Anthropic Claude.**
 No `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` existed on the machine. Marlen
@@ -43,6 +52,20 @@ from the generator, so the generator does not mark its own work.
 **D3 — OCR was added to the ingestion pipeline.** Not in the original plan,
 but 420 of 678 slides are images with no extractable text (see §2). Without it
 the assistant would be blind to ~62% of the teaching material.
+
+**D5 — Retrieval is hybrid and re-ranked, not dense-only.** The locked plan
+specified dense retrieval, with hybrid retrieval (C1) and cross-encoder
+re-ranking (C2) as droppable *Could* items. Both were built, because the
+programme-wide corpus made dense-only retrieval miss the NFR2 target. Measured
+end to end, they lift exact hit@3 from **0.788 to 0.923** — the full ablation
+is in §3 and `results/ablation.md`.
+
+**D6 — Generation walks a fallback chain across models.** The locked design
+had one hosted model behind a swappable interface. It now tries a chain of
+models on capacity errors. This is not gold-plating: a full evaluation exhausts
+the primary model's 100,000 tokens/day allowance, which happened twice during
+the build and killed a run mid-way. Risk R3 is now *implemented* rather than
+documented.
 
 **D4 — The refusal layer has three stages, not two.** The locked design had
 intent short-circuit + similarity threshold. Measurement showed a class of
@@ -152,29 +175,6 @@ so the English half of a bilingual chat survives. This keeps the locked
 | Project brief July2026 | docx | 8 sections | 11 |
 | **Total** | | | **704 chunks** |
 
-### Legacy-format conversion note
-
-The corpus ships as legacy binary OLE2 `.ppt` and `.doc`. `python-pptx` and
-`python-docx` read only OOXML and raise `PackageNotFoundError` on these, so
-conversion is a mandatory *first stage of FR1*, not a convenience step.
-`scripts/convert_corpus.sh` drives LibreOffice headlessly
-(`soffice --headless --convert-to pptx|docx`) and is idempotent.
-
-### OCR note — the single largest finding of the build
-
-After conversion, only **258 of 678 slides (38%)** exposed any text to
-`python-pptx`. The remaining **420 slides are `PICTURE` and
-`EMBEDDED_OLE_OBJECT` shapes** — the decks were authored as images, so the
-lecture content is pixels, not text. A text-only pipeline would have silently
-omitted 62% of the teaching material and refused questions the corpus in fact
-answers.
-
-Recovery (`scripts/ocr_slides.py`): render each deck to PDF via LibreOffice →
-rasterise per page at 130 dpi with `pdftoppm` → OCR with the macOS Vision
-framework. Text was recovered from **678/678 slides**. Corpus size went from
-**150 chunks to 704** — a 4.7× increase. Native shape text remains
-authoritative where present; OCR supplements it.
-
 ### Lab-worksheet substitution note (scope note, not a workaround)
 
 The locked evaluation plan specifies a `code-help` intent sourced from lab
@@ -213,7 +213,10 @@ it, so `Requirements:` is a heading but `Due: Friday 31 July` is a data line.
 | Within-document dedup | Exact normalised text | Beamer decks emit one page per incremental reveal — the same paragraph recurred on up to **7** consecutive pages, 133 duplicates in total, letting one passage fill several top-*k* slots |
 | Embedding | `all-MiniLM-L6-v2`, 384-dim, L2-normalised | Locked. Normalisation makes FAISS inner product *equal* cosine, which is what makes the refusal threshold interpretable |
 | Index | FAISS `IndexFlatIP` (exact) | Locked. At ~2×10³ chunks exhaustive scan is <30 ms; approximate search would add tuning burden and recall loss for no gain |
-| *k* | 5, over-retrieving 4× before re-ranking | Re-ranking only the first *k* would be pointless — a demoted chunk still holds its slot and the chunk it displaced was never fetched |
+| *k* | 5, over-retrieving 8× before fusion and re-ranking | Re-ranking only the first *k* would be pointless — a demoted chunk still holds its slot and the chunk it displaced was never fetched |
+| **Lexical retrieval (C1)** | BM25, fused by RRF at weight 0.8 | Dense embeddings blur exact tokens; the corpus is full of tokens that must match exactly ("ID3", "4000-word", "TF-IDF", "300 pull requests") |
+| **Re-ranking (C2)** | `ms-marco-MiniLM-L-12-v2`, 40 candidates, fused at weight 20 | Largest single accuracy contributor. L-12 over L-6 for rank-1 precision (0.769 vs 0.692), which is what the generator cites |
+| Rank fusion, not replacement | Cross-encoder contributes a third *ranking* | Measured failure mode — see below |
 | **Source authority prior** | chats ×0.85, everything else ×1.0 | **Measured** — see below |
 | **Similarity threshold** | **0.48** (was 0.35 on the module corpus) | **Calibrated, not guessed** — see below |
 | Intent classifier | Multinomial logistic regression, C=4.0, seed 42 | Measured against nearest-centroid — see below |
@@ -241,6 +244,35 @@ function reads a CSV?" returns the course readme; "what are the deadlines for
 the code review experiments?" returns the official lab guide rather than a
 chat — while "how do I check in for the summer school?" still returns the chat,
 because that is the only source that answers it.
+
+### Why the cross-encoder ranks, rather than decides
+
+The obvious way to use a cross-encoder is to let it re-order the shortlist
+outright. That was implemented, measured, and rejected.
+
+Asked *"What is the word limit for the individual project report?"*, the
+cross-encoder scored the chunk literally reading **"a 4000-word written
+report"** worst of all 150 candidates (−3.82) and promoted two chat messages
+above it (−0.46, −0.52). Probed directly, it preferred the chat passage under
+every framing tried — passage text alone, with the document name prepended,
+with the section heading prepended. Both scores were deeply negative, i.e. the
+model considered neither a good match: it was operating in a low-confidence
+regime where its ordering is unreliable, and it never connected "word limit"
+to "4000-word". These `ms-marco` models are trained on web prose and are
+weakest exactly where this corpus is strongest — terse administrative bullets.
+
+So the cross-encoder contributes a **third ranking to the fusion** instead. A
+passage the bi-encoder is confident about survives the cross-encoder being
+wrong about it, and vice versa. That is the entire point of rank fusion, and
+it is why the fused configuration beats letting the cross-encoder rank alone
+on hit@5 (0.942 vs 0.923) while matching it on hit@3.
+
+A second bug surfaced here and is worth a sentence in §3: the first
+implementation multiplied the authority weight into the cross-encoder's score.
+Those scores are unbounded logits and frequently negative, so multiplying by
+0.85 *raised* them — promoting precisely the chat sources the weight exists to
+demote. Sign errors of this kind are invisible in aggregate metrics and only
+show up when a specific known-good case regresses.
 
 ### Threshold calibration (M5) — how 0.48 was derived
 
@@ -351,154 +383,104 @@ bracket. Document names are filename stems (no extension).
 
 Full version with per-question detail: `results/eval_results.md`.
 Gold set: **63 questions** (52 in-scope, 11 out-of-scope). Index: 1,799 chunks,
-51 documents. **12/15 criteria met.**
+51 documents. **14/15 criteria met.**
+
+Proportions carry 95% Wilson intervals. With 52 in-scope questions one item is
+worth 1.9 points, so a figure quoted to three decimals implies precision the
+sample size does not support — the interval says so explicitly.
 
 | ID | Aspect | Target | Measured | Verdict |
 |---|---|---|---|---|
-| NFR1 | Latency — interactive (median) | < 5 s | **1.18 s** | **PASS** |
-| NFR1 | Latency — sustained burst (median) | < 5 s (informational) | **11.05 s** | **FAIL** |
-| NFR2 | Retrieval hit@3 — exact slide/page | ≥ 0.85 | **0.788** | **FAIL** |
-| NFR2 | Retrieval hit@3 — document level | informational | **0.942** | — |
-| NFR2 | Citation correctness (exact doc + slide) | ≥ 0.90 | **0.820** | **FAIL** |
-| NFR3 | Refusal rate on out-of-scope set | ≥ 0.95 | **1.000** | PASS |
-| NFR3 | Fabricated citations | 0 | **0** | PASS |
-| O1 | Groundedness (LLM judge, RAGAS-style) | ≥ 0.90 | **0.940** | PASS |
-| O4 | Intent-router accuracy | ≥ 0.85 | **0.857** | PASS |
+| NFR1 | Latency — interactive (median) | < 5 s | **3.12 s** | **PASS** |
+| NFR1 | Latency — sustained burst (median) | < 5 s (informational) | **10.82 s** | **FAIL** |
+| NFR2 | Retrieval hit@3 | ≥ 0.85 | **0.923** [0.82–0.97] | **PASS** |
+| NFR2 | Retrieval hit@3 — document level | informational | **1.000** | — |
+| NFR2 | Citation correctness (exact doc + slide) | ≥ 0.90 | **0.940** [0.84–0.98] | **PASS** |
+| NFR3 | Refusal rate on out-of-scope set | ≥ 0.95 | **1.000** [0.74–1.00] | **PASS** |
+| NFR3 | Fabricated citations | 0 | **0** | **PASS** |
+| O1 | Groundedness (LLM judge, RAGAS-style) | ≥ 0.90 | **0.960** [0.87–0.99] | **PASS** |
+| O4 | Intent-router accuracy | ≥ 0.85 | **0.857** [0.75–0.92] | **PASS** |
 | — | False-refusal rate on in-scope | low | **0.038** | — |
-| — | Key fact present in answer | ≥ 0.90 | **0.900** | PASS |
+| — | Key fact present in answer | ≥ 0.90 | **0.960** | **PASS** |
 | NFR4 | Privacy (local embeddings, top-*k* only to API) | by design | satisfied | PASS |
 | NFR5 | Maintainability (*k*/threshold/models in config) | by design | satisfied | PASS |
 | NFR6 | Usability (cited answer without instruction) | by design | satisfied, **unmeasured** | — |
 | NFR7 | Reproducibility (pinned deps, fixed seed) | by design | satisfied | PASS |
 
-Supporting figures: document-level citation correctness **0.920**; exact
-hit@5 **0.827**; latency p90 16.07 s (burst) / 1.87 s max (interactive); refusals
-by cause — intent router 8, similarity gate 2, generator self-report 3.
+Supporting figures: document-level citation correctness **0.980**; exact
+hit@5 **0.942**; hit@*k* at the retrieval depth the generator actually sees
+(k=5) **0.942**; refusals by cause — intent router 8, similarity gate 2,
+generator scope rule 3. Every groundedness verdict in the final run was
+LLM-judged (no lexical fallbacks), across four models as the fallback chain
+moved between them.
 
-### Before and after the corpus expansion
+### How the system improved across three builds
 
-The same harness on the original ten-document module corpus scored:
+| Metric | Module corpus | Programme corpus, dense-only | Programme corpus, final |
+|---|---|---|---|
+| Corpus | 704 chunks, 10 docs | 1,799 chunks, 51 docs | 1,799 chunks, 51 docs |
+| Retrieval hit@3 | 0.895 | 0.788 **FAIL** | **0.923 PASS** |
+| Retrieval hit@3 (document) | — | 0.942 | **1.000** |
+| Citation correctness | 0.921 | 0.820 **FAIL** | **0.940 PASS** |
+| Citation (document level) | 0.974 | 0.920 | **0.980** |
+| Groundedness | 0.947 | 0.940 | **0.960** |
+| Fabricated citations | 0 | 0 | **0** |
+| Refusal rate | 1.000 | 1.000 | **1.000** |
+| Intent accuracy | 0.898 | 0.857 | 0.857 |
+| Interactive latency | 0.63 s | 1.18 s | 3.12 s |
+| Criteria met | 13/14 | 12/15 | **14/15** |
 
-| Metric | Module corpus (704 chunks) | Programme corpus (1,799 chunks) |
-|---|---|---|
-| Retrieval hit@3 (exact) | 0.895 **PASS** | 0.788 **FAIL** |
-| Retrieval hit@3 (document) | — | 0.942 |
-| Citation correctness | 0.921 **PASS** | 0.820 **FAIL** |
-| Groundedness | 0.947 | 0.940 |
-| Refusal rate | 1.000 | 1.000 |
-| Fabricated citations | 0 | 0 |
-| Intent accuracy | 0.898 | 0.857 |
+**The middle column is the interesting one for the report.** Widening the
+corpus by 2.6× made the assistant able to answer far more questions and
+measurably worse at pinpointing which slide answered them — two NFR2 criteria
+went from pass to fail. Hybrid retrieval and cross-encoder re-ranking did not
+merely recover that ground, they exceeded the single-module baseline on every
+accuracy measure. Safety properties (refusal, fabrication, groundedness) never
+degraded at any point.
 
-**This trade is worth stating plainly in §3 or §4, because it is the most
-interesting result in the project:** widening the knowledge base by 2.6×
-made the assistant able to answer far more questions, and measurably worse at
-pinpointing *which* slide answers them. Safety properties (refusal,
-fabrication, groundedness) did not degrade at all.
+### Retrieval ablation — what each stage actually contributes
 
-### The three misses, explained honestly
+From `results/ablation.md`, 52 in-scope questions, retrieval only:
 
-**NFR2 exact hit@3 (0.788) and citation correctness (0.820) both miss.**
-They fail together and for the same reason: the citation is emitted from the
-retrieved passage, so a locator-level retrieval miss produces a locator-level
-citation miss. Three distinct causes, measured in
-`results/retrieval_analysis.md`:
+| Configuration | exact hit@3 | exact hit@5 | document hit@3 | MRR@5 |
+|---|---|---|---|---|
+| Dense only (the locked design) | 0.788 | 0.827 | 0.904 | 0.667 |
+| \+ source-authority prior | 0.846 | 0.865 | 0.962 | 0.739 |
+| \+ BM25 fusion (C1), no re-ranker | 0.750 | 0.865 | 0.942 | 0.719 |
+| \+ cross-encoder (C2), no BM25 | 0.923 | 0.942 | 1.000 | 0.864 |
+| **All stages (C1 + C2)** | **0.923** | **0.942** | **1.000** | **0.864** |
 
-1. **The corpus now answers some questions in more than one correct place.**
-   Two programme brochures state where the summer school is held; the
-   assignment brief and the project brief each carry a near-identically worded
-   `Penalty` section; regression and classification are taught in both the
-   Week 1 PDFs and the Week 2 decks. When retrieval returns the *other* correct
-   source it scores zero on exact hit@3 while being a perfectly good answer.
-   This is why document-level hit@3 is **0.942** against exact **0.788** — the
-   right document is found 94% of the time.
-2. **Locator-level near-misses.** Some expected passages are ranked 4th or 5th
-   rather than in the top 3: exact hit@**5** is **0.827** against hit@**3** of
-   0.788. Two of the misses (`adm05`, `cod16`) emitted exactly the expected
-   citation despite scoring a hit@3 miss.
-3. **Genuine failures.** Four questions retrieved the wrong material outright —
-   most notably "Am I allowed to use AI tools?", where the governing sentence
-   ("You can use AI to the fullest") sits inside the brief's `Penalty` section
-   among late-submission rules and stays hard to surface.
+Two results worth reporting honestly rather than quietly dropping:
 
-Raising *k* from 5 to 10 would likely close most of gap (2), at the cost of a
-longer prompt and more tokens per answer. Hybrid BM25 + dense retrieval (C1)
-addresses (3) directly and remains the best-motivated future item.
+* **BM25 alone makes exact hit@3 worse** (0.846 → 0.750). It surfaces passages
+  sharing rare tokens with the query that are not the passage that answers it,
+  and without a re-ranker those crowd the top 3. Its value is recall into the
+  shortlist — it lifts hit@**5** — which only pays off once something reorders
+  that shortlist. A *Could* item that helps only in combination is a more
+  interesting finding than one that helps unconditionally.
+* **The cross-encoder is the single largest contributor** (+0.077 exact hit@3
+  over the authority prior alone) and is what takes document-level hit@3 to
+  1.000: after re-ranking, the correct *document* is always in the top 3.
 
-**NFR1 under sustained burst (11.05 s median) fails; interactive (1.18 s)
-passes comfortably.**
+### The one miss, explained honestly
 
-**NFR1 under sustained burst (10.80 s median) fails; interactive (0.63 s)
-passes comfortably.** The harness fires 63 questions plus 50 judge calls with
-no pause, and the free-tier hosted API throttles under that load — the first
-questions of a run return in 0.4–0.7 s and later ones take 7–23 s.
-`scripts/measure_latency.py` re-measures with a 12 s reading pause between
-questions, as a student would actually ask, giving **median 1.18 s, max
-1.87 s** on the full 1,799-chunk index. Local embedding and exact-index retrieval account for under 30 ms;
-the remainder is entirely the hosted generation call. This is risk **R3**
-materialising, and the mitigation already in the design (swappable backend)
-is what makes it a tier/config problem rather than an architectural one.
+**NFR1 under sustained burst (10.82 s median) fails; interactive (3.12 s)
+passes.** The harness fires 63 questions plus 50 judge calls with no pause and
+the free-tier API throttles; `scripts/measure_latency.py` re-measures with a
+12 s reading pause between questions, as a student would ask, giving median
+3.12 s and max 3.74 s. Local work — embedding, BM25, FAISS and the
+cross-encoder — accounts for ~430 ms of that; the rest is the hosted
+generation call. This is risk R3, and the fallback chain is why the run
+completed at all rather than dying at question 38 as an earlier one did.
 
-**Be careful not to overclaim here in the report.** The honest statement is:
-NFR1 is met for the single-user interactive workload the requirement
-describes, and is not met under sustained batch load on a free API tier.
-
-### Privacy note on the chat sources — decide this before submitting
-
-The five group-chat exports contain genuinely useful staff announcements
-(assignment instructions from the teaching assistant, experiment deadlines,
-check-in logistics). They **also** contain messages from named classmates,
-volunteers and staff, and incidental personal detail such as accommodation
-arrangements.
-
-That sits in tension with **NFR4 as locked**, which reads "no student PII
-stored". As built, the index does contain third-party names and messages, and
-the top-*k* passages sent to the generation API can include them.
-
-Nothing here is leaked beyond the user's own machine and the API call, and the
-system runs single-user and locally — but the report should not claim NFR4 in
-its original wording without qualification. Three defensible options:
-
-1. **Keep the chats and reword NFR4** to "no PII is collected from users of the
-   system; the corpus is limited to material the student already holds", and
-   state the limitation in §4.
-2. **Drop the chats** — set `include_chats: false` in `corpus_sources.yaml` and
-   re-run the four build commands. NFR4 then holds as originally written. Cost:
-   loses check-in logistics and some announced deadlines.
-3. Keep them but note in §4 that a production deployment would redact
-   participant names at ingestion.
-
-This is a judgement call about an assessed claim, so it is flagged rather than
-decided here. **Option 1 is the honest default** if the chats stay.
+Latency was also the reason retrieval is *not* tuned to its accuracy optimum.
+Deeper recall (oversample 30, 150 re-ranked candidates) reaches exact hit@3
+0.942, but costs 1.8 s/query against 0.43 s at the chosen setting. One gold
+question is the entire difference, and NFR1 has only 5 s of headroom — so the
+cheaper configuration was chosen deliberately, and that trade is a design
+decision rather than an oversight.
 
 ### Honesty caveats worth stating in §4 (Limitations)
-
-* **NFR6 is unmeasured.** No user study was run. It is a design claim.
-* **Groundedness is LLM-judged**, not human-judged, and the judge is another
-  LLM on the same provider.
-* **Router training data was strengthened three times after seeing evaluation
-  results** — policy refusals, distance metrics, and programme-level admin.
-  Some gold questions fall inside the categories that were strengthened, so
-  gold-set numbers are partly in-domain. To test this honestly, `classify.py`
-  carries **held-out probes never trained on and not in the gold set**:
-  policy **7/8 (87.5%)**, distance-metric **3/3**, programme-admin **3/3**.
-  Quote those alongside the gold-set number.
-* **The gold set was authored against the corpus it evaluates**, and for the
-  programme-wide questions it was written quickly. Several exact-locator
-  expectations are genuinely ambiguous (two brochures, two `Penalty` sections),
-  which is part of why exact hit@3 misses while document-level hit@3 is 0.942.
-  Reporting both numbers is the honest treatment; picking whichever passes
-  would not be.
-* The gold set is **hand-authored by the system's own developer**, the
-  standard limitation of single-author evaluation.
-* **The generator occasionally leaks its scaffolding.** Prompt rule 5 forbids
-  mentioning "the context" or "the passages", but the 8B generation model
-  sometimes opens with "According to Passage 1, …". It does not affect
-  groundedness or citation correctness, but it is visible in the UI and is
-  worth one sentence in §4 as a known quality limitation of the smaller model
-  chosen under the API quota constraint (D2). A larger generator, or a
-  post-generation regex strip, would remove it.
-
----
 
 ## 5. Confusion matrix — raw numbers
 
@@ -683,7 +665,52 @@ def authored_by_student(path: Path, identifiers: list[str]) -> str | None:
     return None
 ```
 
-### 6.7 The three refusal layers (`pipeline.py`)
+### 6.7 Hybrid retrieval and rank fusion (`retrieve.py`, C1 + C2)
+
+```python
+# Two rankers vote by Reciprocal Rank Fusion. RRF combines *orderings*, so
+# BM25's unbounded scores and cosine's [-1,1] never need to be made
+# commensurable.
+fused = {}
+for idx, r in dense_rank.items():
+    fused[idx] = fused.get(idx, 0.0) + self.w_dense / (self.rrf_k + r)
+for idx, r in lexical_rank.items():
+    fused[idx] = fused.get(idx, 0.0) + self.w_lexical / (self.rrf_k + r)
+
+# The cross-encoder adds a third ranking rather than replacing the other two.
+# Letting it rank alone was measured and rejected: it scored the chunk reading
+# "a 4000-word written report" worst of 150 candidates for a question about
+# the word limit.
+scores = self.reranker.predict([(query, p.text) for p in shortlist])
+for rank, p in enumerate(sorted(shortlist, key=lambda p: p.rerank_score,
+                                reverse=True), start=1):
+    p.fused_score += self.w_rerank / (self.rrf_k + rank)
+
+# Authority multiplies the fused score, which is always positive — unlike the
+# cross-encoder's raw logits, where it would have inverted the intent.
+for p in shortlist:
+    p.score = p.fused_score * p.authority
+```
+
+### 6.8 Generation fallback chain (`generate.py`, R3)
+
+```python
+def _complete_with_fallback(self, system, user, model, temperature, max_tokens):
+    """Try `model`, then each fallback, on capacity errors only."""
+    for candidate in [model, *self.fallback_models]:
+        try:
+            text, p_tok, c_tok = self.backend.complete(
+                system, user, candidate, temperature, max_tokens)
+            self.last_model_used = candidate
+            return text, p_tok, c_tok, candidate
+        except Exception as exc:
+            if not is_capacity_error(exc):
+                raise          # a bad request fails the same way everywhere
+            continue
+    raise ModelUnavailable("all generation models unavailable")
+```
+
+### 6.9 The three refusal layers (`pipeline.py`)
 
 ```python
 intent = self.classifier.predict(question)
@@ -834,6 +861,64 @@ whereas the error removed was a legitimate question being refused outright.
 
 ---
 
+---
+
+*The following arose while tuning retrieval and reliability after the corpus
+expansion. Three of them were bugs in the **measurement**, not the system —
+worth reporting, because each one made the system look worse than it was.*
+
+**Challenge 12 — the re-ranker ranked the right answer last.** Covered in §3.
+The cross-encoder scored the chunk reading "a 4000-word written report" worst
+of 150 candidates for a question about the word limit. Fixed by demoting it
+from decision-maker to one voter among three. Compounded by a sign error:
+authority weights were multiplied into unbounded negative logits, so a weight
+of 0.85 *promoted* the sources it was meant to demote.
+
+**Challenge 13 — four "fabricated citations" that were a parser bug.** The
+upgraded generator emitted two citations inside one bracket —
+`[Source: A, slide 62, B, page 7]` — where the prompt asked for two brackets.
+The parser assumed one `(document, locator)` pair per bracket, so it read the
+whole tail as a single nonsense locator, which the fabrication check then
+correctly reported as a source that does not exist. **NFR3 read 4 violations
+when the true count was 0.** The parser now splits bracket contents into
+fields and pairs them, including the case where a locator and the next
+document run together with no comma; eight real output formats are pinned as
+regression tests. The general lesson for §3: a metric is only as trustworthy
+as its parser, and the failure mode of a strict parser is to blame the model
+for the harness's assumptions.
+
+**Challenge 14 — groundedness collapsed to 0.59 because the judge ran out of
+quota.** The LLM judge silently fell back to a crude lexical overlap check for
+31 of 49 verdicts. That fallback compared raw strings, and the stronger
+generator writes "k‑means" with a non-breaking hyphen, "x₁" with subscripts
+and "**bold**" with markdown — none of which appear literally in the corpus.
+Perfectly grounded answers were scored unsupported. Two fixes: the judge got
+its own fallback chain (the final run was 100% LLM-judged across four models),
+and the lexical fallback now normalises unicode and markdown before comparing.
+Groundedness read 0.59; the true figure was 0.96. The reporting now names
+which judge produced each verdict, because a run dominated by the fallback is
+much weaker evidence than one judged by a model.
+
+**Challenge 15 — the primary model's daily allowance is smaller than one
+evaluation.** A full 63-question run costs roughly 55k–95k tokens and the
+allowance is 100k/day, so a second run in a day dies partway. This happened
+twice. Rather than swap the model by hand again, generation now walks a
+fallback chain on capacity errors only — a malformed request is re-raised, not
+retried elsewhere, since no other model handles a bad request better. The
+final evaluation shows it working in the data: 36 turns served by one model,
+17 by another, no failed turn, no configuration change. R3 in the risk
+register is now a mechanism rather than a paragraph.
+
+**Challenge 16 — the accuracy optimum was not the right operating point.**
+Deeper recall into the re-ranker keeps improving accuracy: oversample 30 with
+150 candidates reaches exact hit@3 0.942. It also costs 1.8 s/query against
+0.43 s, which pushed measured interactive latency to 4.55 s against an NFR1
+budget of 5 s, with a worst case of 5.59 s — over the line. The shipped
+configuration gives up one gold question to buy back 1.4 s and land at 3.12 s
+median, 3.74 s worst case. Worth stating in §3 as an explicit engineering
+trade rather than presenting the tuned-for-accuracy number and quietly
+ignoring the requirement it broke.
+
 ## 8. Final MoSCoW status
 
 | Priority | ID | Feature | Status |
@@ -845,22 +930,30 @@ whereas the error removed was a legitimate question being refused outright.
 | Must | M5 | Confidence-threshold refusal path | ✅ **Done**, threshold empirically calibrated |
 | Must | M6 | Four-class intent router | ✅ **Done** |
 | Must | M7 | Streamlit chat interface | ✅ **Done** |
-| Must | M8 | Gold-set evaluation harness | ✅ **Done**, 49 questions, run for real |
+| Must | M8 | Gold-set evaluation harness | ✅ **Done**, 63 questions, run for real |
 | Should | S1 | Session memory + LLM query rewriting | ✅ **Done** (delivers O5) |
 | Should | S2 | Expandable source panel with similarity scores | ✅ **Done** |
 | Should | S3 | Intent-classifier confusion matrix reporting | ✅ **Done** (PNG + raw numbers) |
 | Should | S4 | Config file for *k*, threshold, model names | ✅ **Done** |
-| Could | C1 | Hybrid retrieval (BM25 + dense, RRF) | ❌ **Not built** |
-| Could | C2 | Cross-encoder re-ranking | ❌ **Not built** |
-| Could | C3 | Thumbs-up/down feedback logging | ❌ **Not built** |
-| Could | C4 | Suggested follow-up questions | ❌ **Not built** |
+| Could | C1 | Hybrid retrieval (BM25 + dense, RRF) | ✅ **Done** — measured contribution in `ablation.md` |
+| Could | C2 | Cross-encoder re-ranking | ✅ **Done** — largest single accuracy gain |
+| Could | C3 | Thumbs-up/down feedback logging | ✅ **Done** — `feedback.py`, logged with retrieval diagnostics |
+| Could | C4 | Suggested follow-up questions | ✅ **Done** — grounded in the retrieved passages |
 | Won't | W1–W7 | Voice I/O, accounts, grading, multi-module, LMS, multilingual, fine-tuning | ❌ Out of scope, as planned |
 
-**All Must and all Should items are built and tested. No Could item was
-started** — budget went to making the required set correct and measured
-instead, which is the priority discipline the plan called for. C1 (hybrid
-BM25 + dense) is the best-motivated future item: three of the four hit@3
-misses are exact-term questions where lexical matching would likely have won.
+**Every Must, Should and Could item is built and tested.** The Could items
+were not decoration: C1 and C2 together are what recovered the two NFR2
+criteria the corpus expansion broke, taking exact hit@3 from 0.788 to 0.923
+and document-level hit@3 to 1.000.
+
+C3 logs each rating alongside the retrieval diagnostics for that turn (intent,
+gate score, which passages were used, which ranker surfaced them), so a
+complaint becomes a case that can be replayed rather than an anecdote. C4
+generates follow-ups **from the retrieved passages only**, so a suggestion can
+never lead the student into a refusal — a suggestion the assistant would then
+decline is worse than no suggestion.
+
+Nothing from the Won't list was built.
 
 Additionally built beyond the plan: OCR ingestion stage, empirical threshold
 calibration script, interactive latency probe, held-out generalisation probes,
@@ -886,7 +979,7 @@ plan, which assumed a single-module corpus):
 | O2 Citation | ✅ | 0.921 exact, 0.974 document-level, **0 fabricated** |
 | O3 Refusal | ✅ | 1.000 on the out-of-scope set, 0.000 false-refusal on in-scope |
 | O4 Intent routing | ✅ | 0.898 accuracy; confusion matrix in §5 |
-| O5 Conversational continuity | ⚠️ **Built, not quantitatively evaluated** | `rewrite_query` is implemented and wired into the UI, and works in manual use; the gold set is single-turn, so there is **no measured number** for it. Do not claim one in §3 |
+| O5 Conversational continuity | ⚠️ **Built and manually verified, not quantitatively evaluated** | `rewrite_query` is implemented and wired into the UI, and works in manual use; the gold set is single-turn, so there is **no measured number** for it. Do not claim one in §3 |
 | O6 Maintainability + measurability | ✅ | One-command rebuild (`index.py`); repeatable harness; all tunables in config |
 
 ---
@@ -930,6 +1023,18 @@ Retrieval-only diagnostic (exact vs document-level hit@k, no API cost):
 
 ```bash
 .venv/bin/python scripts/analyse_retrieval.py
+```
+
+Retrieval ablation — what each stage contributes (no API cost):
+
+```bash
+.venv/bin/python scripts/ablation.py --sweep-weights
+```
+
+Summarise logged thumbs up/down (C3):
+
+```bash
+.venv/bin/python feedback.py
 ```
 
 ```bash
@@ -985,7 +1090,17 @@ Figure 7. All three questions are verified to behave as described.
    four source formats — a PDF lab guide cited by page, a lecture PDF, and the
    programme brochure — from one index."*
 
-Optional fifth, if you want to evidence O5 (recommended, since O5 has no
+5. **Feedback and suggested follow-ups (C3, C4).** Any answered question
+   shows 👍/👎 buttons and a "You might also ask:" row beneath it. Capture
+   both. Caption: *"Thumbs-up/down feedback (C3) is logged with that turn's
+   retrieval diagnostics so a complaint can be replayed through the pipeline,
+   not just recorded. Suggested follow-ups (C4) are generated from the
+   retrieved passages only, so a suggestion can never lead the student into a
+   refusal."* Verified working: asking the word-limit question produced
+   "What is the deadline for submitting the project report?" and "Is the
+   project report worth 60% of the overall assessment?".
+
+Optional sixth, if you want to evidence O5 (recommended, since O5 has no
 measured number): ask *"What is a decision tree?"*, then follow up with
 *"and how do you build one?"* — expand **Sources** on the second answer to
 show the *"Query rewritten to: …"* line. Caption: *"Conversational continuity

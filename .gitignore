@@ -10,3 +10,7 @@ corpus/pdf/
 corpus/png/
 index_store/
 .DS_Store
+
+# Runtime feedback log (C3). Contains the questions students typed,
+# so it is treated as data, not source, and is never committed.
+results/feedback.jsonl
