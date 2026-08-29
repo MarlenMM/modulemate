@@ -46,7 +46,7 @@ include_globs:
   - "Lectures Week 2/HIT summer course_AI and ML_assignment_July2026.doc"
 
   # --- Course group chats: staff announcements, deadlines, logistics ---
-  # See the privacy note in IMPLEMENTATION_SUMMARY_FOR_REPORT.md before
+  # See the privacy note in IMPLEMENTATION_NOTES.md before
   # enabling. Set include_chats: false to drop these without editing globs.
   - "chats/*.rtf"
 

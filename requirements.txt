@@ -13,11 +13,12 @@ python-docx==1.1.2
 pypdf==5.1.0
 
 # --- OCR of image-only slides (macOS Vision framework) ---
-# Only needed to regenerate corpus/ocr/. On a non-macOS host, substitute
-# another OCR engine in scripts/ocr_slides.py; the rest of the pipeline is
-# platform-independent and reads the cached JSON.
-pyobjc-framework-Vision==12.2.1
-pyobjc-framework-Quartz==12.2.1
+# Only needed to regenerate corpus/ocr/, and installed only on macOS (the
+# environment markers below). On another host, substitute another OCR engine in
+# scripts/ocr_slides.py; the rest of the pipeline is platform-independent and
+# reads the cached JSON.
+pyobjc-framework-Vision==12.2.1; sys_platform == "darwin"
+pyobjc-framework-Quartz==12.2.1; sys_platform == "darwin"
 
 # --- Embedding + vector index (FR2) ---
 sentence-transformers==3.3.1

@@ -1,0 +1,17 @@
+# Deliberately close to ruff's defaults. The point of linting here is to catch
+# dead imports and genuinely ambiguous names before they reach a reader, not to
+# impose a house style on a codebase this size.
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    # Long lines inside prompt strings and docstrings are intentional: breaking
+    # a prompt across lines changes what the model receives.
+    "E501",
+]
+
+[lint.per-file-ignores]
+# tests/ deliberately imports after a sys.path shim.
+"tests/*" = ["E402"]

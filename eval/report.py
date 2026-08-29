@@ -14,6 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
@@ -249,7 +250,6 @@ def main() -> None:
     png = results_dir / "confusion_matrix.png"
     plot_confusion(labels, matrix, png)
 
-    results_dir_g = results_dir
     results_dir_ref = results_dir
     rows = scorecard(s, read_interactive_latency(results_dir), results_dir)
     n_fail = sum(1 for r in rows if r[4] == FAIL)
@@ -344,7 +344,7 @@ def main() -> None:
     w("\n## Intent-router confusion matrix (S3)\n")
     w(f"![Confusion matrix]({png.name})\n")
     w("Rows are the true intent, columns the predicted intent.\n")
-    header = " | ".join(f"pred `{l}`" for l in labels)
+    header = " | ".join(f"pred `{label}`" for label in labels)
     w(f"| true \\ pred | {header} | total |")
     w("|---" * (len(labels) + 2) + "|")
     for i, label in enumerate(labels):

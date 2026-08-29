@@ -8,6 +8,7 @@ corpus/raw/
 corpus/converted/
 corpus/pdf/
 corpus/png/
+corpus/ocr/
 index_store/
 .DS_Store
 

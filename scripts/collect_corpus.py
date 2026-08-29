@@ -55,6 +55,7 @@ def opening_text(path: Path, max_chars: int = 4000) -> str:
     try:
         if suffix == ".pdf":
             import warnings
+
             from pypdf import PdfReader
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")

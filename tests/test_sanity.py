@@ -19,10 +19,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import config  # noqa: E402
 from generate import build_context_block, parse_citations  # noqa: E402
 from ingest import (  # noqa: E402
-    chunk_lines, chunk_text, is_english_enough, is_informative, latin_ratio,
+    chunk_lines,
+    chunk_text,
+    is_english_enough,
+    is_informative,
+    latin_ratio,
 )
 from retrieve import RetrievalResult, Retrieved  # noqa: E402
-
 
 # --------------------------------------------------------------------------
 # Chunking
