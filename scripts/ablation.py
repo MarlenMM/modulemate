@@ -24,8 +24,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import config  # noqa: E402
-from goldset import load_gold, split_scope  # noqa: E402
 import retrieve as retrieve_mod  # noqa: E402
+from goldset import load_gold, split_scope  # noqa: E402
 
 
 def norm(v: str | None) -> str:
@@ -53,8 +53,8 @@ def acceptable(item: dict) -> tuple[set, set]:
     ablation numbers are directly comparable with the headline metrics."""
     pairs = {(norm(item["expected_source_doc"]),
               norm(item["expected_slide_or_section"]))}
-    for d, l in item.get("also_acceptable", []):
-        pairs.add((norm(d), norm(l)))
+    for doc, loc in item.get("also_acceptable", []):
+        pairs.add((norm(doc), norm(loc)))
     return pairs, {d for d, _ in pairs}
 
 

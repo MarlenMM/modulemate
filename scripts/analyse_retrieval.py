@@ -47,8 +47,8 @@ def main() -> None:
     for item in items:
         wanted = {(norm(item["expected_source_doc"]),
                    norm(item["expected_slide_or_section"]))}
-        for d, l in item.get("also_acceptable", []):
-            wanted.add((norm(d), norm(l)))
+        for doc, loc in item.get("also_acceptable", []):
+            wanted.add((norm(doc), norm(loc)))
         want_docs = {d for d, _ in wanted}
         res = retriever.retrieve(item["question"], k=5)
 

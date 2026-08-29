@@ -30,7 +30,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import config  # noqa: E402
-from generate import parse_citations  # noqa: E402
 from goldset import OUT_OF_SCOPE, load_gold  # noqa: E402
 from pipeline import ModuleMate, TurnResult  # noqa: E402
 
@@ -213,7 +212,7 @@ def judge_groundedness(bot: ModuleMate, result: TurnResult,
 
 def confusion_matrix(labels: list[str], truth: list[str],
                      pred: list[str]) -> list[list[int]]:
-    idx = {l: i for i, l in enumerate(labels)}
+    idx = {label: i for i, label in enumerate(labels)}
     m = [[0] * len(labels) for _ in labels]
     for t, p in zip(truth, pred):
         if t in idx and p in idx:

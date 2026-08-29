@@ -1,11 +1,34 @@
 # ModuleMate
 
+[![CI](https://github.com/MarlenMM/modulemate/actions/workflows/ci.yml/badge.svg)](https://github.com/MarlenMM/modulemate/actions/workflows/ci.yml)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-750014.svg)](LICENSE)
+[![Fabricated citations: 0](https://img.shields.io/badge/fabricated%20citations-0-1a7f37.svg)](results/eval_results.md)
+
 A retrieval-grounded course assistant for the **HIT Global Summer School 2026**.
 
 ModuleMate answers student questions using **only** material issued by the
 programme. Every substantive answer cites the document and slide, page, section
 or cell it came from, and when the corpus does not support an answer the system
 says so and redirects to the tutor rather than guessing.
+
+### Measured, on a 63-question gold set
+
+| | | | |
+|---|---|---|---|
+| Retrieval hit@3 | **0.923** | Groundedness (LLM judge) | **0.960** |
+| Citation correctness | **0.940** | Intent-router accuracy | **0.857** |
+| Fabricated citations | **0** | Refusal rate, out-of-scope | **1.000** |
+
+**14 of 15 criteria met.** The one that is not — sustained-burst latency, 10.8 s
+median against a < 5 s target — is recorded as a **FAIL** in
+[the scorecard](results/eval_results.md), with its cause identified (hosted-API
+throttling; under 30 ms of it is retrieval) rather than the target being moved.
+The false-refusal rate on in-scope questions (**0.038**) is published next to
+the refusal rate, because a refusal rate on its own can be maximised by
+refusing everything.
+
+---
 
 **Corpus** — 51 staff-issued documents across five formats, 1,799 indexed passages:
 
@@ -16,6 +39,13 @@ says so and redirects to the tutor rather than guessing.
 | Intelligent Software Engineering | code-review lab guide, course-introduction lecture |
 | Programme level | Global Summer School brochure and academic theme list |
 | Announcements | 5 course group-chat exports |
+
+> **The corpus itself is not in this repository.** Every document in it is
+> teaching material issued by HIT staff, and redistributing it is not mine to
+> do. What is committed is the *manifest* naming those files and the pipeline
+> that ingests them: point `corpus_sources.yaml` at your own copy of the
+> material and `index.py` rebuilds everything. This is also why the measured
+> numbers above, rather than a hosted demo, are the reproducible artifact here.
 
 The corpus is declared in [`corpus_sources.yaml`](corpus_sources.yaml), not in
 code. It contains **course-issued material only**: the student's own reports,
@@ -157,5 +187,5 @@ in-scope versus out-of-scope similarity distributions by
 ## Results
 
 See `results/eval_results.md` for the full NFR scorecard, and
-`IMPLEMENTATION_SUMMARY_FOR_REPORT.md` for the build narrative, key decisions
+`IMPLEMENTATION_NOTES.md` for the build narrative, key decisions
 and known limitations.
