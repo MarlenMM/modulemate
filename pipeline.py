@@ -16,6 +16,7 @@ Order of operations for one turn:
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import config
@@ -43,6 +44,10 @@ class TurnResult:
     completion_tokens: int = 0
     followups: list[str] = field(default_factory=list)   # C4
     model_used: str = ""      # which model served this turn (R3 fallback)
+    # Set only when the generation backend itself failed and the caller asked
+    # to degrade rather than raise. A backend outage is not a refusal and is
+    # deliberately kept in its own field so it can never be counted as one.
+    error: str | None = None
 
     @property
     def was_rewritten(self) -> bool:
@@ -77,10 +82,29 @@ class ModuleMate:
         history: list[tuple[str, str]] | None = None,
         rewrite: bool = True,
         suggest: bool | None = None,
+        on_stage: Callable[[str], None] | None = None,
+        degrade_on_error: bool = False,
     ) -> TurnResult:
+        """Answer one question.
+
+        `on_stage` is called with the name of each stage as it is entered
+        ("routing", "searching", "writing"). The UI uses it to report what the
+        pipeline is actually doing during the wait; the evaluation harness
+        passes nothing and the calls become no-ops, so neither caller is
+        running a different code path from the other.
+
+        `degrade_on_error` decides what happens when the generation backend
+        fails outright — a decommissioned model, a network outage, an expired
+        key. The UI passes True and gets a TurnResult carrying `error` and the
+        passages retrieval already found, so a student still sees the material
+        even when no answer can be written. The harness leaves it False so a
+        broken backend fails the run loudly instead of quietly scoring zero.
+        """
         started = time.time()
         history = history or []
+        stage = on_stage or (lambda _name: None)
 
+        stage("routing")
         intent = self.classifier.predict(question)
 
         # --- Step 2: intent short-circuit, before any network call (FR7) ---
@@ -96,6 +120,7 @@ class ModuleMate:
             )
 
         # --- Step 3: conversational query rewriting (S1/FR4) ---
+        stage("searching")
         query = (
             self.generator.rewrite_query(question, history)
             if rewrite and history else question
@@ -120,7 +145,25 @@ class ModuleMate:
             )
 
         # --- Step 6: grounded generation (M4/FR6) ---
-        gen: Generation = self.generator.answer(query, result.passages)
+        stage("writing")
+        try:
+            gen: Generation = self.generator.answer(query, result.passages)
+        except Exception as exc:
+            if not degrade_on_error:
+                raise
+            return TurnResult(
+                question=question,
+                rewritten_query=query,
+                intent=intent,
+                answer="",
+                is_refusal=False,
+                refusal_reason=None,
+                passages=result.passages,
+                top_score=result.top_score,
+                threshold=result.threshold,
+                latency_seconds=time.time() - started,
+                error=f"{type(exc).__name__}: {exc}",
+            )
 
         # --- Step 7: suggested follow-ups (C4), never on a refusal ---
         want_suggestions = (

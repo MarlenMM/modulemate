@@ -133,6 +133,17 @@ skipped, de-duplicated and rejected.
 .venv/bin/python -m streamlit run app.py
 ```
 
+The interface is built around the evidence rather than around the chat. The
+answer is the only element allowed to be large; anything the system measured —
+intent, similarity scores, model, latency — is set in monospace beneath it so
+prose and evidence are never mistaken for each other. The rule down the left
+of each turn carries its state: grey for the question, teal for an answer that
+cleared the retrieval gate, amber for a refusal, brick for a generation backend
+that could not be reached. Under every answered *and* refused turn,
+`ui.gate_meter` draws the decision itself — the best passage's cosine on a
+scale with the calibrated threshold notched on it — because a refusal is only
+worth trusting if the reason for it can be seen.
+
 ## Run the evaluation
 
 ```bash
@@ -178,7 +189,9 @@ in-scope versus out-of-scope similarity distributions by
 | `classify.py` | M6 — four-class intent router (the sole trained artefact) |
 | `generate.py` | M4/S1 — swappable LLM backend, grounded prompt, query rewriting |
 | `pipeline.py` | end-to-end turn handling shared by the UI and the harness |
-| `app.py` | M7/S2 — Streamlit chat UI with the expandable source panel |
+| `app.py` | M7/S2 — chat UI: turn flow, source panel, ratings, follow-ups |
+| `ui.py` | the interface's design system — palette, type scale, mark, gate meter |
+| `.streamlit/config.toml` | theme and client settings the stylesheet cannot set |
 | `config.py` / `config.yaml` | S4 — configuration loader and values |
 | `eval/` | M8 — gold set, harness, report generator |
 | `scripts/` | corpus conversion, OCR, threshold calibration, latency probe |
