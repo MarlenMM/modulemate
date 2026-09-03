@@ -30,6 +30,35 @@ refusing everything.
 
 ---
 
+### The interface
+
+![ModuleMate's opening screen: a sidebar showing 1,799 indexed passages from 51
+source documents, and a main panel explaining how a question is routed, searched
+and answered, with three suggested questions to start
+from.](docs/empty-state.png)
+
+Built around the evidence rather than around the chat. The answer is the only
+element allowed to be large; everything the system measured — intent, similarity
+scores, model, latency — is set in monospace beneath it, so prose and evidence
+are never mistaken for each other. The rule down the left of a turn carries its
+state: grey for the question, teal for an answer that cleared the retrieval
+gate, amber for a refusal, brick for a generation backend that could not be
+reached.
+
+![A refused turn: the question "What are the opening hours of the campus
+library?" answered with a refusal, above a meter showing the best passage
+scoring 0.441 against a gate of 0.48 — short by 0.039.](docs/refusal.png)
+
+Every turn draws the decision that produced it. The meter puts the best
+passage's cosine on a scale with the calibrated threshold notched on it, so a
+refusal can be read rather than taken on trust: here a reasonable question was
+routed correctly, retrieved the five closest passages, and still fell 0.039
+short of the gate — refused in 0.3 s, because no model is called once retrieval
+has failed. The same meter appears under answers, showing the margin they
+cleared by.
+
+---
+
 **Corpus** — 51 staff-issued documents across five formats, 1,799 indexed passages:
 
 | Source | Contents |
@@ -196,6 +225,7 @@ in-scope versus out-of-scope similarity distributions by
 | `eval/` | M8 — gold set, harness, report generator |
 | `scripts/` | corpus conversion, OCR, threshold calibration, latency probe |
 | `results/` | measured outputs (scorecard, confusion matrix, calibration) |
+| `docs/` | interface screenshots used above |
 
 ## Results
 
