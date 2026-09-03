@@ -28,6 +28,17 @@ The false-refusal rate on in-scope questions (**0.038**) is published next to
 the refusal rate, because a refusal rate on its own can be maximised by
 refusing everything.
 
+> **These numbers predate a forced model change.** In September 2026 the
+> provider retired every Llama model this system was built on, and the
+> generator moved to `qwen/qwen3.8-27b` — the candidates and the measurements
+> behind that choice are in
+> [`results/model_migration.md`](results/model_migration.md). Retrieval hit@3
+> and the router accuracy are unaffected, because neither involves a
+> generator. Groundedness, citation correctness and every latency figure were
+> measured on the retired model and have **not** been re-measured; a
+> ten-question spot check found the replacement identical on citation accuracy
+> and 2.4× faster, which is a spot check and not the 63-question harness.
+
 ---
 
 ### The interface
