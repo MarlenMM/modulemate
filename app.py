@@ -1,466 +1,715 @@
-"""M7 — Streamlit chat interface (FR8, NFR6), with S2, C3 and C4.
+"""Streamlit entry point. User data lives only behind authenticated Store calls."""
 
-Design intent, tied to the "Ana" persona: she will not trust an answer she
-cannot check. So the interface is built around evidence rather than around
-chat. Three things follow from that.
-
-The answer is the only thing on the page allowed to be large. Everything the
-machine measured — scores, intent, model, latency — is set in monospace and
-demoted, so a reader can tell prose from evidence without reading either.
-
-The refusal gate is drawn, not asserted. `ui.gate_meter` puts the best
-passage's cosine on a scale with the calibrated threshold notched on it, and
-it is shown on answers as well as refusals: a student who can see the margin
-on a good answer has a reason to believe the refusal on a bad one.
-
-Refusals say which of the three guardrails fired — router, similarity gate, or
-the generator's own escape hatch — because "I don't know" is only useful when
-you can tell whether the material is missing or the question was out of bounds.
-
-The visual language (paper, one accent, one rhythm) lives in ui.py.
-"""
 from __future__ import annotations
 
-import html
+import json
+import random
+import re
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 import streamlit as st
 
-import config
-import feedback as feedback_mod
-import ui
-from pipeline import ModuleMate
+from modulemate.assistant import MODES, AIBackend, ProviderError, answer_question, generate_cards
+from modulemate.db import AuthenticationError, Database, Store, UserError
+from modulemate.ingest import SUPPORTED, parse_upload
+from modulemate.search import overview, search
+from modulemate.settings import ROOT, load_settings
+from modulemate.study import calendar_export, cloze_cards, plan_tasks
 
-st.set_page_config(
-    page_title="ModuleMate",
-    page_icon=ui.favicon(),
-    layout="wide",
-    # "auto", not "expanded": on a narrow screen Streamlit overlays the
-    # sidebar on the conversation, so forcing it open buries the answer on a
-    # phone. Let it collapse itself and the layout stays readable at any width.
-    initial_sidebar_state="auto",
+st.set_page_config(page_title="ModuleMate · Your study workspace", page_icon="📖", layout="wide")
+st.markdown(
+    """<style>
+.block-container {max-width:1180px;padding-top:2rem;padding-bottom:3rem}
+[data-testid="stSidebar"] {border-right:1px solid #dddcd5}
+h1,h2,h3 {letter-spacing:-.025em}
+[data-testid="stMetric"] {border:1px solid #deded6;border-radius:12px;padding:16px}
+[data-testid="stChatMessage"] {border:1px solid #e5e4dc;border-radius:12px}
+.stButton button {border-radius:8px}
+pre {white-space:pre-wrap!important;overflow-wrap:anywhere!important}
+</style>""",
+    unsafe_allow_html=True,
 )
-st.markdown(ui.CSS, unsafe_allow_html=True)
-
-# The stages pipeline.ask reports, in the order it reaches them.
-STAGES = ["routing", "searching", "writing"]
-
-# Openers taken from eval/gold_set.json, so every one of them is a question
-# the system has been measured on rather than a demo that happens to work.
-# One per answerable intent, plus one the guardrail is meant to stop: a
-# student learns more from seeing the refusal than from being told about it.
-OPENERS = [
-    ("What is the word limit for the individual project report?", "admin"),
-    ("What is the difference between supervised and unsupervised learning?", "a concept"),
-    ("What are the steps for constructing a decision tree?", "code help"),
-]
-REFUSAL_OPENER = "Can you grant me an extension on my submission deadline?"
 
 
-@st.cache_resource(show_spinner="Loading the index, retrievers and models…")
-def get_bot() -> ModuleMate:
-    """Built once per server process, not per interaction."""
-    return ModuleMate(config.load())
+def plain(value):
+    """Escape Markdown in user-derived widget labels/notices (including images)."""
+    return re.sub(r"([\\`*_{}\[\]()<>#+.!|~-])", r"\\\1", str(value))
 
 
-def ask(question: str) -> None:
-    """Queue a question. Clicking an opener is the same as typing one."""
-    st.session_state.pending_question = question
+def reset_session():
+    st.session_state.clear()
 
 
-# --------------------------------------------------------------------------
-# Zero state
-# --------------------------------------------------------------------------
-
-def render_opening(manifest: dict) -> None:
-    """What a student sees before they have asked anything.
-
-    It answers the questions a first-time reader actually has — what this
-    reads, what it does with a question, what it refuses — using the real
-    corpus counts and the real calibrated threshold rather than claims.
-    """
-    cfg = config.load()
-    threshold = cfg.get("retrieval.similarity_threshold")
-    k = cfg.get("retrieval.k")
-    n_chunks = manifest.get("n_chunks")
-    n_docs = manifest.get("n_documents")
-
-    st.markdown(
-        '<p class="mm-lede">Ask about the summer school and get the slide '
-        'the answer came from.</p>',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        f'<p class="mm-sub">ModuleMate reads {n_chunks:,} passages from '
-        f'{n_docs} documents the programme issued — lecture decks and PDFs, '
-        'lab notebooks, the assignment and project briefs, the teaching '
-        'schedule and the course group chats. It quotes those and nothing '
-        'else. It has no access to your submissions, your marks, or the '
-        'internet.</p>',
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<p class="mm-label">What happens to your question</p>',
-                unsafe_allow_html=True)
-    st.markdown(
-        "<ol class='mm-steps'>"
-        "<li>A <b>router</b> sorts it into admin, concept, code help or "
-        "out of scope. Out-of-scope questions stop here — nothing is "
-        "searched and no model is called.</li>"
-        f"<li>The rest go to <b>search</b>: dense vectors and exact-word "
-        f"BM25 over the same {n_chunks:,} passages, fused, then re-ranked by "
-        f"a cross-encoder. If the best of the top {k} scores below "
-        f"<b>{threshold}</b> similarity, ModuleMate refuses instead of "
-        "guessing.</li>"
-        "<li>What survives is written into an answer that <b>names the "
-        "document and the slide, page or cell</b>. The passages it used, "
-        "their scores and which retriever found them are one click away "
-        "under every answer.</li>"
-        "</ol>",
-        unsafe_allow_html=True,
-    )
-
-    st.markdown('<p class="mm-label">Start with one of these</p>',
-                unsafe_allow_html=True)
-    for question, kind in OPENERS:
-        st.button(
-            question,
-            key=f"open::{question}",
-            on_click=ask,
-            args=(question,),
-            help=f"A question about {kind}, from the evaluation set.",
-        )
-
-    st.markdown(
-        '<p class="mm-label">And one it will turn down</p>',
-        unsafe_allow_html=True,
-    )
-    st.button(
-        REFUSAL_OPENER,
-        key="open::refusal",
-        on_click=ask,
-        args=(REFUSAL_OPENER,),
-        help="The router stops this one before anything is searched.",
-    )
-    st.markdown(
-        '<p class="mm-note">ModuleMate will not grant extensions, mark work, '
-        'write your report, or answer anything the course materials do not '
-        'cover. It sends you to your tutor instead.</p>',
-        unsafe_allow_html=True,
-    )
-
-
-# --------------------------------------------------------------------------
-# Evidence under an answer
-# --------------------------------------------------------------------------
-
-def render_gate(result) -> None:
-    """The handmade part: the refusal decision, drawn to scale.
-
-    Skipped for router refusals, where no retrieval happened and there is
-    therefore no score to plot — drawing an empty meter there would imply a
-    measurement that was never taken.
-    """
-    if result.refusal_reason == "intent" or not result.threshold:
-        return
-    st.markdown(
-        ui.gate_meter(result.top_score, result.threshold,
-                      cleared=result.top_score >= result.threshold),
-        unsafe_allow_html=True,
-    )
-
-
-def render_meta(result) -> None:
-    """One monospace line of what this turn actually cost and used."""
-    bits = [f"intent <b>{html.escape(result.intent.label)}</b> "
-            f"{result.intent.confidence:.0%}"]
-    if result.refusal_reason == "intent":
-        bits += ["no search", "no model call"]
-    else:
-        bits.append(f"{len(result.passages)} passages")
-        if result.error:
-            bits.append("generation failed")
-        elif result.model_used:
-            bits.append(f"<b>{html.escape(result.model_used)}</b>")
-    bits.append(f"{result.latency_seconds:.1f}s")
-    st.markdown(
-        '<p class="mm-meta">' + " &middot; ".join(bits) + "</p>",
-        unsafe_allow_html=True,
-    )
-
-
-def render_sources(result, key: str) -> None:
-    """S2/FR8 — the passages the answer was built from, with their scores.
-
-    Deliberately flat: the passages sit on the page separated by space and a
-    hairline, rather than each in its own bordered box inside the panel.
-    """
-    if not result.passages:
-        return
-    n = len(result.passages)
-    if result.error:
-        label = f"Read the {n} passages your question matched"
-    elif result.is_refusal:
-        label = f"Read the {n} closest passages it found anyway"
-    else:
-        label = f"Read the {n} passages this answer was built from"
-    with st.expander(label):
-        if result.was_rewritten:
-            st.markdown(
-                '<p class="mm-meta">Your follow-up was searched as '
-                f'<b>{html.escape(result.rewritten_query)}</b></p>',
-                unsafe_allow_html=True,
-            )
-        blocks = []
-        for p in result.passages:
-            scores = [f"cosine {p.raw_score:.3f}"]
-            if p.authority != 1.0:
-                scores.append(f"authority x{p.authority}")
-            scores.append(html.escape(p.found_by))
-            text = html.escape(p.text[:700]) + ("…" if len(p.text) > 700 else "")
-            blocks.append(
-                '<div class="mm-passage">'
-                '<div class="mm-passage-head">'
-                f'<span class="mm-rank">{p.rank}</span>'
-                f'<span class="mm-passage-doc">{html.escape(p.source_document)}</span>'
-                f'<span class="mm-passage-loc">{html.escape(p.slide_or_section)}</span>'
-                "</div>"
-                f'<p class="mm-passage-scores">{" &middot; ".join(scores)}</p>'
-                f'<p class="mm-passage-text">{text}</p>'
-                "</div>"
-            )
-        st.markdown("".join(blocks), unsafe_allow_html=True)
-
-
-def render_feedback(result, key: str) -> None:
-    """C3 — logged with the turn's retrieval diagnostics, for error analysis."""
-    state_key = f"rated::{key}"
-    if st.session_state.get(state_key):
-        st.markdown(
-            '<p class="mm-meta">Logged as '
-            f'<b>{st.session_state[state_key]}</b> — thanks. It goes into the '
-            'error-analysis log with this turn\'s scores.</p>',
-            unsafe_allow_html=True,
-        )
-        return
-    left, right, _ = st.columns([1, 1, 3])
-    if left.button("Helpful", key=f"up::{key}"):
-        feedback_mod.record(result, "up")
-        st.session_state[state_key] = "helpful"
-        st.rerun()
-    if right.button("Not helpful", key=f"down::{key}",
-                    help="Wrong, or it refused something it should have answered"):
-        feedback_mod.record(result, "down")
-        st.session_state[state_key] = "not helpful"
-        st.rerun()
-
-
-def render_followups(result, key: str) -> None:
-    """C4 — next questions, grounded in the passages this turn retrieved."""
-    if not result.followups:
-        return
-    st.markdown('<p class="mm-label">Ask next</p>', unsafe_allow_html=True)
-    for i, q in enumerate(result.followups):
-        st.button(q, key=f"fu::{key}::{i}", on_click=ask, args=(q,))
-
-
-# --------------------------------------------------------------------------
-# Turns
-# --------------------------------------------------------------------------
-
-REFUSAL_WHY = {
-    "intent": (
-        "Stopped by the intent router, before anything was searched and "
-        "before any model was called."
-    ),
-    "threshold": (
-        "Nothing in the indexed materials came close enough. The best "
-        "passage scored under the calibrated gate, so ModuleMate refused "
-        "rather than answer from a weak match."
-    ),
-    "model": (
-        "The passages that came back were on the right topic but did not "
-        "contain the answer, so the generator declined to fill the gap."
-    ),
-}
-
-
-def render_question(text: str) -> None:
-    with st.container():
-        st.markdown(ui.turn_anchor("question"), unsafe_allow_html=True)
-        st.markdown(ui.speaker("You"), unsafe_allow_html=True)
-        st.markdown(
-            f'<p class="mm-question">{html.escape(text)}</p>',
-            unsafe_allow_html=True,
-        )
-
-
-def render_answer(result, key: str, *, rateable: bool = True) -> None:
-    if result.error:
-        kind = "error"
-    elif result.is_refusal:
-        kind = "refusal"
-    else:
-        kind = "answer"
-    with st.container():
-        st.markdown(ui.turn_anchor(kind), unsafe_allow_html=True)
-        st.markdown(
-            ui.speaker("ModuleMate", state=None if kind == "answer" else kind),
-            unsafe_allow_html=True,
-        )
-        if result.error:
-            # Retrieval succeeded and only the writing failed, so say exactly
-            # that and leave the passages underneath: the turn is still worth
-            # something to the student even with no answer on top of it.
-            st.markdown(
-                '<p class="mm-error">I found the material but could not write '
-                'the answer \u2014 the generation service turned the request '
-                'down. The passages below are the ones your question actually '
-                'matched, so they are still worth reading. If this keeps '
-                'happening, the model named in <code>config.yaml</code> may no '
-                'longer be offered by the provider.</p>',
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                '<p class="mm-error-detail">'
-                + html.escape(result.error) + "</p>",
-                unsafe_allow_html=True,
-            )
-        elif result.is_refusal:
-            st.markdown(
-                f'<p class="mm-refusal">{html.escape(result.answer)}</p>',
-                unsafe_allow_html=True,
-            )
-            why = REFUSAL_WHY.get(result.refusal_reason)
-            if why:
-                st.markdown(f'<p class="mm-refusal-why">{why}</p>',
-                            unsafe_allow_html=True)
-        else:
-            st.markdown(result.answer)
-        render_gate(result)
-        render_meta(result)
-        render_sources(result, key)
-        # Nothing was written, so there is nothing to rate or to follow up on.
-        if rateable and not result.error:
-            render_feedback(result, key)
-            render_followups(result, key)
-
-
-# --------------------------------------------------------------------------
-# Sidebar
-# --------------------------------------------------------------------------
-
-def render_sidebar(manifest: dict) -> None:
-    with st.sidebar:
-        st.markdown(ui.wordmark(), unsafe_allow_html=True)
-        st.markdown(
-            '<p class="mm-side-note">Course assistant for the HIT Global '
-            'Summer School 2026. It answers from the programme\'s own '
-            'materials and names the source every time.</p>',
-            unsafe_allow_html=True,
-        )
-        # R1 mitigation: corpus staleness is visible rather than silent, so a
-        # student can see whether the index predates the material they mean.
-        built = str(manifest.get("built_at", "unknown")).split(" ")[0]
-        rows = {
-            "Passages indexed": f"{manifest.get('n_chunks', 0):,}",
-            "Source documents": str(manifest.get("n_documents", "—")),
-            "Index built": built,
-        }
-        st.markdown(
-            '<dl class="mm-stats">'
-            + "".join(
-                f'<div class="mm-stat"><dt>{k}</dt><dd>{v}</dd></div>'
-                for k, v in rows.items()
-            )
-            + "</dl>",
-            unsafe_allow_html=True,
-        )
-
-        stats = feedback_mod.summarise()
-        if stats.get("n"):
-            st.markdown('<p class="mm-label">Ratings so far</p>',
-                        unsafe_allow_html=True)
-            st.markdown(
-                f'<p class="mm-meta">{stats["n"]} rated &middot; '
-                f'<b>{stats["up"]} helpful</b> &middot; '
-                f'{stats["down"]} not</p>',
-                unsafe_allow_html=True,
-            )
-        if st.session_state.get("messages"):
-            st.button("Start over", key="reset", on_click=reset)
-
-
-def reset() -> None:
-    st.session_state.messages = []
-
-
-# --------------------------------------------------------------------------
-# Turn loop
-# --------------------------------------------------------------------------
-
-def conversation_history(messages) -> list[tuple[str, str]]:
-    """S1 — the (question, answer) pairs the query rewriter reads."""
-    history: list[tuple[str, str]] = []
-    pending: str | None = None
-    for msg in messages:
-        if msg["role"] == "user":
-            pending = msg["content"]
-        elif pending is not None:
-            history.append((pending, msg["content"]))
-            pending = None
-    return history
-
-
-def main() -> None:
-    bot = get_bot()
-    render_sidebar(bot.manifest)
-
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    if not st.session_state.messages:
-        render_opening(bot.manifest)
-
-    for i, msg in enumerate(st.session_state.messages):
-        if msg["role"] == "user":
-            render_question(msg["content"])
-        else:
-            render_answer(msg["result"], key=str(i))
-
-    prompt = st.chat_input(
-        "e.g. Is the 4000-word limit inclusive of references?"
-    )
-    if not prompt:
-        prompt = st.session_state.pop("pending_question", None)
-    if not prompt:
-        return
-
-    history = conversation_history(st.session_state.messages)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    render_question(prompt)
-
-    # The wait reports the stage the pipeline has actually reached, rather
-    # than animating for its own sake. A router refusal never leaves the
-    # first stage, which is itself the honest picture of what happened.
-    slot = st.empty()
-
-    def show_stage(name: str) -> None:
-        slot.markdown(ui.stage_line(STAGES, STAGES.index(name)),
-                      unsafe_allow_html=True)
-
-    result = bot.ask(prompt, history=history, on_stage=show_stage,
-                     degrade_on_error=True)
-    slot.empty()
-
-    render_answer(result, key=str(len(st.session_state.messages)),
-                  rateable=False)
-    st.session_state.messages.append(
-        {"role": "assistant", "content": result.answer, "result": result}
-    )
-    # Rerun so the rating and follow-up controls render against a stable
-    # message index rather than one that shifts as the turn completes.
+def flash(message):
+    st.session_state.flash = message
     st.rerun()
 
 
-if __name__ == "__main__":
+def sign_in(db, settings):
+    st.title("Your materials. Your study space.")
+    st.write(
+        "Turn course notes into answers you can check, cards you can review, and a plan you can follow."
+    )
+    a, b, c = st.columns(3)
+    a.info(
+        "**Bring your own sources**\n\nUpload documents or paste notes. Every course starts with an empty library."
+    )
+    b.info(
+        "**Learn with evidence**\n\nSearch locally, or opt in to AI explanations with source references."
+    )
+    c.info(
+        "**Build a study habit**\n\nMake recall cards, review what is due, and plan your next session."
+    )
+    st.caption(
+        "No university materials are bundled. Local tools work without an AI key. Accounts belong to this installation."
+    )
+    action = st.radio("Account", ["Sign in", "Create account"], horizontal=True)
+    with st.form("authentication"):
+        username = st.text_input("Username", max_chars=40, autocomplete="username")
+        password = st.text_input(
+            "Password",
+            type="password",
+            max_chars=256,
+            help="At least 12 characters. Use a unique passphrase.",
+        )
+        repeat = (
+            st.text_input("Repeat password", type="password", max_chars=256)
+            if action == "Create account"
+            else None
+        )
+        submitted = st.form_submit_button(action, type="primary")
+    if submitted:
+        try:
+            if action == "Create account":
+                if password != repeat:
+                    raise UserError("Passwords do not match.")
+                token = db.register(username, password, allowed=settings.allow_registration)
+            else:
+                token = db.login(username, password)
+            reset_session()
+            st.session_state.token = token
+            st.rerun()
+        except UserError as exc:
+            st.error(str(exc))
+    st.caption(
+        "Passwords are hashed. Content is stored on this server; its operator can access it. There is no password recovery service, so keep your passphrase safe."
+    )
+
+
+def source_panel(sources, key):
+    if not sources:
+        return
+    with st.expander(f"Check sources · {len(sources)} passages"):
+        for i, passage in enumerate(sources, 1):
+            st.text(f"[{i}] {passage['name']} · {passage['locator']}")
+            st.text(passage["text"])
+            st.divider()
+
+
+def select_documents(documents, key):
+    names = {d["id"]: d["name"] for d in documents}
+    selected = st.multiselect(
+        "Focus on documents (leave empty for all)", list(names), format_func=names.get, key=key
+    )
+    return selected or None
+
+
+def library(store, course_id):
+    st.header("Course library")
+    st.write(
+        "Add material you have permission to use. Search and study tools use only this course's library."
+    )
+    st.caption(
+        "Extracted text is saved; original files are not retained. Images, handwriting and scanned pages need OCR first."
+    )
+    with (
+        st.expander("Upload documents", expanded=True),
+        st.form(f"upload_{course_id}", clear_on_submit=True),
+    ):
+        uploads = st.file_uploader(
+            "PDF, DOCX, PPTX, TXT, Markdown or notebook",
+            type=[s[1:] for s in sorted(SUPPORTED)],
+            accept_multiple_files=True,
+        )
+        rights = st.checkbox(
+            "I have permission to use these materials here.", key=f"upload_rights_{course_id}"
+        )
+        submitted = st.form_submit_button("Add to library", type="primary")
+    if submitted:
+        if not rights:
+            st.error("Confirm you have permission to use the materials.")
+        elif not uploads:
+            st.info("Choose at least one document.")
+        elif len(uploads) > 5 or sum(u.size for u in uploads) > 30 * 1024 * 1024:
+            st.error("Add at most 5 files / 30 MB per batch, with at most 15 MB per file.")
+        else:
+            for upload in uploads:
+                try:
+                    with st.spinner(f"Reading {plain(upload.name)}…"):
+                        parsed = parse_upload(upload.name, upload.getvalue())
+                        _, created = store.add_document(course_id, parsed)
+                    st.success(
+                        f"{plain(parsed.name)}: {len(parsed.chunks)} passages added."
+                        if created
+                        else f"{plain(parsed.name)}: already in this course; skipped."
+                    )
+                    for warning in parsed.warnings:
+                        st.warning(plain(warning))
+                except UserError as exc:
+                    st.error(f"{plain(upload.name)}: {plain(exc)}")
+    with st.expander("Paste notes"), st.form(f"notes_{course_id}", clear_on_submit=True):
+        title = st.text_input("Note title", max_chars=150)
+        content = st.text_area("Your notes", height=200, max_chars=100000)
+        note_rights = st.checkbox("These are my notes, or I have permission to use them.")
+        if st.form_submit_button("Save notes"):
+            if not note_rights:
+                st.error("Confirm you have permission to use these notes.")
+            elif not title.strip():
+                st.error("Give the note a title.")
+            else:
+                parsed = parse_upload(title + ".txt", content.encode())
+                _, created = store.add_document(course_id, parsed)
+                st.success(
+                    "Notes saved." if created else "These notes are already in your library."
+                )
+    docs = store.documents(course_id)
+    if not docs:
+        st.info(
+            "Your library is empty. Upload a document, paste notes, or try the original example below."
+        )
+        if st.button("Add original Learning Lab example"):
+            parsed = parse_upload(
+                "Learning Lab.md", (ROOT / "examples/learning-lab.md").read_bytes()
+            )
+            store.add_document(course_id, parsed)
+            flash("Original example added. Try asking: What is retrieval practice?")
+        return
+    a, b, c = st.columns(3)
+    a.metric("Documents", len(docs))
+    b.metric("Searchable passages", sum(d["chunks"] for d in docs))
+    c.metric("Text characters", f"{sum(d['characters'] for d in docs):,}")
+    with st.form(f"search_{course_id}"):
+        query = st.text_input(
+            "Find something in your materials",
+            max_chars=4000,
+            placeholder="A concept, deadline, formula or distinctive phrase",
+        )
+        go = st.form_submit_button("Search library")
+    if go:
+        hits = search(store, course_id, query)
+        if not hits:
+            st.info("No matching passages. Try another term or add the missing material.")
+        for hit in hits:
+            st.text(f"{hit.name} · {hit.locator}")
+            st.text(hit.text)
+            st.divider()
+    for doc in docs:
+        with st.expander(f"{plain(doc['name'])} · {doc['chunks']} passages"):
+            for warning in json.loads(doc["warnings"]):
+                st.warning(plain(warning))
+            full = store.document(doc["id"])
+            st.text(full["text"][:16000])
+            if len(full["text"]) > 16000:
+                st.caption(
+                    "Preview shortened to 16,000 characters; download contains all extracted text."
+                )
+            st.download_button(
+                "Download extracted text",
+                full["text"],
+                file_name="extracted-notes.txt",
+                mime="text/plain",
+                key=f"download_{doc['id']}",
+            )
+            confirm = st.checkbox(
+                "Delete this document, its linked cards and this course's chat history",
+                key=f"confirm_{doc['id']}",
+            )
+            if st.button("Delete document", key=f"delete_{doc['id']}", disabled=not confirm):
+                store.delete_document(doc["id"])
+                for key in list(st.session_state):
+                    if key.startswith(("draft_", "quiz_", "reveal_")):
+                        del st.session_state[key]
+                flash("Document and derived study content removed.")
+
+
+def assistant(store, course_id, settings, use_ai):
+    st.header("Ask, understand, connect")
+    docs = store.documents(course_id)
+    if not docs:
+        st.info("Add material in Library first. Your assistant starts with your sources.")
+        return
+    mode = st.selectbox("How would you like to study?", list(MODES), key=f"mode_{course_id}")
+    doc_ids = select_documents(docs, f"assistant_docs_{course_id}")
+    if mode == "Summarize":
+        st.caption(
+            "Summaries cover selected excerpts. Focus on one document or topic for more useful coverage."
+        )
+    if not use_ai:
+        st.info(
+            "Local evidence mode · Search returns original excerpts. Enable AI in the sidebar for explanations and guided tutoring."
+        )
+    else:
+        st.caption(
+            f"AI enabled · {settings.provider_host} · {settings.ai_model}. Check the evidence before relying on an answer."
+        )
+    messages = store.messages(course_id)
+    if messages:
+        with st.expander("Conversation options"):
+            transcript = "\n\n".join(
+                f"You: {m['question']}\n\nModuleMate: {m['answer']}" for m in messages
+            )
+            st.download_button(
+                "Export displayed conversation", transcript, "conversation.txt", "text/plain"
+            )
+            if st.button("Clear this course's conversation"):
+                store.clear_messages(course_id)
+                flash("Conversation cleared.")
+    else:
+        st.caption(
+            "Try a question about a specific concept, ask for a comparison, or choose Summarize and ask for a study outline."
+        )
+    for message in messages:
+        with st.chat_message("user"):
+            st.text(message["question"])
+        with st.chat_message("assistant"):
+            st.text(message["answer"])
+            st.caption(message["mode"])
+            source_panel(message["sources"], message["id"])
+    question = st.chat_input("Ask about your materials…", max_chars=4000)
+    if question:
+        with st.chat_message("user"):
+            st.text(question)
+        with st.chat_message("assistant"):
+            with st.spinner("Finding evidence and preparing your answer…"):
+                result = answer_question(
+                    store,
+                    course_id,
+                    question,
+                    mode=mode,
+                    document_ids=doc_ids,
+                    use_ai=use_ai,
+                    backend=AIBackend(settings) if use_ai else None,
+                )
+            st.text(result.text)
+            if result.notice:
+                st.caption(result.notice)
+            source_panel([p.to_dict() for p in result.passages], "latest")
+
+
+def cards_page(store, course_id, settings, use_ai, today):
+    st.header("Recall beats recognition")
+    st.write("Create focused cards, try the answer from memory, then check your source.")
+    cards = store.cards(course_id)
+    due = [c for c in cards if c["due"] <= today.isoformat()]
+    counts = store.review_counts(course_id)
+    a, b, c = st.columns(3)
+    a.metric("Saved cards", len(cards))
+    b.metric("Due today", len(due))
+    c.metric("Reviews completed", sum(counts.values()))
+    tool = st.radio(
+        "Study tools", ["Review", "Create cards", "Practice quiz", "Manage cards"], horizontal=True
+    )
+    if tool == "Review":
+        if not due:
+            st.success(
+                "You're up to date. Create some cards or use Practice quiz for another round."
+            )
+            if cards:
+                st.caption(f"Next scheduled review: {min(c['due'] for c in cards)}")
+            return
+        card = due[0]
+        st.caption(f"{len(due)} cards due · recall first")
+        st.text(card["front"])
+        reveal_key = f"reveal_{card['id']}"
+        if st.button("Reveal answer", key=f"show_{card['id']}"):
+            st.session_state[reveal_key] = True
+        if st.session_state.get(reveal_key):
+            st.text(card["back"])
+            if card["document_name"]:
+                st.caption(f"{plain(card['document_name'])} · {plain(card['locator'])}")
+            st.caption(
+                "Again: tomorrow · Hard: a short interval · Good/Easy: increasing intervals. These are self-ratings, not an exam score."
+            )
+            for col, rating in zip(st.columns(4), ["Again", "Hard", "Good", "Easy"], strict=True):
+                if col.button(rating, key=f"{rating}_{card['id']}", width="stretch"):
+                    store.review_card(card["id"], rating, today=today)
+                    st.session_state.pop(reveal_key, None)
+                    st.rerun()
+    elif tool == "Create cards":
+        docs = store.documents(course_id)
+        with st.expander("Write your own card", expanded=True):
+            source_names = {
+                None: "My own card (no source link)",
+                **{d["id"]: d["name"] for d in docs},
+            }
+            source_id = st.selectbox(
+                "Optional card source", list(source_names), format_func=source_names.get
+            )
+            locator = ""
+            if source_id:
+                source_passages = store.document_passages(source_id)
+                locator = st.selectbox(
+                    "Source location", list(dict.fromkeys(p["locator"] for p in source_passages))
+                )
+                st.text(
+                    "\n\n".join(p["text"] for p in source_passages if p["locator"] == locator)[
+                        :6000
+                    ]
+                )
+            with st.form(f"manual_card_{course_id}", clear_on_submit=True):
+                front = st.text_area("Question", max_chars=1000)
+                back = st.text_area("Answer", max_chars=4000)
+                if st.form_submit_button("Save card"):
+                    created = store.add_card(
+                        course_id, front, back, source_id, locator, today=today
+                    )
+                    flash("Card saved." if created else "That card already exists.")
+        if not docs:
+            st.info("Add material to create source-linked cards automatically.")
+            return
+        doc_ids = select_documents(docs, f"card_docs_{course_id}")
+        topic = st.text_input("Optional topic for new cards", max_chars=500)
+        st.caption(
+            "AI drafts recall questions when enabled. Local mode makes fill-in-the-blank cards from source sentences. Review drafts before saving."
+        )
+        if st.button("Draft cards from material", type="primary"):
+            passages = (
+                search(store, course_id, topic, doc_ids)
+                if topic.strip()
+                else overview(store, course_id, doc_ids)
+            )
+            if not passages:
+                st.info("No matching material. Try a different topic.")
+            else:
+                with st.spinner("Preparing card drafts…"):
+                    try:
+                        drafts = (
+                            generate_cards(passages, AIBackend(settings))
+                            if use_ai
+                            else cloze_cards(passages)
+                        )
+                    except (ProviderError, ValueError, KeyError, TypeError):
+                        drafts = cloze_cards(passages)
+                        st.warning(
+                            "AI drafts could not be verified. Showing local cloze drafts instead."
+                        )
+                st.session_state[f"draft_{course_id}"] = drafts
+                if not drafts:
+                    st.info("No suitable cards found. Try another document or write a card above.")
+        drafts = st.session_state.get(f"draft_{course_id}", [])
+        if drafts:
+            with st.form(f"save_drafts_{course_id}"):
+                selected = []
+                for i, draft in enumerate(drafts):
+                    selected.append(
+                        st.checkbox(
+                            f"Save draft {i + 1}", value=True, key=f"draft_select_{course_id}_{i}"
+                        )
+                    )
+                    st.text(draft["front"])
+                    st.text(draft["back"])
+                    st.caption(draft["locator"])
+                if st.form_submit_button("Save selected cards"):
+                    saved = sum(
+                        store.add_card(course_id, **draft, today=today)
+                        for draft, select in zip(drafts, selected, strict=True)
+                        if select
+                    )
+                    st.session_state.pop(f"draft_{course_id}", None)
+                    flash(f"Saved {saved} new cards. Identical cards are skipped.")
+    elif tool == "Practice quiz":
+        if not cards:
+            st.info("Create some cards to start a quiz.")
+            return
+        quiz_key = f"quiz_{course_id}"
+        if st.button("Start a fresh 5-card quiz"):
+            st.session_state[quiz_key] = {
+                "ids": [c["id"] for c in random.sample(cards, min(5, len(cards)))],
+                "position": 0,
+                "correct": 0,
+                "revealed": False,
+            }
+        quiz = st.session_state.get(quiz_key)
+        if not quiz:
+            st.caption(
+                "Try answering each question before revealing it. Practice does not change your review schedule."
+            )
+            return
+        if quiz["position"] >= len(quiz["ids"]):
+            st.success(
+                f"Finished: you marked {quiz['correct']} of {len(quiz['ids'])} answers as recalled."
+            )
+            return
+        by_id = {c["id"]: c for c in cards}
+        card = by_id.get(quiz["ids"][quiz["position"]])
+        if not card:
+            st.session_state.pop(quiz_key, None)
+            st.rerun()
+        st.progress(quiz["position"] / len(quiz["ids"]))
+        st.text(card["front"])
+        st.text_area(
+            "Your recall attempt (not saved)", key=f"quiz_attempt_{course_id}_{quiz['position']}"
+        )
+        if st.button("Check answer"):
+            quiz["revealed"] = True
+        if quiz["revealed"]:
+            st.text(card["back"])
+            if card["document_name"]:
+                st.caption(f"{plain(card['document_name'])} · {plain(card['locator'])}")
+            for col, label, score in zip(
+                st.columns(2), ["I recalled it", "Needs more practice"], [1, 0], strict=True
+            ):
+                if col.button(label):
+                    quiz["correct"] += score
+                    quiz["position"] += 1
+                    quiz["revealed"] = False
+                    st.rerun()
+    else:
+        if not cards:
+            st.info("No saved cards yet.")
+        for card in cards:
+            with st.expander(plain(card["front"][:90])):
+                with st.form(f"edit_{card['id']}"):
+                    front = st.text_area("Question", value=card["front"], max_chars=1000)
+                    back = st.text_area("Answer", value=card["back"], max_chars=4000)
+                    st.caption(
+                        f"Due {card['due']} · {card['repetitions']} successful reviews since last Again"
+                    )
+                    if st.form_submit_button("Save changes"):
+                        store.update_card(card["id"], front, back)
+                        flash("Card updated.")
+                if st.button("Delete card", key=f"delete_card_{card['id']}"):
+                    store.delete_card(card["id"])
+                    flash("Card deleted.")
+
+
+def planner(store, course_id, today):
+    st.header("Make room for learning")
+    st.write(
+        "Set your own deadlines and estimates. The plan fits work into your available time, earliest deadlines first."
+    )
+    with st.form(f"new_task_{course_id}", clear_on_submit=True):
+        title = st.text_input("Task or assignment", max_chars=200)
+        a, b = st.columns(2)
+        due = a.date_input("Due date", value=today)
+        minutes = b.number_input("Estimated minutes", min_value=5, max_value=2400, value=30, step=5)
+        if st.form_submit_button("Add task", type="primary"):
+            store.add_task(course_id, title, due.isoformat(), int(minutes))
+            flash("Task added.")
+    tasks = store.tasks(course_id)
+    if not tasks:
+        st.info("No tasks yet. Add a reading session, revision topic or assignment deadline.")
+        return
+    for task in tasks:
+        a, b, c = st.columns([6, 2, 1])
+        a.text(f"{task['title']} · {task['minutes']} min · due {task['due']}")
+        if b.button("Reopen" if task["done"] else "Mark done", key=f"done_{task['id']}"):
+            store.modify_task(task["id"], done=not task["done"])
+            st.rerun()
+        if c.button("Remove", key=f"remove_{task['id']}"):
+            store.modify_task(task["id"], delete=True)
+            st.rerun()
+    with st.expander("Edit a task"):
+        by_id = {t["id"]: t for t in tasks}
+        task_id = st.selectbox(
+            "Task to edit", list(by_id), format_func=lambda key: by_id[key]["title"]
+        )
+        selected = by_id[task_id]
+        with st.form(f"edit_task_{task_id}"):
+            new_title = st.text_input("Updated title", selected["title"], max_chars=200)
+            new_due = st.date_input("Updated due date", date.fromisoformat(selected["due"]))
+            new_minutes = st.number_input(
+                "Updated estimated minutes",
+                min_value=5,
+                max_value=2400,
+                value=selected["minutes"],
+                step=5,
+            )
+            if st.form_submit_button("Save task changes"):
+                store.update_task(task_id, new_title, new_due.isoformat(), int(new_minutes))
+                flash("Task updated.")
+    st.subheader("Your study plan")
+    a, b = st.columns(2)
+    capacity = a.slider("Minutes available each day", 5, 240, 60, step=5)
+    horizon = b.slider("Days to plan", 1, 30, 7)
+    sessions, warnings = plan_tasks(tasks, capacity, horizon, today=today)
+    for warning in warnings:
+        st.warning(plain(warning))
+    if sessions:
+        st.dataframe(
+            [{k: s[k] for k in ("date", "title", "minutes")} for s in sessions],
+            width="stretch",
+            hide_index=True,
+        )
+        st.caption(
+            "Blocks are at most 50 minutes. Breaks are extra. Mark tasks done as you finish; use Edit a task when your deadline or estimate changes."
+        )
+    elif not warnings:
+        st.success("All tasks are complete.")
+    st.download_button(
+        "Export deadlines to calendar (.ics)",
+        calendar_export(tasks),
+        "study-deadlines.ics",
+        "text/calendar",
+    )
+
+
+def account(store, db, settings, course_id):
+    st.header("Your data, your controls")
+    st.write(
+        "Your account is private within this app. The server operator can access its database; it is not encrypted end to end."
+    )
+    st.caption(
+        "Uploaded originals are discarded after extraction. Notes, chat, cards, reviews and tasks persist in the local database. AI is off until you opt in for this session."
+    )
+    st.download_button(
+        "Export all my data (JSON)",
+        json.dumps(store.export(), ensure_ascii=False, indent=2),
+        "modulemate-export.json",
+        "application/json",
+    )
+    st.caption(
+        "The export contains your content, not passwords or session tokens. Keep it private. JSON re-import is not currently supported."
+    )
+    with st.expander("Change password"), st.form("password_change", clear_on_submit=True):
+        old = st.text_input("Current password", type="password", max_chars=256)
+        new = st.text_input("New password", type="password", max_chars=256)
+        repeat = st.text_input("Repeat new password", type="password", max_chars=256)
+        if st.form_submit_button("Update password"):
+            if new != repeat:
+                st.error("New passwords do not match.")
+            else:
+                store.change_password(old, new)
+                st.success("Password changed. Other sessions have been signed out.")
+    if course_id:
+        course = next(c for c in store.courses() if c["id"] == course_id)
+        with st.expander("Course settings"):
+            with st.form("course_settings"):
+                name = st.text_input("Course name", course["name"], max_chars=100)
+                description = st.text_area("Description", course["description"], max_chars=1000)
+                if st.form_submit_button("Save course settings"):
+                    store.update_course(course_id, name, description)
+                    flash("Course settings saved.")
+            confirm = st.checkbox(
+                "Delete this course and all its documents, cards, tasks and chats"
+            )
+            if st.button("Delete course permanently", disabled=not confirm):
+                store.delete_course(course_id)
+                token = st.session_state.token
+                reset_session()
+                st.session_state.token = token
+                flash("Course deleted.")
+    with st.expander("Delete my account"):
+        st.warning(
+            "This removes all of your data from the active database. Operator backups and copies already exported or sent to an AI provider are separate."
+        )
+        with st.form("delete_account"):
+            password = st.text_input("Confirm your password", type="password", max_chars=256)
+            confirmed = st.checkbox("Permanently delete my account and all my courses")
+            if st.form_submit_button("Delete my account", disabled=not confirmed):
+                store.delete_account(password)
+                reset_session()
+                st.rerun()
+
+
+def main():
+    settings = load_settings()
+    db = Database(settings.data_dir / "modulemate.sqlite3")
+    if not st.session_state.get("token"):
+        sign_in(db, settings)
+        return
+    store = Store(db, st.session_state.token)
+    try:
+        profile = store.profile()
+    except AuthenticationError:
+        reset_session()
+        st.rerun()
+    with st.sidebar:
+        st.title("ModuleMate")
+        st.caption("A little structure. A lot of progress.")
+        st.text(f"Signed in as {profile['username']}")
+        courses = store.courses()
+        names = {c["id"]: c["name"] for c in courses}
+        course_id = (
+            st.selectbox("Current course", list(names), format_func=names.get) if courses else None
+        )
+        with (
+            st.expander("Create a course", expanded=not courses),
+            st.form("new_course", clear_on_submit=True),
+        ):
+            name = st.text_input(
+                "Course name", max_chars=100, placeholder="e.g. Introduction to biology"
+            )
+            description = st.text_input("What are you working towards?", max_chars=1000)
+            if st.form_submit_button("Create course"):
+                store.create_course(name, description)
+                flash("Course created. Choose it above and add your materials.")
+        page = st.radio("Workspace", ["Library", "Assistant", "Cards", "Planner", "Account"])
+        st.divider()
+        timezone = st.selectbox(
+            "Your timezone",
+            [
+                "Asia/Seoul",
+                "UTC",
+                "Europe/London",
+                "Europe/Paris",
+                "America/New_York",
+                "America/Los_Angeles",
+                "Asia/Shanghai",
+                "Asia/Kolkata",
+                "Asia/Tokyo",
+                "Australia/Sydney",
+            ],
+        )
+        today = datetime.now(ZoneInfo(timezone)).date()
+        st.caption(f"Study date: {today.isoformat()}")
+        if settings.ai_ready:
+            st.caption(
+                f"Optional AI provider: {settings.provider_host}\nModel: {settings.ai_model}"
+            )
+            use_ai = st.checkbox(
+                "Enable AI for this session",
+                key="ai_consent",
+                help="Sends your question, up to 8 source excerpts and the last 3 conversation turns to this provider. Drafting and support checks send source excerpts and drafts to this same provider. Review its data policy first.",
+            )
+            st.caption(
+                "Enabling AI shares selected text with this provider. Disable it to keep further requests local."
+            )
+        else:
+            use_ai = False
+            st.caption(
+                "Local mode · No AI provider configured. All core study tools are available."
+            )
+        if st.button("Sign out"):
+            db.logout(st.session_state.token)
+            reset_session()
+            st.rerun()
+    if st.session_state.get("flash"):
+        st.success(st.session_state.pop("flash"))
+    if page == "Account":
+        account(store, db, settings, course_id)
+    elif not course_id:
+        st.title("Start with a course")
+        st.write(
+            "Create a course in the sidebar, then add notes or try the original Learning Lab example. Each course keeps its own materials, conversations and study tools."
+        )
+    elif page == "Library":
+        library(store, course_id)
+    elif page == "Assistant":
+        assistant(store, course_id, settings, use_ai)
+    elif page == "Cards":
+        cards_page(store, course_id, settings, use_ai, today)
+    elif page == "Planner":
+        planner(store, course_id, today)
+
+
+try:
     main()
+except AuthenticationError as exc:
+    st.error(str(exc))
+    if st.button("Return to sign in"):
+        reset_session()
+        st.rerun()
+except UserError as exc:
+    st.error(str(exc))

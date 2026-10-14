@@ -1,25 +1,22 @@
-# Interface theme. The palette is committed to here as well as in ui.py so
-# that the widgets Streamlit draws before our stylesheet loads are already the
-# right colour, and the app never flashes the framework's default red.
-
 [theme]
 base = "light"
-primaryColor = "#1F5C50"          # the single accent: links, focus, gate meter
-backgroundColor = "#FBF9F5"       # warm paper
-secondaryBackgroundColor = "#F4F0E8"
-textColor = "#1B1A17"
+primaryColor = "#176B5B"
+backgroundColor = "#FAF9F6"
+secondaryBackgroundColor = "#EFEEE9"
+textColor = "#202C2A"
 font = "sans serif"
 
-[client]
-# Hide the deploy button and developer menu: they belong to the framework,
-# not to the product a student is looking at.
-toolbarMode = "viewer"
-# A student should never be shown a Python traceback. Unexpected failures
-# print in full to the server log, where a tutor can read them, and the
-# browser gets nothing. The one failure the app expects -- the generation
-# backend being unreachable -- is caught in pipeline.ask and rendered as a
-# designed state instead (see app.render_answer).
-showErrorDetails = "none"
+[server]
+address = "127.0.0.1"
+maxUploadSize = 15
+maxMessageSize = 25
+enableXsrfProtection = true
+enableCORS = true
+headless = true
 
 [browser]
 gatherUsageStats = false
+
+[client]
+toolbarMode = "viewer"
+showErrorDetails = "none"
