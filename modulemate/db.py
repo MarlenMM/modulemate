@@ -14,7 +14,7 @@ from contextlib import contextmanager
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 SESSION_SECONDS = 12 * 60 * 60
 MAX_DOCUMENTS = 100
 MAX_CHUNKS = 12000
@@ -150,7 +150,15 @@ class Database:
                     if sqlite3.complete_statement(statement):
                         con.execute(statement)
                         statement = ""
-                con.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
+                version = 1
+            if version < 2:
+                con.execute("""CREATE TABLE embeddings (
+                    chunk_id INTEGER NOT NULL REFERENCES chunks(id) ON DELETE CASCADE,
+                    model TEXT NOT NULL, digest TEXT NOT NULL, dimensions INTEGER NOT NULL,
+                    vector BLOB NOT NULL, PRIMARY KEY(chunk_id, model)
+                )""")
+                con.execute("ALTER TABLE messages ADD COLUMN metadata TEXT NOT NULL DEFAULT '{}'")
+            con.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
         self.path.chmod(0o600)
 
     @contextmanager
@@ -426,9 +434,13 @@ class Store:
                 "SELECT * FROM messages WHERE course_id=? ORDER BY created_at DESC,id DESC LIMIT ?",
                 (course_id, min(max(limit, 1), 200)),
             ).fetchall()
-            return [dict(r) | {"sources": json.loads(r["sources"])} for r in reversed(rows)]
+            return [
+                dict(r)
+                | {"sources": json.loads(r["sources"]), "metadata": json.loads(r["metadata"])}
+                for r in reversed(rows)
+            ]
 
-    def add_message(self, course_id, question, answer, sources, mode):
+    def add_message(self, course_id, question, answer, sources, mode, metadata=None):
         question = checked_text(question, "Question", 4000)
         answer = checked_text(answer, "Answer", 30000)
         with self.transaction() as (con, user):
@@ -438,8 +450,17 @@ class Store:
                 if doc["course_id"] != course_id:
                     raise UserError("Source is not in the selected course.")
             con.execute(
-                "INSERT INTO messages VALUES (?,?,?,?,?,?,?)",
-                (uid(), course_id, question, answer, json.dumps(sources), mode, now_iso()),
+                "INSERT INTO messages VALUES (?,?,?,?,?,?,?,?)",
+                (
+                    uid(),
+                    course_id,
+                    question,
+                    answer,
+                    json.dumps(sources),
+                    mode,
+                    now_iso(),
+                    json.dumps(metadata or {}),
+                ),
             )
             con.execute(
                 "DELETE FROM messages WHERE course_id=? AND id NOT IN (SELECT id FROM messages WHERE course_id=? ORDER BY created_at DESC,id DESC LIMIT 200)",

@@ -1,0 +1,441 @@
+{
+  "scope": "Original development checks of reference-fact coverage in composed answers; not semantic correctness or blinded test accuracy.",
+  "backend": "local neural",
+  "questions": 46,
+  "reference_fact_passes": 42,
+  "resolvable_citations": 46,
+  "median_answer_ms": 158.65,
+  "p95_answer_ms": 486.81,
+  "misses": [
+    "respiration-1",
+    "enzymes-1",
+    "median-0",
+    "binary_search-1"
+  ],
+  "answers": [
+    {
+      "id": "photosynthesis-0",
+      "question": "How do plants turn sunshine into fuel?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Photosynthesis converts light energy into chemical energy. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "photosynthesis-1",
+      "question": "What does chlorophyll absorb?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Chlorophyll absorbs light in the chloroplasts. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "respiration-0",
+      "question": "How do cells release usable energy from sugar?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Cellular respiration breaks down glucose to release energy stored in ATP. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "respiration-1",
+      "question": "Where does cellular respiration occur?",
+      "fact_coverage_pass": false,
+      "missing_reference_facts": [
+        "mitochondria"
+      ],
+      "citation_markers_resolve": true,
+      "answer": "Cellular respiration breaks down glucose to release energy stored in ATP. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "osmosis-0",
+      "question": "Why does water move through a semipermeable barrier?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The related notes don't establish the specific detail you're asking for. What they do say is:\n\nOsmosis is the movement of water across a selectively permeable membrane toward a region of higher solute concentration. [1]",
+      "notice": "Partial evidence only; the requested detail is not confirmed."
+    },
+    {
+      "id": "osmosis-1",
+      "question": "Define osmosis",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Osmosis is the movement of water across a selectively permeable membrane toward a region of higher solute concentration. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "enzymes-0",
+      "question": "Which biological substances speed up chemical reactions?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Enzymes are biological catalysts that lower the activation energy of reactions. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "enzymes-1",
+      "question": "What affects enzyme activity?",
+      "fact_coverage_pass": false,
+      "missing_reference_facts": [
+        "temperature",
+        "pH"
+      ],
+      "citation_markers_resolve": true,
+      "answer": "Enzymes are biological catalysts that lower the activation energy of reactions. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "median-0",
+      "question": "Which measure of center resists unusually large values?",
+      "fact_coverage_pass": false,
+      "missing_reference_facts": [
+        "median",
+        "less sensitive"
+      ],
+      "citation_markers_resolve": true,
+      "answer": "With an even number of values, average the two central values. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "median-1",
+      "question": "How do I calculate the median with an even number of values?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "With an even number of values, average the two central values. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "mean-0",
+      "question": "How do I compute the arithmetic average?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The arithmetic mean is the sum of all values divided by the number of observations. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "mean-1",
+      "question": "Can an outlier change the mean?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Extreme observations can change it substantially. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "variance-0",
+      "question": "How can we quantify the spread around the average?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Variance measures the average squared distance from the mean. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "variance-1",
+      "question": "How are standard deviation and variance related?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Standard deviation is the square root of variance and has the same units as the original observations. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "sampling-0",
+      "question": "What happens if some people are more likely to be selected for a survey?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Sampling bias occurs when the selection process systematically favors some members of a population. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "sampling-1",
+      "question": "What is a random sample?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "A random sample selects observations using a chance mechanism. [1] Sampling bias occurs when the selection process systematically favors some members of a population. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "stack-0",
+      "question": "Which container gives back the newest item first?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "A stack removes the most recently inserted item first. [2]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "stack-1",
+      "question": "What operations does a stack support?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Push adds an item and pop removes the top item. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "queue-0",
+      "question": "Which data structure serves the oldest waiting item?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "A queue removes the earliest inserted item first. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "queue-1",
+      "question": "What does dequeue do?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Enqueue adds an item at the rear and dequeue removes an item from the front. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "binary_search-0",
+      "question": "How can I find an item by repeatedly discarding half the possibilities?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Binary search repeatedly halves a sorted interval by comparing the target with the middle element. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "binary_search-1",
+      "question": "What must be true before using binary search?",
+      "fact_coverage_pass": false,
+      "missing_reference_facts": [
+        "sorted input"
+      ],
+      "citation_markers_resolve": true,
+      "answer": "Binary search repeatedly halves a sorted interval by comparing the target with the middle element. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "recursion-0",
+      "question": "How does a self-calling function know when to stop?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "A base case stops further calls. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "recursion-1",
+      "question": "What is recursion?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Recursion occurs when a function calls itself on a smaller instance of the problem. [1] A base case stops further calls. [1] Without a reachable base case, recursion may not terminate. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "spacing-0",
+      "question": "How can revision be spread out over time?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Spacing distributes review across separate study sessions. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "spacing-1",
+      "question": "When are the spaced reviews in the fictional plan?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "In the fictional study plan, reviews occur one day, three days and seven days after the first session. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "retrieval-0",
+      "question": "How can I test what I remember without looking at my notes first?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Retrieval practice means attempting to recall an idea before checking the answer. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "retrieval-1",
+      "question": "What should I do after a retrieval attempt?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "After trying, compare your response with the source and correct mistakes. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "interleaving-0",
+      "question": "What is the name for mixing different kinds of exercises?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Interleaving alternates different problem types within one practice session. [1] Blocked practice repeats one type before switching to another. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "interleaving-1",
+      "question": "Compare interleaving and blocked practice",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "**interleaving**\n\nInterleaving alternates different problem types within one practice session. [1]\n\n**blocked practice**\n\nBlocked practice repeats one type before switching to another. [1]",
+      "notice": "Side-by-side source statements; no unstated differences inferred."
+    },
+    {
+      "id": "overfitting-0",
+      "question": "Why can a model do well on examples it has seen but badly on new ones?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The related notes don't establish the specific detail you're asking for. What they do say is:\n\nOverfitting occurs when a model learns training-specific patterns that do not generalize well. [1]",
+      "notice": "Partial evidence only; the requested detail is not confirmed."
+    },
+    {
+      "id": "overfitting-1",
+      "question": "What is overfitting?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Overfitting occurs when a model learns training-specific patterns that do not generalize well. [1] Training performance can be high while performance on unseen data is poor. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "regularization-0",
+      "question": "How can we discourage a predictive model from becoming too complex?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Regularization adds a penalty to the learning objective to discourage excessive model complexity. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "regularization-1",
+      "question": "What does L2 regularization penalize?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "L2 regularization penalizes the sum of squared parameter values. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "validation-0",
+      "question": "Which data should I reserve until all tuning decisions are finished?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "A test set is reserved for final evaluation after those choices. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "validation-1",
+      "question": "Why should preprocessing not be fitted on the test set?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The related notes don't establish the specific detail you're asking for. What they do say is:\n\nFitting preprocessing on test data leaks information into training. [1]",
+      "notice": "Partial evidence only; the requested detail is not confirmed."
+    },
+    {
+      "id": "report-0",
+      "question": "How long should the Northstar write-up be?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The fictional Northstar report must contain 2400 words, excluding references. [2]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "report-1",
+      "question": "What is the Northstar report deadline?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The deadline is 18 May 2028 at 16:00. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "presentation-0",
+      "question": "How much time do we get to speak to the class?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The fictional Northstar presentation lasts eight minutes, followed by two minutes of questions. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "presentation-1",
+      "question": "How much of the mark is the Northstar presentation?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The fictional Northstar presentation lasts eight minutes, followed by two minutes of questions. [1] It accounts for thirty percent of the overall project mark. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "late-0",
+      "question": "What happens if I hand in the Northstar report after it is due?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "In the fictional Northstar course, late reports lose five percentage points per day. [2]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "late-1",
+      "question": "How do I request a Northstar extension?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Extensions must be arranged with the instructor before the deadline. [3]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "korean-0",
+      "question": "금요일 시험 시간",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "시험 시간은 오전 열 시입니다. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "korean-1",
+      "question": "복습",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "복습은 배운 내용을 다시 확인하는 활동입니다. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "chinese-0",
+      "question": "概率",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "概率是可能性的度量。 [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "chinese-1",
+      "question": "课程报告",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "课程报告需要两千字。 [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    }
+  ]
+}

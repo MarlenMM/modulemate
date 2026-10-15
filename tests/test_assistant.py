@@ -40,8 +40,10 @@ def test_local_mode_never_calls_backend(store, populated):
     course, _ = populated
     backend = FakeBackend(fails=True)
     answer = answer_question(store, course, "retrieval practice", backend=backend, use_ai=False)
-    assert answer.kind == "evidence"
-    assert "Matching excerpts" in answer.text
+    assert answer.kind == "local"
+    assert "Retrieval practice means" in answer.text
+    assert len(answer.text) < 700
+    assert "[1]" in answer.text
     assert backend.calls == []
     assert store.messages(course)[0]["sources"]
 
@@ -88,7 +90,7 @@ def test_ai_failure_returns_evidence_without_error_details(store, populated, fai
     course, _ = populated
     backend = FakeBackend("{}", fails=failure == "outage")
     answer = answer_question(store, course, "retrieval practice", use_ai=True, backend=backend)
-    assert answer.kind == "evidence"
+    assert answer.kind == "local"
     assert "could not be verified" in answer.notice
     assert "private provider exception" not in answer.text
 
@@ -204,7 +206,7 @@ def test_real_quote_with_unsupported_claim_falls_back(store, populated):
     result = answer_question(
         store, course, "retrieval practice", use_ai=True, backend=RejectingVerifier()
     )
-    assert result.kind == "evidence"
+    assert result.kind == "local"
     assert "could not be verified" in result.notice
 
 

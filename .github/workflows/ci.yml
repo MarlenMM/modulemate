@@ -2,6 +2,7 @@ name: Quality
 on:
   push:
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -22,4 +23,22 @@ jobs:
       - run: uv run python scripts/check_release.py
       - run: uv run pytest -q
       - run: uv run python scripts/evaluate.py
+      - run: uv run python scripts/evaluate_intelligence.py
+      - run: uv run python scripts/evaluate_answers.py
       - run: uv run pip-audit --progress-spinner off
+
+  local-models:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.12'
+          enable-cache: true
+      - run: uv sync --locked --extra ml
+      - run: uv run --extra ml python scripts/prepare_models.py
+      - run: MODULEMATE_TEST_LOCAL_ML=1 uv run --extra ml pytest tests/test_local_models.py -q
+      - run: uv run --extra ml python scripts/evaluate_intelligence.py --local-ml
+      - run: uv run --extra ml python scripts/evaluate_answers.py --local-ml
+      - run: uv run --extra ml python scripts/evaluate_answers.py --local-ml --challenge

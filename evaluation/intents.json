@@ -1,0 +1,130 @@
+[
+  {
+    "text": "What distinguishes supervised learning from unsupervised learning?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Could you unpack the meaning of covariance?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What makes a model generalize badly?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Help me grasp the principle behind gradient descent",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Describe the relationship between mass and acceleration",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What are the key ideas in this section?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "How should I interpret the confidence interval?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What does the second concept refer to?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "At what time do we have to hand in the portfolio?",
+    "intent": "admin"
+  },
+  {
+    "text": "Does the bibliography count toward the maximum length?",
+    "intent": "admin"
+  },
+  {
+    "text": "How many minutes are allocated to our talk?",
+    "intent": "admin"
+  },
+  {
+    "text": "Is there a penalty for missing a class?",
+    "intent": "admin"
+  },
+  {
+    "text": "Where can I find the submission link?",
+    "intent": "admin"
+  },
+  {
+    "text": "Which day is our final assessment?",
+    "intent": "admin"
+  },
+  {
+    "text": "What fraction of the grade comes from the presentation?",
+    "intent": "admin"
+  },
+  {
+    "text": "May I work with a partner on this task?",
+    "intent": "admin"
+  },
+  {
+    "text": "My script crashes with an IndexError; what happened?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Can you walk through the provided implementation?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Which parameters must I pass to fit?",
+    "intent": "code_help"
+  },
+  {
+    "text": "The notebook kernel stops when I run this cell",
+    "intent": "code_help"
+  },
+  {
+    "text": "How can I replace this loop with an array operation?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What does the snippet print to the console?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Why is this dictionary lookup failing?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Help me trace the recursive calls in this function",
+    "intent": "code_help"
+  },
+  {
+    "text": "Hello there!",
+    "intent": "social"
+  },
+  {
+    "text": "Many thanks for your explanation",
+    "intent": "social"
+  },
+  {
+    "text": "Catch you later",
+    "intent": "social"
+  },
+  {
+    "text": "Can you introduce yourself?",
+    "intent": "social"
+  },
+  {
+    "text": "What sort of assistance do you offer?",
+    "intent": "social"
+  },
+  {
+    "text": "Good afternoon",
+    "intent": "social"
+  },
+  {
+    "text": "Tell me something funny",
+    "intent": "social"
+  },
+  {
+    "text": "Suggest somewhere to eat tonight",
+    "intent": "social"
+  }
+]

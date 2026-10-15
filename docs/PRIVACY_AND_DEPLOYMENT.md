@@ -15,7 +15,8 @@ formal security audit are outside this release.
 
 - Usernames, salted scrypt password hashes, expiring hashed session tokens and
   short-lived login failure counters.
-- Courses, extracted document text, local FTS index, saved chats, cards, review
+- Courses, extracted document text, local FTS index, model-versioned vectors,
+  saved chats and dialogue metadata, cards, review
   events and tasks. No uploaded originals, provider keys or raw passwords in DB.
 - Local mode sends no material to an AI service. Streamlit usage stats are off.
 - Optional AI shares selected excerpts and recent conversation with the displayed
@@ -35,6 +36,8 @@ formal security audit are outside this release.
 | `MODULEMATE_AI_BASE_URL` | `https://api.openai.com/v1`; HTTPS required except loopback |
 | `MODULEMATE_AI_MODEL` | Empty: no default model commitment |
 | `MODULEMATE_AI_API_KEY` | Empty: local tools still work |
+| `MODULEMATE_LOCAL_ML` | `auto`; uses prepared local weights, `off` forces word matching |
+| `MODULEMATE_MODEL_DIR` | `~/.cache/modulemate/models`; public model files only |
 | `MODULEMATE_ALLOW_REGISTRATION` | `true`; set `false` to close new account creation |
 
 There are no per-user provider overrides. Only trusted operators should change
@@ -90,3 +93,25 @@ and [Chat Completions response formats](https://platform.openai.com/docs/api-ref
 Upload extension filters alone are not validation; the application also validates
 content and parser limits. JSON mode alone is not grounding; application-side
 source validation still runs.
+
+## Local models and schema upgrade
+
+Run `uv sync --extra ml` and `uv run --extra ml python scripts/prepare_models.py`
+to download pinned public encoder, relevance and reader weights (about 310 MiB, plus framework dependencies). Downloads contact Hugging Face
+for those public files; no course text is sent. Runtime inference loads local
+safetensors with remote code disabled and local-files-only mode. It does not
+fall back to a hosted embedding service. Keep the model directory writable only
+by trusted operators. `MODULEMATE_LOCAL_ML=off` disables neural inference.
+
+The application uses CPU inference with two Torch threads and batches passages
+outside write transactions. Large new courses can take tens of seconds or more
+to prepare. Use Library's preparation control before chatting. Exact vector
+search is bounded by the existing 12,000-passage course limit. This is not a
+high-concurrency inference service; additional deployment quotas remain necessary.
+
+Before upgrading an existing installation, back it up with SQLite's backup API.
+Schema v2 adds vectors and message metadata transactionally. It preserves v1
+accounts and content. A rollback to v1 code requires restoring the pre-upgrade
+backup; old code deliberately rejects newer schemas. Embeddings are derived
+private data, receive source-deletion cascades and are included in operator DB
+backups. Human-readable account exports omit vectors but include chat metadata.

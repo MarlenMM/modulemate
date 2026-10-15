@@ -1,0 +1,312 @@
+{
+  "scope": "Original development checks of reference-fact coverage in composed answers; not semantic correctness or blinded test accuracy.",
+  "checks": [
+    {
+      "id": "photosynthesis-0",
+      "required_facts": [
+        "chemical energy"
+      ]
+    },
+    {
+      "id": "photosynthesis-1",
+      "required_facts": [
+        "light"
+      ]
+    },
+    {
+      "id": "respiration-0",
+      "required_facts": [
+        "glucose",
+        "ATP"
+      ]
+    },
+    {
+      "id": "respiration-1",
+      "required_facts": [
+        "mitochondria"
+      ]
+    },
+    {
+      "id": "osmosis-0",
+      "required_facts": [
+        "don't establish"
+      ]
+    },
+    {
+      "id": "osmosis-1",
+      "required_facts": [
+        "movement of water",
+        "higher solute concentration"
+      ]
+    },
+    {
+      "id": "enzymes-0",
+      "required_facts": [
+        "catalysts",
+        "activation energy"
+      ]
+    },
+    {
+      "id": "enzymes-1",
+      "required_facts": [
+        "temperature",
+        "pH"
+      ]
+    },
+    {
+      "id": "median-0",
+      "required_facts": [
+        "median",
+        "less sensitive"
+      ]
+    },
+    {
+      "id": "median-1",
+      "required_facts": [
+        "two central values"
+      ]
+    },
+    {
+      "id": "mean-0",
+      "required_facts": [
+        "sum",
+        "divided"
+      ]
+    },
+    {
+      "id": "mean-1",
+      "required_facts": [
+        "Extreme observations",
+        "change"
+      ]
+    },
+    {
+      "id": "variance-0",
+      "required_facts": [
+        "Variance",
+        "squared distance"
+      ]
+    },
+    {
+      "id": "variance-1",
+      "required_facts": [
+        "square root",
+        "same units"
+      ]
+    },
+    {
+      "id": "sampling-0",
+      "required_facts": [
+        "Sampling bias",
+        "systematically favors"
+      ]
+    },
+    {
+      "id": "sampling-1",
+      "required_facts": [
+        "chance mechanism"
+      ]
+    },
+    {
+      "id": "stack-0",
+      "required_facts": [
+        "stack",
+        "most recently"
+      ]
+    },
+    {
+      "id": "stack-1",
+      "required_facts": [
+        "Push",
+        "pop"
+      ]
+    },
+    {
+      "id": "queue-0",
+      "required_facts": [
+        "queue",
+        "earliest"
+      ]
+    },
+    {
+      "id": "queue-1",
+      "required_facts": [
+        "front"
+      ]
+    },
+    {
+      "id": "binary_search-0",
+      "required_facts": [
+        "Binary search",
+        "halves"
+      ]
+    },
+    {
+      "id": "binary_search-1",
+      "required_facts": [
+        "sorted input"
+      ]
+    },
+    {
+      "id": "recursion-0",
+      "required_facts": [
+        "base case",
+        "stops"
+      ]
+    },
+    {
+      "id": "recursion-1",
+      "required_facts": [
+        "function calls itself"
+      ]
+    },
+    {
+      "id": "spacing-0",
+      "required_facts": [
+        "Spacing",
+        "separate study sessions"
+      ]
+    },
+    {
+      "id": "spacing-1",
+      "required_facts": [
+        "one day",
+        "three days",
+        "seven days"
+      ]
+    },
+    {
+      "id": "retrieval-0",
+      "required_facts": [
+        "Retrieval practice",
+        "recall"
+      ]
+    },
+    {
+      "id": "retrieval-1",
+      "required_facts": [
+        "compare your response",
+        "correct mistakes"
+      ]
+    },
+    {
+      "id": "interleaving-0",
+      "required_facts": [
+        "Interleaving",
+        "alternates"
+      ]
+    },
+    {
+      "id": "interleaving-1",
+      "required_facts": [
+        "Interleaving",
+        "Blocked practice"
+      ]
+    },
+    {
+      "id": "overfitting-0",
+      "required_facts": [
+        "Overfitting",
+        "do not generalize"
+      ]
+    },
+    {
+      "id": "overfitting-1",
+      "required_facts": [
+        "Overfitting",
+        "training"
+      ]
+    },
+    {
+      "id": "regularization-0",
+      "required_facts": [
+        "Regularization",
+        "complexity"
+      ]
+    },
+    {
+      "id": "regularization-1",
+      "required_facts": [
+        "sum of squared parameter values"
+      ]
+    },
+    {
+      "id": "validation-0",
+      "required_facts": [
+        "test set",
+        "final evaluation"
+      ]
+    },
+    {
+      "id": "validation-1",
+      "required_facts": [
+        "leaks information into training"
+      ]
+    },
+    {
+      "id": "report-0",
+      "required_facts": [
+        "2400 words",
+        "excluding references"
+      ]
+    },
+    {
+      "id": "report-1",
+      "required_facts": [
+        "18 May 2028",
+        "16:00"
+      ]
+    },
+    {
+      "id": "presentation-0",
+      "required_facts": [
+        "eight minutes"
+      ]
+    },
+    {
+      "id": "presentation-1",
+      "required_facts": [
+        "thirty percent"
+      ]
+    },
+    {
+      "id": "late-0",
+      "required_facts": [
+        "late reports",
+        "five percentage points"
+      ]
+    },
+    {
+      "id": "late-1",
+      "required_facts": [
+        "Extensions",
+        "instructor",
+        "before the deadline"
+      ]
+    },
+    {
+      "id": "korean-0",
+      "required_facts": [
+        "오전 열 시"
+      ]
+    },
+    {
+      "id": "korean-1",
+      "required_facts": [
+        "복습은 배운 내용을"
+      ]
+    },
+    {
+      "id": "chinese-0",
+      "required_facts": [
+        "概率是可能性的度量"
+      ]
+    },
+    {
+      "id": "chinese-1",
+      "required_facts": [
+        "课程报告需要两千字"
+      ]
+    }
+  ]
+}

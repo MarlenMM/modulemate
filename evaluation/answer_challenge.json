@@ -1,0 +1,153 @@
+{
+  "scope": "Additional original challenge questions written after the initial 46-case development pass. No parameter changes are fitted to this set. Reference-fact coverage is a limited proxy, not semantic accuracy.",
+  "queries": [
+    {
+      "id": "challenge-1",
+      "question": "What pigment captures light for the plant?",
+      "required_facts": [
+        "Chlorophyll",
+        "light"
+      ]
+    },
+    {
+      "id": "challenge-2",
+      "question": "Which gas is used to make sugars in the plant process?",
+      "required_facts": [
+        "carbon dioxide"
+      ]
+    },
+    {
+      "id": "challenge-3",
+      "question": "Which organelles are associated with releasing ATP from glucose?",
+      "required_facts": [
+        "mitochondria"
+      ]
+    },
+    {
+      "id": "challenge-4",
+      "question": "What crosses the membrane during osmosis?",
+      "required_facts": [
+        "water"
+      ]
+    },
+    {
+      "id": "challenge-5",
+      "question": "Are enzymes used up in the reactions they catalyze?",
+      "required_facts": [
+        "not consumed"
+      ]
+    },
+    {
+      "id": "challenge-6",
+      "question": "What is the central observation called after ordering a sample?",
+      "required_facts": [
+        "median"
+      ]
+    },
+    {
+      "id": "challenge-7",
+      "question": "Which dispersion measure is expressed in the original measurement units?",
+      "required_facts": [
+        "Standard deviation",
+        "same units"
+      ]
+    },
+    {
+      "id": "challenge-8",
+      "question": "What goes wrong when a survey systematically favors some population members?",
+      "required_facts": [
+        "Sampling bias"
+      ]
+    },
+    {
+      "id": "challenge-9",
+      "question": "Which structure uses push and pop?",
+      "required_facts": [
+        "stack",
+        "Push",
+        "pop"
+      ]
+    },
+    {
+      "id": "challenge-10",
+      "question": "Which structure enqueues at the rear?",
+      "required_facts": [
+        "queue",
+        "rear"
+      ]
+    },
+    {
+      "id": "challenge-11",
+      "question": "What growth rate describes binary search running time?",
+      "required_facts": [
+        "logarithmic"
+      ]
+    },
+    {
+      "id": "challenge-12",
+      "question": "How is infinite self-calling avoided?",
+      "required_facts": [
+        "base case"
+      ]
+    },
+    {
+      "id": "challenge-13",
+      "question": "How does spaced study separate review sessions?",
+      "required_facts": [
+        "Spacing",
+        "separate"
+      ]
+    },
+    {
+      "id": "challenge-14",
+      "question": "After recalling an answer, how should errors be handled?",
+      "required_facts": [
+        "correct mistakes"
+      ]
+    },
+    {
+      "id": "challenge-15",
+      "question": "Which practice format alternates kinds of problems?",
+      "required_facts": [
+        "Interleaving",
+        "alternates"
+      ]
+    },
+    {
+      "id": "challenge-16",
+      "question": "What penalty does the L2 method add?",
+      "required_facts": [
+        "sum of squared parameter values"
+      ]
+    },
+    {
+      "id": "challenge-17",
+      "question": "Which data split should be used for hyperparameter selection?",
+      "required_facts": [
+        "validation set",
+        "hyperparameters"
+      ]
+    },
+    {
+      "id": "challenge-18",
+      "question": "For Northstar, how should the submission file be named?",
+      "required_facts": [
+        "project code"
+      ]
+    },
+    {
+      "id": "challenge-19",
+      "question": "How many minutes of questions follow the Northstar talk?",
+      "required_facts": [
+        "two minutes"
+      ]
+    },
+    {
+      "id": "challenge-20",
+      "question": "How many points are deducted per day for a late Northstar report?",
+      "required_facts": [
+        "five percentage points"
+      ]
+    }
+  ]
+}

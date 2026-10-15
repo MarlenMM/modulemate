@@ -13,6 +13,8 @@ import streamlit as st
 from modulemate.assistant import MODES, AIBackend, ProviderError, answer_question, generate_cards
 from modulemate.db import AuthenticationError, Database, Store, UserError
 from modulemate.ingest import SUPPORTED, parse_upload
+from modulemate.local_models import ModelUnavailable, get_local_models, model_status
+from modulemate.retrieval import prepare_index
 from modulemate.search import overview, search
 from modulemate.settings import ROOT, load_settings
 from modulemate.study import calendar_export, cloze_cards, plan_tasks
@@ -56,7 +58,7 @@ def sign_in(db, settings):
         "**Bring your own sources**\n\nUpload documents or paste notes. Every course starts with an empty library."
     )
     b.info(
-        "**Learn with evidence**\n\nSearch locally, or opt in to AI explanations with source references."
+        "**Learn with evidence**\n\nAsk questions, connect ideas and practice recall with cited answers from your notes."
     )
     c.info(
         "**Build a study habit**\n\nMake recall cards, review what is due, and plan your next session."
@@ -100,7 +102,9 @@ def sign_in(db, settings):
 def source_panel(sources, key):
     if not sources:
         return
-    with st.expander(f"Check sources · {len(sources)} passages"):
+    with st.expander(
+        f"Check sources · {len(sources)} {'passage' if len(sources) == 1 else 'passages'}"
+    ):
         for i, passage in enumerate(sources, 1):
             st.text(f"[{i}] {passage['name']} · {passage['locator']}")
             st.text(passage["text"])
@@ -189,6 +193,23 @@ def library(store, course_id):
     a.metric("Documents", len(docs))
     b.metric("Searchable passages", sum(d["chunks"] for d in docs))
     c.metric("Text characters", f"{sum(d['characters'] for d in docs):,}")
+    if docs and model_status() == "ready":
+        with st.expander("Prepare local semantic search"):
+            st.caption(
+                "New passages are indexed on your first question. Prepare them now to avoid that first-question delay; existing vectors are reused."
+            )
+            if st.button("Prepare this course"):
+                try:
+                    with st.spinner("Preparing local semantic index…"):
+                        engine = get_local_models()
+                        if engine is None:
+                            raise ModelUnavailable("Local models unavailable")
+                        count = prepare_index(store, course_id, engine)
+                    st.success(f"Ready. Indexed {count} new passages locally.")
+                except ModelUnavailable:
+                    st.error(
+                        "Local models could not be used. Rerun the model setup command with --force; word search is still available."
+                    )
     with st.form(f"search_{course_id}"):
         query = st.text_input(
             "Find something in your materials",
@@ -233,6 +254,14 @@ def library(store, course_id):
                 flash("Document and derived study content removed.")
 
 
+def render_answer(text):
+    # Permit paragraph/bullet/emphasis formatting, but neutralize links, images,
+    # HTML and escape sequences from both source text and model output.
+    for char in ["\\", "[", "]", "<", ">"]:
+        text = text.replace(char, "\\" + char)
+    st.markdown(text, unsafe_allow_html=False)
+
+
 def assistant(store, course_id, settings, use_ai):
     st.header("Ask, understand, connect")
     docs = store.documents(course_id)
@@ -246,10 +275,22 @@ def assistant(store, course_id, settings, use_ai):
             "Summaries cover selected excerpts. Focus on one document or topic for more useful coverage."
         )
     if not use_ai:
-        st.info(
-            "Local evidence mode · Search returns original excerpts. Enable AI in the sidebar for explanations and guided tutoring."
+        st.caption(
+            "Local study assistant · Focused source-based answers, comparisons and recall prompts. No hosted AI requests."
+        )
+    status = model_status()
+    if status == "ready":
+        st.caption(
+            "Local semantic models installed · Understands similar wording and ranks relevant evidence."
         )
     else:
+        with st.expander("Improve matching with local machine learning"):
+            st.write(
+                "Install the local models once to match paraphrases and rank evidence. Model setup downloads public weights; your materials stay on this computer."
+            )
+            st.code("uv sync --extra ml\nuv run --extra ml python scripts/prepare_models.py")
+            st.caption(f"Local model status: {status}. Word matching remains available.")
+    if use_ai:
         st.caption(
             f"AI enabled · {settings.provider_host} · {settings.ai_model}. Check the evidence before relying on an answer."
         )
@@ -273,15 +314,28 @@ def assistant(store, course_id, settings, use_ai):
         with st.chat_message("user"):
             st.text(message["question"])
         with st.chat_message("assistant"):
-            st.text(message["answer"])
-            st.caption(message["mode"])
+            render_answer(message["answer"])
+            st.caption(message.get("metadata", {}).get("notice") or message["mode"])
             source_panel(message["sources"], message["id"])
-    question = st.chat_input("Ask about your materials…", max_chars=4000)
+    if messages:
+        suggestions = messages[-1].get("metadata", {}).get("suggestions", [])
+        for col, suggestion in zip(st.columns(max(1, len(suggestions))), suggestions, strict=False):
+            if col.button(suggestion, key=f"followup_{messages[-1]['id']}_{suggestion}"):
+                st.session_state[f"pending_question_{course_id}"] = suggestion
+    typed = st.chat_input("Ask about your materials…", max_chars=4000)
+    question = typed or st.session_state.pop(f"pending_question_{course_id}", None)
     if question:
         with st.chat_message("user"):
             st.text(question)
         with st.chat_message("assistant"):
             with st.spinner("Finding evidence and preparing your answer…"):
+                try:
+                    engine = get_local_models()
+                except ModelUnavailable:
+                    engine = None
+                    st.warning(
+                        "Local models could not be loaded. Using word matching; rerun the model setup command with --force to repair them."
+                    )
                 result = answer_question(
                     store,
                     course_id,
@@ -290,11 +344,13 @@ def assistant(store, course_id, settings, use_ai):
                     document_ids=doc_ids,
                     use_ai=use_ai,
                     backend=AIBackend(settings) if use_ai else None,
+                    engine=engine,
                 )
-            st.text(result.text)
+            render_answer(result.text)
             if result.notice:
                 st.caption(result.notice)
             source_panel([p.to_dict() for p in result.passages], "latest")
+        st.rerun()
 
 
 def cards_page(store, course_id, settings, use_ai, today):

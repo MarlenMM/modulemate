@@ -1,0 +1,12 @@
+{
+  "backend": "local neural hybrid",
+  "cold_index_and_search_seconds": 67.72,
+  "documents": 100,
+  "passages": 3700,
+  "ingest_seconds": 0.76,
+  "search_median_ms": 281.12,
+  "search_p95_ms": 316.15,
+  "exact_topic_hits": 100,
+  "scope": "Synthetic local timing only, excludes parsing subprocess startup and AI latency.",
+  "measurement_note": "Recorded while other local evaluation processes were active; timings include CPU contention."
+}

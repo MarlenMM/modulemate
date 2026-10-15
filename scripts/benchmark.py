@@ -1,5 +1,6 @@
 """Synthetic local retrieval timing at the 100-document course limit."""
 
+import argparse
 import json
 import statistics
 import sys
@@ -11,10 +12,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from modulemate.db import Database, Store  # noqa: E402
 from modulemate.ingest import parse_upload  # noqa: E402
-from modulemate.search import search  # noqa: E402
+from modulemate.local_models import get_local_models  # noqa: E402
+from modulemate.retrieval import prepare_index, retrieve  # noqa: E402
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--local-ml", action="store_true")
+    args = parser.parse_args()
+    engine = get_local_models() if args.local_ml else None
+    if args.local_ml and engine is None:
+        parser.error("Install local models first")
     with tempfile.TemporaryDirectory() as tmp:
         db = Database(Path(tmp) / "benchmark.sqlite3")
         store = Store(db, db.register("benchmark", "original synthetic benchmark"))
@@ -29,15 +37,25 @@ def main():
                 course, parse_upload(f"topic{i:03d}.txt", text.encode(), isolated=False)
             )
         ingestion = time.perf_counter() - start
+        cold = None
+        if engine:
+            start = time.perf_counter()
+            prepare_index(store, course, engine)
+            retrieve(store, course, "Topic000 process assumptions", engine=engine)
+            cold = round(time.perf_counter() - start, 2)
         durations, hits = [], 0
         for i in range(100):
             start = time.perf_counter()
-            found = search(store, course, f"Topic{i:03d} process assumptions")
+            found = retrieve(
+                store, course, f"Topic{i:03d} process assumptions", engine=engine
+            ).passages
             durations.append((time.perf_counter() - start) * 1000)
             hits += bool(found and found[0].name == f"topic{i:03d}.txt")
         print(
             json.dumps(
                 {
+                    "backend": "local neural hybrid" if engine else "lexical",
+                    "cold_index_and_search_seconds": cold,
                     "documents": 100,
                     "passages": sum(d["chunks"] for d in store.documents(course)),
                     "ingest_seconds": round(ingestion, 2),

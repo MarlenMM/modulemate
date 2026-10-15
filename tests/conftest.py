@@ -26,3 +26,9 @@ def populated(store, course):
     parsed = parse_upload("Learning Lab.md", Path("examples/learning-lab.md").read_bytes())
     document, _ = store.add_document(course, parsed)
     return course, document
+
+
+@pytest.fixture(autouse=True)
+def no_implicit_models(monkeypatch):
+    # Ordinary tests and UI flows must work offline without a local model cache.
+    monkeypatch.setenv("MODULEMATE_LOCAL_ML", "off")

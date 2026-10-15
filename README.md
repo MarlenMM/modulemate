@@ -1,125 +1,154 @@
 # ModuleMate
 
-**Your materials. Your study space.**
+**A study chatbot grounded in your own materials.**
 
-ModuleMate is a local/self-hosted student assistant that turns your own notes into
-searchable evidence, study cards and a practical revision plan. Every account
-starts empty. No university slides, assignments, group chats or extracted course
-text are bundled with this version.
+Ask a question, connect two ideas, or practice explaining a concept. ModuleMate
+finds the relevant evidence and gives a concise, cited response. Local machine
+learning handles paraphrases without an API key; optional generated explanations
+can use an OpenAI-compatible provider or local model server.
 
-![Course library with the original Learning Lab demo](docs/screenshots/library.jpg)
+Originally built for the **HIT Summer School 2026 AI and Machine Learning
+project**, ModuleMate is now a private, user-owned study workspace. The summer
+submission and the subsequent portfolio improvements are distinct;
+[HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md) explains that history.
+Every account starts empty. No university material is bundled.
 
-## What you can do
+![Local comparison and contextual follow-up](docs/screenshots/local-conversation.jpg)
 
-- **Organize courses:** separate libraries, conversations, cards and deadlines.
-- **Bring your materials:** PDF, DOCX, PPTX, TXT, Markdown, notebooks or pasted
-  notes. Page/slide/section/cell references stay attached to searchable passages.
-- **Ask with evidence:** local search works without an API key. Optional AI can
-  explain, compare, summarize selected passages or guide you with a question.
-  Its source IDs and verbatim evidence quotes are checked before display.
-- **Practice recall:** write cards, draft local cloze cards or use optional AI
-  drafts. Review before saving; reveal answers before grading; practice with a
-  shuffled quiz. Due cards follow a simple spaced review schedule.
-- **Plan study:** add tasks, dates and time estimates. Allocate daily capacity,
-  see what does not fit and export deadlines to a calendar.
-- **Control your data:** export your account, clear chats, remove documents,
-  change your password or delete your account.
+## What it does
 
-Materials are indexed for retrieval, **not used to train a model**. Upload only
-content you have permission to use. This app does not determine your course's
-rules or grant permission to redistribute someone else's material.
+- **Understand your question:** hybrid word/semantic retrieval finds related
+  wording, and a local relevance model helps rank the evidence.
+- **Keep the conversation going:** ask “Explain the second one” after a comparison,
+  follow a topic into recall practice and compare your explanation with its
+  source, or switch to a new subject. Ambiguous
+  references prompt a clarification.
+- **Answer with sources:** a local extractive reader helps select the relevant
+  sentence, with concise cited answers, comparisons, extractive
+  study outlines and recall prompts work locally. The source panel shows the original passages for each citation. Unsupported details are identified rather than filled in.
+- **Organize your learning:** separate courses; PDF, DOCX, PPTX, Markdown, text,
+  notebook and pasted-note imports; source-linked flashcards, spaced reviews,
+  practice quizzes, deadlines and daily study planning.
+- **Keep control:** account isolation, document deletion, chat clearing, exports,
+  password changes and account deletion. Hosted generation requires session consent.
 
-## Start in two commands
+Local answers select and arrange source sentences; they are **not free-form LLM
+reasoning**. The models are pretrained, not trained on your documents. The small
+intent classifier is trained on original example utterances shipped in this repo.
+
+## Start with local machine learning
 
 Requires Python **3.12 or 3.13** and [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync --locked --extra ml
+uv run --extra ml python scripts/prepare_models.py
+uv run --extra ml streamlit run app.py
+```
+
+Model preparation downloads about **310 MiB** of pinned public encoder, relevance
+and extractive-reader weights, once. Framework dependencies are additional. It does not upload documents. After setup, local inference works
+offline on CPU. Keep `--extra ml` in `uv run` commands so uv retains the optional
+model dependencies. No model download happens during a question.
+
+Open the local URL, create an account and course, and add your materials or the
+original **Learning Lab** example. New passages are indexed on the first question;
+use **Library → Prepare local semantic search** to prepare a larger course first.
+Existing vectors are reused and deleted with their source documents.
+
+For a smaller installation without neural models:
 
 ```bash
 uv sync --locked
 uv run streamlit run app.py
 ```
 
-Open the local URL printed by Streamlit, create an account, then create a course.
-Upload your own material or click **Add original Learning Lab example**. The
-example is a short, newly written fictional course, with no inherited material.
-No model downloads, LibreOffice, OCR services or API keys are needed for local
-search, manual/cloze cards, quizzes and planning.
+This still provides the conversational extractive assistant, word matching,
+summary/comparison/recall workflows, cards and planning. It can miss paraphrases.
+The UI shows whether local semantic models are available. To repair a corrupt
+model cache, rerun preparation with `--force`.
 
-For pip-based hosting, `requirements.txt` is exported from `uv.lock`:
+For pip deployments, install `requirements-ml.txt` for local ML or
+`requirements.txt` for the smaller installation. Both are exported from `uv.lock`.
+Then use `python scripts/prepare_models.py` (ML only) and
+`python -m streamlit run app.py`. The default binding is `127.0.0.1`.
 
-```bash
-python -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m streamlit run app.py
-```
+## Optional generated explanations
 
-Windows: use `.venv\Scripts\python` instead. The default address is `127.0.0.1`;
-the app is not exposed to your network automatically.
+Copy `.env.example` to `.env` only if `.env` does not already exist. Configure
+`MODULEMATE_AI_BASE_URL`, `MODULEMATE_AI_MODEL` and `MODULEMATE_AI_API_KEY` for a
+chat-completions provider supporting JSON-object output. A compatible local
+server can use a loopback HTTP URL and a placeholder key if none is required.
+There is no automatic provider/model switch.
 
-## Optional AI
+Generation remains off until the signed-in user enables it in the sidebar.
+Requests send the question, up to eight source excerpts, a resolved follow-up
+query and up to three recent conversation turns. Source filters also constrain
+conversation context. Card requests send excerpts. The provider's data terms
+apply; keys remain operator configuration, never account-export data.
 
-Copy `.env.example` to `.env` **only if you do not already have a `.env` file**.
-Set `MODULEMATE_AI_BASE_URL`, `MODULEMATE_AI_MODEL` and `MODULEMATE_AI_API_KEY`
-for an OpenAI-compatible chat-completions provider supporting JSON-object output.
-Choose a model currently available from that provider; there is no hardcoded
-model or automatic switch to a different provider. A compatible local server can
-use a loopback HTTP URL and a placeholder API key if it requires none.
+Responses must include valid source IDs and exact supporting quotes. A second
+request checks support. Invalid output, insufficient evidence or provider failure
+falls back to a local response. These checks reduce mistakes; they do not prove
+correctness, and the same model can repeat an error. Review the sources.
 
-AI remains off until the signed-in user enables it in the sidebar. Requests send
-the question, up to eight source excerpts and up to three recent conversation
-turns. Card requests send excerpts. The provider's retention/training terms apply
-to these requests; the app cannot control them. Keys are operator configuration,
-never account-export data. An unavailable provider, malformed response or invalid
-source reference falls back to clearly labeled local excerpts.
+## Measured improvements
 
-A second AI pass checks whether every claim is supported; failed checks fall back to excerpts. This adds one provider request per generated answer or card batch. Citation checks verify source IDs and quote membership with whitespace normalization. They do **not** prove
-that the explanation follows from the quote or that the source itself is true.
-Review the evidence. Summaries are sampled excerpts, not guaranteed full-document
-coverage. Search is lexical, with Unicode normalization and CJK bigrams; semantic
-paraphrases without shared words can be missed.
+On an original **46-question development set** spanning 23 passages in seven
+documents, first-result retrieval improved from **82.6% lexical to 91.3% hybrid**;
+top-three retrieval improved from **93.5% to 100%**. Paraphrase first-result hits
+improved from **66.7% to 85.7%** (21 questions). All eight unrelated questions
+returned no evidence. Complete-answer reference-fact checks passed **45/46**
+development questions and **18/20** additional challenge questions. These are
+limited fact-coverage checks, not semantic correctness scores. The results are
+small synthetic observations, not a
+blinded evaluation or general accuracy claim.
 
-## Files, limits and privacy
+At 100 synthetic documents / 3,700 passages, preparing the neural index and first
+search took **67.72 seconds**; subsequent retrieval took **281 ms median / 316 ms
+p95**, with 100/100 exact-topic hits. These timings exclude model loading,
+answer composition and hosted generation. See [validation](docs/VALIDATION.md)
+for failures, model comparisons, test commands and limitations.
 
-Extracted text is persisted in `data/modulemate.sqlite3`; original uploads are
-processed in memory and not saved to the library. `.gitignore` excludes runtime
-data, environment secrets, old corpora and old indexes. Per-file processing is
-limited to 15 MB, 2 million extracted characters, and 3,000 passages. See
-[privacy and deployment](docs/PRIVACY_AND_DEPLOYMENT.md) for all limits and the
-threat model. This is a small self-hosted app, not an audited public SaaS service.
-
-Scans and diagrams need a searchable text layer or a pasted description. DOCX
-sections are extraction units, not Word page numbers. Notebook code is never
-executed; outputs are excluded. Parser warnings remain visible in the library.
-
-## Development and checks
+## Development
 
 ```bash
-uv run pytest -q
-uv run ruff check .
-uv run ruff format --check .
-uv run pip-audit --progress-spinner off
-uv run python scripts/evaluate.py
-uv run python scripts/benchmark.py
-uv run python scripts/check_release.py
+uv run --extra ml pytest -q
+MODULEMATE_TEST_LOCAL_ML=1 uv run --extra ml pytest tests/test_local_models.py -q
+uv run --extra ml ruff check .
+uv run --extra ml ruff format --check .
+uv run --extra ml python scripts/evaluate_intelligence.py --local-ml
+uv run --extra ml python scripts/evaluate_answers.py --local-ml
+uv run --extra ml python scripts/evaluate_answers.py --local-ml --challenge
+uv run --extra ml python scripts/benchmark.py --local-ml
+uv run --extra ml pip-audit --progress-spinner off
+uv run --extra ml python scripts/check_release.py
 ```
 
-Tests cover actual file extraction, transaction rollback, concurrent first boot,
-account isolation, FTS deletion, citation rejection, outage fallback, scheduling,
-calendar encoding and a complete Streamlit study journey. They use original
-synthetic fixtures and do not need network access. The audit command uses the
-package advisory service. The evaluation is a small lexical regression set, not
-a claim of general academic accuracy.
+Ordinary tests require no network/model downloads. Real-weight tests are explicit.
+CI runs the small installation on Python 3.12 and 3.13; manually dispatched CI
+also installs and tests the neural models. CI results are separate from local checks.
 
-- [Detailed plan and acceptance criteria](PROJECT_PLAN.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Privacy, configuration, deployment and backup](docs/PRIVACY_AND_DEPLOYMENT.md)
-- [Migration from the fixed-corpus prototype](docs/MIGRATION.md)
-- [Validation evidence and known limits](docs/VALIDATION.md)
+## Limits and documentation
 
-## Repository history
+Scans and diagrams need a searchable text layer or a pasted description. Local
+English models do not establish multilingual semantic quality; CJK word matching
+remains available. Summaries sample selected passages, not an entire long course.
+Extracted source text can itself be wrong or conflict with other text, and local
+sentence selection does not resolve every ambiguity or prove entailment.
 
-The current source tree removes the previous fixed university corpus, OCR
-extracts and course-specific evaluation outputs. **Earlier Git commits and
-remote copies can still contain those files.** Removing files in a new commit
-is not history erasure. Use a clean source export for a history-free distribution;
-see [migration notes](docs/MIGRATION.md) before publishing the old repository's
-history elsewhere.
+Extracted text, vectors and study data stay in `data/modulemate.sqlite3`; original
+uploads are processed in memory. Limits include 15 MB per file and 12,000 passages
+per course. This is a small local/self-hosted app, not an audited public SaaS service.
+
+- [Intelligence improvement plan](docs/INTELLIGENCE_PLAN.md)
+- [Architecture and model references](docs/ARCHITECTURE.md)
+- [Privacy, deployment and backup](docs/PRIVACY_AND_DEPLOYMENT.md)
+- [Migration](docs/MIGRATION.md)
+- [HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md)
+- [Validation and known limits](docs/VALIDATION.md)
+
+The current source tree excludes the former university corpus and personal
+runtime data. **Earlier Git commits and remote copies may still contain removed
+files.** A new commit does not erase history. See the migration guide before
+redistributing old history. Upload only material you have permission to use.

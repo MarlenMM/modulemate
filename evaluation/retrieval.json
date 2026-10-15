@@ -1,0 +1,453 @@
+{
+  "passages": [
+    {
+      "document": "biology.md",
+      "locator": "photosynthesis",
+      "text": "Photosynthesis converts light energy into chemical energy. Chlorophyll absorbs light in the chloroplasts. The process uses water and carbon dioxide to produce sugars."
+    },
+    {
+      "document": "biology.md",
+      "locator": "respiration",
+      "text": "Cellular respiration breaks down glucose to release energy stored in ATP. In eukaryotic cells, mitochondria are a major site of this process."
+    },
+    {
+      "document": "biology.md",
+      "locator": "osmosis",
+      "text": "Osmosis is the movement of water across a selectively permeable membrane toward a region of higher solute concentration."
+    },
+    {
+      "document": "biology.md",
+      "locator": "enzymes",
+      "text": "Enzymes are biological catalysts that lower the activation energy of reactions. They are not consumed by the reaction. Their activity depends on temperature and pH."
+    },
+    {
+      "document": "statistics.md",
+      "locator": "median",
+      "text": "The median is the middle value after observations are sorted. With an even number of values, average the two central values. It is less sensitive to extreme observations than the mean."
+    },
+    {
+      "document": "statistics.md",
+      "locator": "mean",
+      "text": "The arithmetic mean is the sum of all values divided by the number of observations. Extreme observations can change it substantially."
+    },
+    {
+      "document": "statistics.md",
+      "locator": "variance",
+      "text": "Variance measures the average squared distance from the mean. Standard deviation is the square root of variance and has the same units as the original observations."
+    },
+    {
+      "document": "statistics.md",
+      "locator": "sampling",
+      "text": "A random sample selects observations using a chance mechanism. Sampling bias occurs when the selection process systematically favors some members of a population."
+    },
+    {
+      "document": "programming.md",
+      "locator": "stack",
+      "text": "A stack removes the most recently inserted item first. Push adds an item and pop removes the top item. An undo history is an example of stack behavior."
+    },
+    {
+      "document": "programming.md",
+      "locator": "queue",
+      "text": "A queue removes the earliest inserted item first. Enqueue adds an item at the rear and dequeue removes an item from the front. A printer waiting list is an example."
+    },
+    {
+      "document": "programming.md",
+      "locator": "binary_search",
+      "text": "Binary search repeatedly halves a sorted interval by comparing the target with the middle element. It requires sorted input and takes logarithmic time."
+    },
+    {
+      "document": "programming.md",
+      "locator": "recursion",
+      "text": "Recursion occurs when a function calls itself on a smaller instance of the problem. A base case stops further calls. Without a reachable base case, recursion may not terminate."
+    },
+    {
+      "document": "learning.md",
+      "locator": "spacing",
+      "text": "Spacing distributes review across separate study sessions. In the fictional study plan, reviews occur one day, three days and seven days after the first session."
+    },
+    {
+      "document": "learning.md",
+      "locator": "retrieval",
+      "text": "Retrieval practice means attempting to recall an idea before checking the answer. After trying, compare your response with the source and correct mistakes."
+    },
+    {
+      "document": "learning.md",
+      "locator": "interleaving",
+      "text": "Interleaving alternates different problem types within one practice session. Blocked practice repeats one type before switching to another."
+    },
+    {
+      "document": "machine_learning.md",
+      "locator": "overfitting",
+      "text": "Overfitting occurs when a model learns training-specific patterns that do not generalize well. Training performance can be high while performance on unseen data is poor."
+    },
+    {
+      "document": "machine_learning.md",
+      "locator": "regularization",
+      "text": "Regularization adds a penalty to the learning objective to discourage excessive model complexity. L2 regularization penalizes the sum of squared parameter values."
+    },
+    {
+      "document": "machine_learning.md",
+      "locator": "validation",
+      "text": "A validation set is used to choose hyperparameters. A test set is reserved for final evaluation after those choices. Fitting preprocessing on test data leaks information into training."
+    },
+    {
+      "document": "logistics.md",
+      "locator": "report",
+      "text": "The fictional Northstar report must contain 2400 words, excluding references. Submit it as a PDF named with your project code. The deadline is 18 May 2028 at 16:00."
+    },
+    {
+      "document": "logistics.md",
+      "locator": "presentation",
+      "text": "The fictional Northstar presentation lasts eight minutes, followed by two minutes of questions. It accounts for thirty percent of the overall project mark."
+    },
+    {
+      "document": "logistics.md",
+      "locator": "late",
+      "text": "In the fictional Northstar course, late reports lose five percentage points per day. Extensions must be arranged with the instructor before the deadline."
+    },
+    {
+      "document": "languages.md",
+      "locator": "korean",
+      "text": "금요일 시험 안내입니다. 시험 시간은 오전 열 시입니다. 복습은 배운 내용을 다시 확인하는 활동입니다."
+    },
+    {
+      "document": "languages.md",
+      "locator": "chinese",
+      "text": "概率是可能性的度量。学习计划帮助分配复习时间。课程报告需要两千字。"
+    }
+  ],
+  "queries": [
+    {
+      "id": "photosynthesis-0",
+      "question": "How do plants turn sunshine into fuel?",
+      "document": "biology.md",
+      "locator": "photosynthesis",
+      "category": "paraphrase"
+    },
+    {
+      "id": "photosynthesis-1",
+      "question": "What does chlorophyll absorb?",
+      "document": "biology.md",
+      "locator": "photosynthesis",
+      "category": "lexical"
+    },
+    {
+      "id": "respiration-0",
+      "question": "How do cells release usable energy from sugar?",
+      "document": "biology.md",
+      "locator": "respiration",
+      "category": "paraphrase"
+    },
+    {
+      "id": "respiration-1",
+      "question": "Where does cellular respiration occur?",
+      "document": "biology.md",
+      "locator": "respiration",
+      "category": "lexical"
+    },
+    {
+      "id": "osmosis-0",
+      "question": "Why does water move through a semipermeable barrier?",
+      "document": "biology.md",
+      "locator": "osmosis",
+      "category": "paraphrase"
+    },
+    {
+      "id": "osmosis-1",
+      "question": "Define osmosis",
+      "document": "biology.md",
+      "locator": "osmosis",
+      "category": "lexical"
+    },
+    {
+      "id": "enzymes-0",
+      "question": "Which biological substances speed up chemical reactions?",
+      "document": "biology.md",
+      "locator": "enzymes",
+      "category": "paraphrase"
+    },
+    {
+      "id": "enzymes-1",
+      "question": "What affects enzyme activity?",
+      "document": "biology.md",
+      "locator": "enzymes",
+      "category": "lexical"
+    },
+    {
+      "id": "median-0",
+      "question": "Which measure of center resists unusually large values?",
+      "document": "statistics.md",
+      "locator": "median",
+      "category": "paraphrase"
+    },
+    {
+      "id": "median-1",
+      "question": "How do I calculate the median with an even number of values?",
+      "document": "statistics.md",
+      "locator": "median",
+      "category": "lexical"
+    },
+    {
+      "id": "mean-0",
+      "question": "How do I compute the arithmetic average?",
+      "document": "statistics.md",
+      "locator": "mean",
+      "category": "paraphrase"
+    },
+    {
+      "id": "mean-1",
+      "question": "Can an outlier change the mean?",
+      "document": "statistics.md",
+      "locator": "mean",
+      "category": "lexical"
+    },
+    {
+      "id": "variance-0",
+      "question": "How can we quantify the spread around the average?",
+      "document": "statistics.md",
+      "locator": "variance",
+      "category": "paraphrase"
+    },
+    {
+      "id": "variance-1",
+      "question": "How are standard deviation and variance related?",
+      "document": "statistics.md",
+      "locator": "variance",
+      "category": "lexical"
+    },
+    {
+      "id": "sampling-0",
+      "question": "What happens if some people are more likely to be selected for a survey?",
+      "document": "statistics.md",
+      "locator": "sampling",
+      "category": "paraphrase"
+    },
+    {
+      "id": "sampling-1",
+      "question": "What is a random sample?",
+      "document": "statistics.md",
+      "locator": "sampling",
+      "category": "lexical"
+    },
+    {
+      "id": "stack-0",
+      "question": "Which container gives back the newest item first?",
+      "document": "programming.md",
+      "locator": "stack",
+      "category": "paraphrase"
+    },
+    {
+      "id": "stack-1",
+      "question": "What operations does a stack support?",
+      "document": "programming.md",
+      "locator": "stack",
+      "category": "lexical"
+    },
+    {
+      "id": "queue-0",
+      "question": "Which data structure serves the oldest waiting item?",
+      "document": "programming.md",
+      "locator": "queue",
+      "category": "paraphrase"
+    },
+    {
+      "id": "queue-1",
+      "question": "What does dequeue do?",
+      "document": "programming.md",
+      "locator": "queue",
+      "category": "lexical"
+    },
+    {
+      "id": "binary_search-0",
+      "question": "How can I find an item by repeatedly discarding half the possibilities?",
+      "document": "programming.md",
+      "locator": "binary_search",
+      "category": "paraphrase"
+    },
+    {
+      "id": "binary_search-1",
+      "question": "What must be true before using binary search?",
+      "document": "programming.md",
+      "locator": "binary_search",
+      "category": "lexical"
+    },
+    {
+      "id": "recursion-0",
+      "question": "How does a self-calling function know when to stop?",
+      "document": "programming.md",
+      "locator": "recursion",
+      "category": "paraphrase"
+    },
+    {
+      "id": "recursion-1",
+      "question": "What is recursion?",
+      "document": "programming.md",
+      "locator": "recursion",
+      "category": "lexical"
+    },
+    {
+      "id": "spacing-0",
+      "question": "How can revision be spread out over time?",
+      "document": "learning.md",
+      "locator": "spacing",
+      "category": "paraphrase"
+    },
+    {
+      "id": "spacing-1",
+      "question": "When are the spaced reviews in the fictional plan?",
+      "document": "learning.md",
+      "locator": "spacing",
+      "category": "lexical"
+    },
+    {
+      "id": "retrieval-0",
+      "question": "How can I test what I remember without looking at my notes first?",
+      "document": "learning.md",
+      "locator": "retrieval",
+      "category": "paraphrase"
+    },
+    {
+      "id": "retrieval-1",
+      "question": "What should I do after a retrieval attempt?",
+      "document": "learning.md",
+      "locator": "retrieval",
+      "category": "lexical"
+    },
+    {
+      "id": "interleaving-0",
+      "question": "What is the name for mixing different kinds of exercises?",
+      "document": "learning.md",
+      "locator": "interleaving",
+      "category": "paraphrase"
+    },
+    {
+      "id": "interleaving-1",
+      "question": "Compare interleaving and blocked practice",
+      "document": "learning.md",
+      "locator": "interleaving",
+      "category": "lexical"
+    },
+    {
+      "id": "overfitting-0",
+      "question": "Why can a model do well on examples it has seen but badly on new ones?",
+      "document": "machine_learning.md",
+      "locator": "overfitting",
+      "category": "paraphrase"
+    },
+    {
+      "id": "overfitting-1",
+      "question": "What is overfitting?",
+      "document": "machine_learning.md",
+      "locator": "overfitting",
+      "category": "lexical"
+    },
+    {
+      "id": "regularization-0",
+      "question": "How can we discourage a predictive model from becoming too complex?",
+      "document": "machine_learning.md",
+      "locator": "regularization",
+      "category": "paraphrase"
+    },
+    {
+      "id": "regularization-1",
+      "question": "What does L2 regularization penalize?",
+      "document": "machine_learning.md",
+      "locator": "regularization",
+      "category": "lexical"
+    },
+    {
+      "id": "validation-0",
+      "question": "Which data should I reserve until all tuning decisions are finished?",
+      "document": "machine_learning.md",
+      "locator": "validation",
+      "category": "paraphrase"
+    },
+    {
+      "id": "validation-1",
+      "question": "Why should preprocessing not be fitted on the test set?",
+      "document": "machine_learning.md",
+      "locator": "validation",
+      "category": "lexical"
+    },
+    {
+      "id": "report-0",
+      "question": "How long should the Northstar write-up be?",
+      "document": "logistics.md",
+      "locator": "report",
+      "category": "paraphrase"
+    },
+    {
+      "id": "report-1",
+      "question": "What is the Northstar report deadline?",
+      "document": "logistics.md",
+      "locator": "report",
+      "category": "lexical"
+    },
+    {
+      "id": "presentation-0",
+      "question": "How much time do we get to speak to the class?",
+      "document": "logistics.md",
+      "locator": "presentation",
+      "category": "paraphrase"
+    },
+    {
+      "id": "presentation-1",
+      "question": "How much of the mark is the Northstar presentation?",
+      "document": "logistics.md",
+      "locator": "presentation",
+      "category": "lexical"
+    },
+    {
+      "id": "late-0",
+      "question": "What happens if I hand in the Northstar report after it is due?",
+      "document": "logistics.md",
+      "locator": "late",
+      "category": "paraphrase"
+    },
+    {
+      "id": "late-1",
+      "question": "How do I request a Northstar extension?",
+      "document": "logistics.md",
+      "locator": "late",
+      "category": "lexical"
+    },
+    {
+      "id": "korean-0",
+      "question": "금요일 시험 시간",
+      "document": "languages.md",
+      "locator": "korean",
+      "category": "lexical"
+    },
+    {
+      "id": "korean-1",
+      "question": "복습",
+      "document": "languages.md",
+      "locator": "korean",
+      "category": "lexical"
+    },
+    {
+      "id": "chinese-0",
+      "question": "概率",
+      "document": "languages.md",
+      "locator": "chinese",
+      "category": "lexical"
+    },
+    {
+      "id": "chinese-1",
+      "question": "课程报告",
+      "document": "languages.md",
+      "locator": "chinese",
+      "category": "lexical"
+    }
+  ],
+  "unanswerable": [
+    "What is the current weather in Oslo?",
+    "How do tectonic plates move?",
+    "Who painted the Mona Lisa?",
+    "What is the orbital period of Neptune?",
+    "How do I repair a bicycle chain?",
+    "What are the rules of chess?",
+    "Who won the world cup in 2010?",
+    "How does a lithium battery store charge?"
+  ]
+}

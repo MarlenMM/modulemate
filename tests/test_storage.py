@@ -15,7 +15,7 @@ def test_schema_initialization_is_concurrent_and_idempotent(tmp_path):
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(lambda _: Database(path), range(4)))
     with sqlite3.connect(path) as con:
-        assert con.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert con.execute("PRAGMA user_version").fetchone()[0] == 2
         assert con.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
 
 
