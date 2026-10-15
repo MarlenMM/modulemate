@@ -1,0 +1,482 @@
+[
+  {
+    "text": "What does this concept mean?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Explain photosynthesis in simple terms",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Why is this assumption necessary?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "How does a neural network learn?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What is the definition of variance?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Can you help me understand this theory?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What is the main idea of the chapter?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Explain the difference between these methods",
+    "intent": "conceptual"
+  },
+  {
+    "text": "How are precision and recall related?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What causes this phenomenon?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Why does the algorithm converge?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Describe how this process works",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What are the limitations of this model?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Is this statement true according to the notes?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Explain that again more simply",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What about the second one?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What does it do?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Can you give an example?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "How is entropy measured?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Compare the two approaches",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Explain the idea behind recursion",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What is a random variable?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "How can I interpret this result?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What are the benefits described in the text?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Summarize the main concepts",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Quiz me on these definitions",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What assumptions are made here?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What does independence mean?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "Explain this equation",
+    "intent": "conceptual"
+  },
+  {
+    "text": "What is overfitting?",
+    "intent": "conceptual"
+  },
+  {
+    "text": "When is the assignment due?",
+    "intent": "admin"
+  },
+  {
+    "text": "How many words should I write?",
+    "intent": "admin"
+  },
+  {
+    "text": "What is the deadline for submission?",
+    "intent": "admin"
+  },
+  {
+    "text": "How much is the final exam worth?",
+    "intent": "admin"
+  },
+  {
+    "text": "Where should I upload my report?",
+    "intent": "admin"
+  },
+  {
+    "text": "What format should the project use?",
+    "intent": "admin"
+  },
+  {
+    "text": "When does the next class start?",
+    "intent": "admin"
+  },
+  {
+    "text": "How long is the presentation?",
+    "intent": "admin"
+  },
+  {
+    "text": "Who teaches this course?",
+    "intent": "admin"
+  },
+  {
+    "text": "What percentage comes from coursework?",
+    "intent": "admin"
+  },
+  {
+    "text": "How many pages does the report need?",
+    "intent": "admin"
+  },
+  {
+    "text": "Is attendance compulsory?",
+    "intent": "admin"
+  },
+  {
+    "text": "What is the policy on late submissions?",
+    "intent": "admin"
+  },
+  {
+    "text": "Are calculators allowed in the exam?",
+    "intent": "admin"
+  },
+  {
+    "text": "What should the file be called?",
+    "intent": "admin"
+  },
+  {
+    "text": "How many students can be in a group?",
+    "intent": "admin"
+  },
+  {
+    "text": "What are the marking criteria?",
+    "intent": "admin"
+  },
+  {
+    "text": "Where is the lecture room?",
+    "intent": "admin"
+  },
+  {
+    "text": "When are office hours?",
+    "intent": "admin"
+  },
+  {
+    "text": "What do I need to submit?",
+    "intent": "admin"
+  },
+  {
+    "text": "What is the word limit?",
+    "intent": "admin"
+  },
+  {
+    "text": "Can I submit after the due date?",
+    "intent": "admin"
+  },
+  {
+    "text": "Which materials are permitted during the test?",
+    "intent": "admin"
+  },
+  {
+    "text": "How is the course assessed?",
+    "intent": "admin"
+  },
+  {
+    "text": "What time is the exam?",
+    "intent": "admin"
+  },
+  {
+    "text": "When will the grades be released?",
+    "intent": "admin"
+  },
+  {
+    "text": "What is the weighting of the quiz?",
+    "intent": "admin"
+  },
+  {
+    "text": "Can we use AI in our assignment?",
+    "intent": "admin"
+  },
+  {
+    "text": "How do I contact the instructor?",
+    "intent": "admin"
+  },
+  {
+    "text": "Are references included in the word count?",
+    "intent": "admin"
+  },
+  {
+    "text": "Why does my Python code raise an error?",
+    "intent": "code_help"
+  },
+  {
+    "text": "How do I fix this traceback?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What does this function return?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Explain the for loop in this notebook",
+    "intent": "code_help"
+  },
+  {
+    "text": "How do I implement binary search?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Why is my variable undefined?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What is wrong with this code?",
+    "intent": "code_help"
+  },
+  {
+    "text": "How can I debug this program?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Why does this list index fail?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What arguments does this method take?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Explain this code snippet",
+    "intent": "code_help"
+  },
+  {
+    "text": "How do I import the library?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Why do I get a syntax error?",
+    "intent": "code_help"
+  },
+  {
+    "text": "How is this class instantiated?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What is the output of this program?",
+    "intent": "code_help"
+  },
+  {
+    "text": "How do I read a CSV in Python?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Why does the test fail?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Explain how this recursive function executes",
+    "intent": "code_help"
+  },
+  {
+    "text": "How should I handle this exception?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What does the return statement do here?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Which package provides this function?",
+    "intent": "code_help"
+  },
+  {
+    "text": "How can I vectorize this loop?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What shape should the input array have?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Why is the tensor dimension wrong?",
+    "intent": "code_help"
+  },
+  {
+    "text": "How can I run the notebook?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Help me understand this SQL query",
+    "intent": "code_help"
+  },
+  {
+    "text": "What is a KeyError?",
+    "intent": "code_help"
+  },
+  {
+    "text": "What does this pandas expression do?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Explain the implementation in the lab",
+    "intent": "code_help"
+  },
+  {
+    "text": "How do I install the dependencies?",
+    "intent": "code_help"
+  },
+  {
+    "text": "Hello",
+    "intent": "social"
+  },
+  {
+    "text": "Hi there",
+    "intent": "social"
+  },
+  {
+    "text": "Good morning",
+    "intent": "social"
+  },
+  {
+    "text": "Hey",
+    "intent": "social"
+  },
+  {
+    "text": "Thanks",
+    "intent": "social"
+  },
+  {
+    "text": "Thank you for helping",
+    "intent": "social"
+  },
+  {
+    "text": "That was helpful thanks",
+    "intent": "social"
+  },
+  {
+    "text": "Goodbye",
+    "intent": "social"
+  },
+  {
+    "text": "See you later",
+    "intent": "social"
+  },
+  {
+    "text": "How are you?",
+    "intent": "social"
+  },
+  {
+    "text": "Who are you?",
+    "intent": "social"
+  },
+  {
+    "text": "What can you do?",
+    "intent": "social"
+  },
+  {
+    "text": "Help",
+    "intent": "social"
+  },
+  {
+    "text": "What is your name?",
+    "intent": "social"
+  },
+  {
+    "text": "Nice to meet you",
+    "intent": "social"
+  },
+  {
+    "text": "Tell me a joke",
+    "intent": "social"
+  },
+  {
+    "text": "What is the weather today?",
+    "intent": "social"
+  },
+  {
+    "text": "Who won the football match?",
+    "intent": "social"
+  },
+  {
+    "text": "Recommend a restaurant",
+    "intent": "social"
+  },
+  {
+    "text": "Write a love poem",
+    "intent": "social"
+  },
+  {
+    "text": "Can you book a flight?",
+    "intent": "social"
+  },
+  {
+    "text": "Sing me a song",
+    "intent": "social"
+  },
+  {
+    "text": "How old are you?",
+    "intent": "social"
+  },
+  {
+    "text": "Are you a robot?",
+    "intent": "social"
+  },
+  {
+    "text": "Do you have feelings?",
+    "intent": "social"
+  },
+  {
+    "text": "What is your favorite color?",
+    "intent": "social"
+  },
+  {
+    "text": "Tell me about yourself",
+    "intent": "social"
+  },
+  {
+    "text": "Thanks goodbye",
+    "intent": "social"
+  },
+  {
+    "text": "What can I ask you?",
+    "intent": "social"
+  },
+  {
+    "text": "Good evening",
+    "intent": "social"
+  }
+]

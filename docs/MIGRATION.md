@@ -44,3 +44,13 @@ outside this project's control.
 4. Use local tools immediately. Configure optional AI and explicitly opt in from
    the sidebar if desired.
 5. Keep the data directory private and back it up with the documented backup API.
+
+## Version 2.0 to 2.1
+
+Back up the private database before starting the new version. The schema migration
+adds vector storage and conversation metadata without removing existing material.
+Install the optional `ml` extra and run model preparation to enable semantic
+matching. The weights are public; earlier course corpora are not restored.
+Without the extra, the enhanced extractive dialogue layer uses lexical retrieval.
+The original v2.0 validation is preserved in `VALIDATION_V2.md`; new observations
+are reported in `VALIDATION.md`.

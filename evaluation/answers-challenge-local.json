@@ -1,0 +1,199 @@
+{
+  "scope": "Additional original challenge questions written after the initial 46-case development pass. No parameter changes are fitted to this set. Reference-fact coverage is a limited proxy, not semantic accuracy.",
+  "backend": "local neural",
+  "questions": 20,
+  "reference_fact_passes": 18,
+  "resolvable_citations": 20,
+  "median_answer_ms": 125.77,
+  "p95_answer_ms": 418.22,
+  "misses": [
+    "challenge-9",
+    "challenge-12"
+  ],
+  "answers": [
+    {
+      "id": "challenge-1",
+      "question": "What pigment captures light for the plant?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Chlorophyll absorbs light in the chloroplasts. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-2",
+      "question": "Which gas is used to make sugars in the plant process?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The process uses water and carbon dioxide to produce sugars. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-3",
+      "question": "Which organelles are associated with releasing ATP from glucose?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Cellular respiration breaks down glucose to release energy stored in ATP. [1] In eukaryotic cells, mitochondria are a major site of this process. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-4",
+      "question": "What crosses the membrane during osmosis?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Osmosis is the movement of water across a selectively permeable membrane toward a region of higher solute concentration. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-5",
+      "question": "Are enzymes used up in the reactions they catalyze?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Enzymes are biological catalysts that lower the activation energy of reactions. [1] They are not consumed by the reaction. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-6",
+      "question": "What is the central observation called after ordering a sample?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The median is the middle value after observations are sorted. [2]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-7",
+      "question": "Which dispersion measure is expressed in the original measurement units?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Standard deviation is the square root of variance and has the same units as the original observations. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-8",
+      "question": "What goes wrong when a survey systematically favors some population members?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Sampling bias occurs when the selection process systematically favors some members of a population. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-9",
+      "question": "Which structure uses push and pop?",
+      "fact_coverage_pass": false,
+      "missing_reference_facts": [
+        "stack"
+      ],
+      "citation_markers_resolve": true,
+      "answer": "Push adds an item and pop removes the top item. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-10",
+      "question": "Which structure enqueues at the rear?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Enqueue adds an item at the rear and dequeue removes an item from the front. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-11",
+      "question": "What growth rate describes binary search running time?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Binary search repeatedly halves a sorted interval by comparing the target with the middle element. [1] It requires sorted input and takes logarithmic time. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-12",
+      "question": "How is infinite self-calling avoided?",
+      "fact_coverage_pass": false,
+      "missing_reference_facts": [
+        "base case"
+      ],
+      "citation_markers_resolve": true,
+      "answer": "Recursion occurs when a function calls itself on a smaller instance of the problem. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-13",
+      "question": "How does spaced study separate review sessions?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Spacing distributes review across separate study sessions. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-14",
+      "question": "After recalling an answer, how should errors be handled?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "After trying, compare your response with the source and correct mistakes. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-15",
+      "question": "Which practice format alternates kinds of problems?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Interleaving alternates different problem types within one practice session. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-16",
+      "question": "What penalty does the L2 method add?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "L2 regularization penalizes the sum of squared parameter values. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-17",
+      "question": "Which data split should be used for hyperparameter selection?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "A validation set is used to choose hyperparameters. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-18",
+      "question": "For Northstar, how should the submission file be named?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "Submit it as a PDF named with your project code. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-19",
+      "question": "How many minutes of questions follow the Northstar talk?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "The fictional Northstar presentation lasts eight minutes, followed by two minutes of questions. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    },
+    {
+      "id": "challenge-20",
+      "question": "How many points are deducted per day for a late Northstar report?",
+      "fact_coverage_pass": true,
+      "missing_reference_facts": [],
+      "citation_markers_resolve": true,
+      "answer": "In the fictional Northstar course, late reports lose five percentage points per day. [1]",
+      "notice": "Selected source sentences, composed locally. Open sources to check context."
+    }
+  ]
+}

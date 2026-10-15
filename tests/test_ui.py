@@ -39,7 +39,9 @@ def test_complete_local_study_journey(tmp_path, monkeypatch):
     page(app, "Assistant")
     app.chat_input[0].set_value("What is retrieval practice?").run()
     assert not app.exception
-    assert any("Matching excerpts" in t.value for t in app.text)
+    assert any("Retrieval practice means" in t.value for t in app.markdown)
+    click(app, "Quiz me on that")
+    assert any("in your own words" in t.value for t in app.markdown)
     page(app, "Cards")
     widget(app.radio, "Study tools").set_value("Create cards").run()
     click(app, "Draft cards from material")

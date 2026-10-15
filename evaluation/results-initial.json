@@ -1,0 +1,296 @@
+{
+  "scope": "Original synthetic development benchmark; not a blinded test or general accuracy estimate.",
+  "dataset_sha256": "fd9e7078bce199374df859c8d5b8b2bf557fc2bd20d856b8923778f2723b7afd",
+  "model": "sentence-transformers/all-MiniLM-L6-v2@1110a243fdf4706b3f48f1d95db1a4f5529b4d41:mean-v1",
+  "retrieval": {
+    "lexical": {
+      "hit_at_1": 0.8261,
+      "hit_at_3": 0.9348,
+      "mrr_at_6": 0.8659,
+      "median_ms": 0.65,
+      "p95_ms": 0.88,
+      "unanswerable_rejected": 8,
+      "by_category": {
+        "paraphrase": {
+          "count": 21,
+          "hit_at_1": 0.6667
+        },
+        "lexical": {
+          "count": 25,
+          "hit_at_1": 0.96
+        }
+      },
+      "not_ranked_first": [
+        {
+          "id": "binary_search-0",
+          "question": "How can I find an item by repeatedly discarding half the possibilities?",
+          "rank": 3,
+          "top": "stack"
+        },
+        {
+          "id": "spacing-0",
+          "question": "How can revision be spread out over time?",
+          "rank": 0,
+          "top": "binary_search"
+        },
+        {
+          "id": "retrieval-0",
+          "question": "How can I test what I remember without looking at my notes first?",
+          "rank": 0,
+          "top": "validation"
+        },
+        {
+          "id": "validation-0",
+          "question": "Which data should I reserve until all tuning decisions are finished?",
+          "rank": 3,
+          "top": "mean"
+        },
+        {
+          "id": "report-0",
+          "question": "How long should the Northstar write-up be?",
+          "rank": 3,
+          "top": "presentation"
+        },
+        {
+          "id": "presentation-0",
+          "question": "How much time do we get to speak to the class?",
+          "rank": 0,
+          "top": "binary_search"
+        },
+        {
+          "id": "late-0",
+          "question": "What happens if I hand in the Northstar report after it is due?",
+          "rank": 3,
+          "top": "report"
+        },
+        {
+          "id": "late-1",
+          "question": "How do I request a Northstar extension?",
+          "rank": 2,
+          "top": "presentation"
+        }
+      ]
+    },
+    "dense": {
+      "hit_at_1": 0.913,
+      "hit_at_3": 1.0,
+      "mrr_at_6": 0.9529,
+      "median_ms": 7.51,
+      "p95_ms": 9.57,
+      "unanswerable_rejected": 8,
+      "by_category": {
+        "paraphrase": {
+          "count": 21,
+          "hit_at_1": 0.8571
+        },
+        "lexical": {
+          "count": 25,
+          "hit_at_1": 0.96
+        }
+      },
+      "not_ranked_first": [
+        {
+          "id": "variance-0",
+          "question": "How can we quantify the spread around the average?",
+          "rank": 3,
+          "top": "mean"
+        },
+        {
+          "id": "stack-0",
+          "question": "Which container gives back the newest item first?",
+          "rank": 2,
+          "top": "queue"
+        },
+        {
+          "id": "late-0",
+          "question": "What happens if I hand in the Northstar report after it is due?",
+          "rank": 2,
+          "top": "report"
+        },
+        {
+          "id": "late-1",
+          "question": "How do I request a Northstar extension?",
+          "rank": 2,
+          "top": "report"
+        }
+      ]
+    },
+    "hybrid": {
+      "hit_at_1": 0.913,
+      "hit_at_3": 1.0,
+      "mrr_at_6": 0.9529,
+      "median_ms": 7.61,
+      "p95_ms": 10.67,
+      "unanswerable_rejected": 8,
+      "by_category": {
+        "paraphrase": {
+          "count": 21,
+          "hit_at_1": 0.8571
+        },
+        "lexical": {
+          "count": 25,
+          "hit_at_1": 0.96
+        }
+      },
+      "not_ranked_first": [
+        {
+          "id": "stack-0",
+          "question": "Which container gives back the newest item first?",
+          "rank": 2,
+          "top": "queue"
+        },
+        {
+          "id": "report-0",
+          "question": "How long should the Northstar write-up be?",
+          "rank": 2,
+          "top": "presentation"
+        },
+        {
+          "id": "late-0",
+          "question": "What happens if I hand in the Northstar report after it is due?",
+          "rank": 2,
+          "top": "report"
+        },
+        {
+          "id": "late-1",
+          "question": "How do I request a Northstar extension?",
+          "rank": 3,
+          "top": "report"
+        }
+      ]
+    },
+    "hybrid_reranked": {
+      "hit_at_1": 0.7609,
+      "hit_at_3": 0.8043,
+      "mrr_at_6": 0.7826,
+      "median_ms": 18.35,
+      "p95_ms": 25.15,
+      "unanswerable_rejected": 8,
+      "by_category": {
+        "paraphrase": {
+          "count": 21,
+          "hit_at_1": 0.4762
+        },
+        "lexical": {
+          "count": 25,
+          "hit_at_1": 1.0
+        }
+      },
+      "not_ranked_first": [
+        {
+          "id": "photosynthesis-0",
+          "question": "How do plants turn sunshine into fuel?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "median-0",
+          "question": "Which measure of center resists unusually large values?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "variance-0",
+          "question": "How can we quantify the spread around the average?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "stack-0",
+          "question": "Which container gives back the newest item first?",
+          "rank": 2,
+          "top": "queue"
+        },
+        {
+          "id": "queue-0",
+          "question": "Which data structure serves the oldest waiting item?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "spacing-0",
+          "question": "How can revision be spread out over time?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "retrieval-0",
+          "question": "How can I test what I remember without looking at my notes first?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "interleaving-0",
+          "question": "What is the name for mixing different kinds of exercises?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "validation-0",
+          "question": "Which data should I reserve until all tuning decisions are finished?",
+          "rank": 0,
+          "top": null
+        },
+        {
+          "id": "report-0",
+          "question": "How long should the Northstar write-up be?",
+          "rank": 2,
+          "top": "presentation"
+        },
+        {
+          "id": "presentation-0",
+          "question": "How much time do we get to speak to the class?",
+          "rank": 0,
+          "top": null
+        }
+      ]
+    }
+  },
+  "documents": 7,
+  "passages": 23,
+  "queries": 46,
+  "unanswerable_queries": 8,
+  "cold_index_and_first_search_seconds": 0.122,
+  "intent": {
+    "count": 32,
+    "accuracy": 0.7812,
+    "misses": [
+      {
+        "text": "Could you unpack the meaning of covariance?",
+        "expected": "conceptual",
+        "predicted": "social"
+      },
+      {
+        "text": "How should I interpret the confidence interval?",
+        "expected": "conceptual",
+        "predicted": "admin"
+      },
+      {
+        "text": "Is there a penalty for missing a class?",
+        "expected": "admin",
+        "predicted": "social"
+      },
+      {
+        "text": "May I work with a partner on this task?",
+        "expected": "admin",
+        "predicted": "code_help"
+      },
+      {
+        "text": "Can you walk through the provided implementation?",
+        "expected": "code_help",
+        "predicted": "social"
+      },
+      {
+        "text": "Which parameters must I pass to fit?",
+        "expected": "code_help",
+        "predicted": "admin"
+      },
+      {
+        "text": "What does the snippet print to the console?",
+        "expected": "code_help",
+        "predicted": "conceptual"
+      }
+    ]
+  },
+  "total_seconds": 4.548
+}

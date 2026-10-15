@@ -8,10 +8,14 @@ from dataclasses import dataclass, field
 from typing import Protocol
 
 from modulemate.db import UserError, checked_text
-from modulemate.search import Passage, overview, search, tokens
+from modulemate.dialogue import compose_local, plan_turn, social_reply
+from modulemate.intent import classify
+from modulemate.retrieval import retrieve, scoped_passages
+from modulemate.search import Passage, _scope, overview
 from modulemate.settings import Settings
 
 MODES = {
+    "Auto": "Choose the most useful response style for the question.",
     "Explain": "Explain clearly with a short example only if supported by the sources.",
     "Summarize": "Summarize the selected passages as a study outline. This is a sampled overview, never claim to cover the whole document/course.",
     "Compare": "Compare the requested ideas. Identify missing evidence instead of filling gaps.",
@@ -27,7 +31,12 @@ spacing, do not claim it improves retention or explain how memory works. Summari
 should faithfully compress stated facts. Socratic questions should ask the learner
 to apply or explain the actual definition without assuming an unstated benefit.
 Do not claim citation validation proves that a statement is true. Follow the requested
-study mode. Answer in the user's language. Keep answers concise and useful.
+study mode. Answer in the user's language. Lead with the direct answer, then a
+short explanation. Use two labeled paragraphs for comparisons; cover both sides or
+identify the missing side. Avoid repetitive introductions, raw excerpts, excessive
+headings, and generic study advice. A contextual follow-up should continue the
+resolved topic in retrieval_question, while answering the actual user question.
+Keep answers concise and useful.
 Return only a JSON object with this exact structure:
 {"insufficient":false,"sections":[{"text":"One factual paragraph or bullet, with no citation markup or URLs", "evidence":[{"source_id":1,"quote":"Exact supporting substring from that passage"}]}]}
 Every section must have evidence. Quotes must contain at least 12 characters and match
@@ -123,6 +132,8 @@ class Answer:
     passages: list[Passage] = field(default_factory=list)
     kind: str = "evidence"
     notice: str = ""
+    suggestions: list[str] = field(default_factory=list)
+    metadata: dict = field(default_factory=dict)
 
 
 def _payload(passages, question, mode, history):
@@ -195,75 +206,131 @@ def validate_answer(raw, passages):
     return "\n\n".join(parts)
 
 
-def evidence_answer(passages, notice=""):
-    if not passages:
-        return Answer(
-            "I couldn't find matching material. Try a distinctive term from your notes, choose another document, or add the missing material.",
-            kind="empty",
-            notice=notice,
-        )
-    text = "Matching excerpts from your materials:\n\n" + "\n\n".join(
-        f"[{i}] {p.name} · {p.locator}\n{p.text}" for i, p in enumerate(passages, 1)
-    )
-    return Answer(
-        text,
-        passages,
-        "evidence",
-        notice or "Local evidence mode shows source text. It does not generate an explanation.",
-    )
-
-
 def answer_question(
-    store, course_id, question, *, mode="Explain", document_ids=None, use_ai=False, backend=None
+    store,
+    course_id,
+    question,
+    *,
+    mode="Auto",
+    document_ids=None,
+    use_ai=False,
+    backend=None,
+    engine=None,
 ):
     question = checked_text(question, "Question", 4000)
     if mode not in MODES:
         raise UserError("Choose a supported study mode.")
-    history = store.messages(course_id, 6)
-    query = question
-    # Carry a previous question only for short referential follow-ups, not topic changes.
-    if (
-        history
-        and len(tokens(question)) <= 5
-        and re.search(r"\b(it|that|those|they|more|again|example|second|first)\b", question, re.I)
-    ):
-        query = history[-1]["question"][:1000] + " " + question
-    passages = search(store, course_id, query, document_ids)
-    sampled = mode == "Summarize"
-    if sampled and (not tokens(question) or not passages):
-        passages = overview(store, course_id, document_ids)
-    notice = "This overview covers up to 8 selected passages, not every page." if sampled else ""
-    result = evidence_answer(passages, notice)
-    if use_ai and backend and passages:
-        try:
-            text = validate_answer(
-                backend.complete(SYSTEM, _payload(passages, question, mode, history)), passages
+    # Even social/clarification responses must validate course/document scope.
+    with store.transaction() as (con, user):
+        _scope(con, store, user, course_id, document_ids)
+    history = store.messages(course_id, 12)
+    if document_ids is not None:
+        allowed = set(document_ids)
+        history = [
+            m
+            for m in history
+            if m["sources"] and all(p["document_id"] in allowed for p in m["sources"])
+        ]
+    plan = plan_turn(question, mode, history)
+    intent = classify(question)
+    plan.intent = intent.label if intent.confidence >= 0.45 else "conceptual"
+    metadata = {
+        "intent": intent.label,
+        "intent_score": round(intent.confidence, 3),
+        "query": plan.query,
+        "topic": plan.topic,
+        "subjects": plan.subjects,
+        "resolved_mode": plan.mode,
+        "used_context": plan.used_context,
+        "recall_review": plan.review_attempt,
+    }
+    reply = social_reply(question)
+    if reply:
+        result = Answer(reply, kind="conversation")
+    elif plan.clarification:
+        result = Answer(plan.clarification, kind="clarification")
+    else:
+        found = retrieve(store, course_id, plan.query, document_ids, engine=engine, limit=8)
+        passages = found.passages
+        # Retrieve each comparison side separately. A good match on one side
+        # must not consume the entire context budget or conceal a missing side.
+        if plan.subjects:
+            groups = [
+                retrieve(store, course_id, subject, document_ids, engine=engine, limit=4).passages
+                for subject in plan.subjects
+            ]
+            merged = []
+            for i in range(4):
+                for group in groups:
+                    if i < len(group) and group[i] not in merged:
+                        merged.append(group[i])
+            passages = merged[:8]
+        if plan.context_ids:
+            passages = [
+                p
+                for p in scoped_passages(store, course_id, document_ids)
+                if p.id in plan.context_ids
+            ][:8]
+        if plan.overview:
+            passages = overview(store, course_id, document_ids, limit=8)
+        metadata["retrieval"] = found.method
+        metadata["indexed_passages"] = found.indexed
+        if passages:
+            text, suggestions, notice = compose_local(plan, passages, engine)
+            if plan.mode == "Summarize":
+                notice += " This covers up to 8 selected passages, not every page."
+            result = Answer(text, passages, "local", notice, suggestions)
+        else:
+            result = Answer(
+                "I couldn't find enough evidence in the selected materials to answer that. Add the relevant notes, select another document, or ask about a topic covered here.",
+                kind="empty",
+                notice=found.notice,
             )
-            if text:
-                check_support(backend, text, passages)
-                result = Answer(
-                    text,
-                    passages,
-                    "ai",
-                    notice
-                    or "Check the cited passages. Source checks do not guarantee the explanation is correct.",
+        if use_ai and backend and passages:
+            try:
+                payload = _payload(passages, question, plan.mode, history)
+                payload["retrieval_question"] = plan.query
+                payload["intent_hint"] = {
+                    "admin": "Give the requested requirement, date or number first. Do not infer unstated policies.",
+                    "code_help": "Walk through the supplied code or algorithm; never claim to execute it.",
+                    "conceptual": "Define the idea first and then explain relationships supported by the sources.",
+                    "social": "Use the actual evidence to decide whether this question is covered.",
+                }[plan.intent]
+                text = validate_answer(backend.complete(SYSTEM, payload), passages)
+                if text:
+                    check_support(backend, text, passages)
+                    result = Answer(
+                        text,
+                        passages,
+                        "ai",
+                        "Check the cited passages. Source checks do not guarantee the explanation is correct.",
+                        result.suggestions,
+                    )
+                    if plan.mode == "Summarize":
+                        result.notice += " This covers selected passages, not every page."
+                else:
+                    result.notice = (
+                        "The AI found insufficient evidence. The local response below uses the closest source statements. "
+                        + result.notice
+                    )
+            except (ProviderError, ValueError, TypeError, KeyError):
+                result.notice = (
+                    "AI was unavailable or its answer could not be verified. Showing a local response. "
+                    + result.notice
                 )
-            else:
-                result = evidence_answer(
-                    passages,
-                    "The AI found insufficient evidence for an answer. These are the closest excerpts.",
-                )
-        except (ProviderError, ValueError, TypeError, KeyError):
-            result = evidence_answer(
-                passages,
-                "AI was unavailable or its answer could not be verified against the sources. Showing local excerpts instead.",
-            )
+        if found.notice and found.notice not in result.notice:
+            result.notice = found.notice + " " + result.notice
+    metadata.update(
+        {"notice": result.notice, "suggestions": result.suggestions, "kind": result.kind}
+    )
+    result.metadata = metadata
     store.add_message(
         course_id,
         question,
         result.text,
         [p.to_dict() for p in result.passages],
-        f"{mode} · {result.kind}",
+        f"{plan.mode} · {result.kind}",
+        metadata,
     )
     return result
 

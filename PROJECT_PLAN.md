@@ -1,4 +1,8 @@
-# ModuleMate: personal study workspace
+# ModuleMate: personal study workspace — version 2.0 delivery plan
+
+This completed plan records the October 14 migration. The current intelligence
+upgrade is specified and tracked in [the improvement plan](docs/INTELLIGENCE_PLAN.md);
+current measurements are in [validation](docs/VALIDATION.md).
 
 ## Product decision
 Replace the fixed university corpus and course-specific classifier with a general,
