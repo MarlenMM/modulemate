@@ -154,6 +154,14 @@ fine-tune is not a substitute for correcting those paths.
     meant to catch, adding cost without the intended benefit. The trial was reverted
     to the previously validated source. Those semantic errors remain documented;
     passing model review must not be presented as correctness certification.
+18. **Real document and card checks.** A temporary copy of the actual workspace
+    produced a cited partial PDF summary and a missing-location response without
+    changing the original content digest. The subsequent real card call failed
+    because every model-written back differed from its source. Cards now select
+    excerpt IDs and receive copied source text, retaining exact-back validation
+    for older provider responses and removing duplicate backs. Conversation outputs
+    retain their earlier QA checkpoint; the isolated card correction has separate
+    unit and real-model checks.
 
 The core and transfer challenges retain actual answers, source references, model
 calls, timings and source/fixture fingerprints. Their word/phrase checks are only

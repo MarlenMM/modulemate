@@ -4,7 +4,7 @@ import pytest
 
 from modulemate.assistant import ProviderError, answer_question, generate_cards, validate_answer
 from modulemate.ingest import parse_upload
-from modulemate.search import overview, search
+from modulemate.search import Passage, overview, search
 
 
 class FakeBackend:
@@ -169,6 +169,57 @@ def test_card_validation_and_source_binding(store, populated):
     assert drafts[0]["document_id"] == document
     store.add_card(course, **drafts[0])
     assert len(store.cards(course)) == 1
+
+
+def test_cards_select_real_back_spans_without_regenerating_their_text():
+    first = Passage(
+        1,
+        "one",
+        "Long note.md",
+        "part 1",
+        "#literal\n" + "A storage rule is recorded precisely for this demonstration. " * 14,
+    )
+    definition = "Spacing distributes review sessions across time instead of concentrating them in one sitting."
+    second = Passage(2, "two", "Study.md", "part 1", "# Study\n## Spacing\n" + definition)
+
+    class SpanBackend(FakeBackend):
+        def complete(self, system, payload):
+            if "source_evidence" in payload:
+                self.calls.append((system, payload))
+                assert payload["source_evidence"][0]["excerpts"][0]["quote"].startswith("#literal")
+                selected = payload["source_evidence"][1]["excerpts"][0]["evidence_id"]
+                assert selected > 2  # Excerpt IDs are not source IDs.
+                return json.dumps(
+                    {
+                        "cards": [
+                            {"front": "How are spaced reviews arranged?", "evidence_id": selected},
+                            {"front": "What is the spacing definition?", "evidence_id": selected},
+                        ]
+                    }
+                )
+            return super().complete(system, payload)
+
+    cards = generate_cards([first, second], SpanBackend())
+    assert cards == [
+        {
+            "front": "How are spaced reviews arranged?",
+            "back": definition,
+            "document_id": "two",
+            "locator": "part 1",
+        }
+    ]
+
+
+@pytest.mark.parametrize("evidence_id", [0, True, 999])
+def test_cards_never_guess_a_back_for_an_invalid_span_id(evidence_id):
+    passage = Passage(
+        1, "one", "Note.md", "part 1", "A real supporting sentence defines the topic."
+    )
+    backend = FakeBackend(
+        json.dumps({"cards": [{"front": "What defines the topic?", "evidence_id": evidence_id}]})
+    )
+    with pytest.raises(ValueError, match="No card answers matched"):
+        generate_cards([passage], backend)
 
 
 def test_prompt_injection_stays_data_and_tracking_markdown_rejected(store, course):

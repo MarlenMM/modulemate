@@ -119,3 +119,9 @@ export. All saved artifacts remain course scoped. The public conversation fixtur
 and offline tests exercise filters, migration, continuation, numeric routines,
 citation binding, errors and UI flows. Real-weight checks are separate from
 network-free CI. We do not fine-tune a language model on private coursework.
+
+Generated cards select an evidence-span ID. The app copies the actual source
+substring into the back, strips leading heading boilerplate from candidates and
+deduplicates identical backs. It validates each selected ID and its original source
+again before checking the question's support. Legacy provider responses with an
+explicit back still require an exact source match. Cards remain drafts for review.

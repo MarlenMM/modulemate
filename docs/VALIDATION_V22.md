@@ -7,7 +7,7 @@ missing. Text explicitly supplied in a request can also be rewritten or organize
 
 ## Automated and integration checks
 
-The offline run passed **170 tests**, with five real-model tests intentionally
+The offline run passed **174 tests**, with five real-model tests intentionally
 skipped. Those **five real-model integration tests** were run separately against
 the prepared local encoder, reranker and extractive reader. Lint, formatting,
 legacy lexical evaluation and the installed-environment dependency audit were
@@ -21,6 +21,22 @@ journeys. Model tests are separate so CI does not silently download weights.
 The release check scans tracked files for runtime databases, private corpus paths,
 private environment files and obvious keys. It does not erase or certify Git
 history. No coursework or private chat output is included in the evaluation.
+
+A real PDF was checked on a temporary copy of the local workspace. The assistant
+produced a partial summary with cited pages and correctly reported the missing
+seminar location. It did not strictly obey the requested five-bullet format. The
+original workspace's content digest remained unchanged. This was a document-task
+smoke check, not a statistics curriculum benchmark; its private output is not published.
+
+That check exposed an actual card-copying failure. Card generation now selects
+source-span IDs, so the app supplies the original answer text and removes duplicate
+backs instead of asking the model to reproduce a quotation. Real local generation
+then produced cards with source-matching backs. Invalid span IDs are rejected.
+The final isolated Streamlit AppTest opened a fresh workspace without login,
+loaded the original Learning Lab example, selected the prepared 9B model, and
+completed a two-sentence comparison with two source passages. The same check
+produced two distinct cards with exact source backs after deduplication. This
+tested application code/widget state; it did not inspect the blocked live browser.
 
 ## Local conversation observations
 
@@ -61,6 +77,21 @@ A separate four-case, writer-only trial of 512-token capped thinking took about
 28–33 seconds per draft and still mishandled a false premise. A five-turn broader
 critic trial approved unsupported details. Neither experiment was adopted. These
 small exploratory trials are not controlled estimates of a model's general ability.
+
+The subsequent eight-turn probe on new fictional facts satisfied 7/8 constraints.
+Manual reading found the current quantity, explicit permission, optional item,
+reservation condition, missing funder, author and polite rewrite consistent with
+their provided text. The weight question correctly disclosed absent measurements
+and described the assembly directions, but used a conservative response type.
+This small probe was written after the general-set failures, so it is not a blinded
+or representative accuracy estimate.
+
+[Recorded questions, answers, actual source chunks and timings](../evaluation/observations/v2.2-conversations.json)
+retain all three runs, including failures and source/data fingerprints. The full
+32-turn run predates the presentation cleanup. The seven-turn recovery and eight-turn
+probe match QA checkpoint commit `645a62d`; the later card-only correction was
+verified separately. Medians were 17.29, 16.88 and 9.61 seconds respectively, on this
+machine and these small inputs; they are not a general latency guarantee.
 
 ## Boundaries and remaining limits
 

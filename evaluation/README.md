@@ -8,6 +8,10 @@ partial exercise help, missing evidence, follow-ups, text rewriting and hostile
 source instructions. Run `scripts/evaluate_conversations.py --suite general`.
 The runner records actual prose, source context, model calls, latency and code/data
 fingerprints in ignored `results/`. Phrase checks alone do not establish correctness.
+[The 2.2 observations](observations/v2.2-conversations.json) retain 47 original-fixture
+responses from the full run, focused recovery and new-fact probe, with source chunks
+and provenance. The full run predates the final presentation cleanup; the other
+two match the recorded QA checkpoint before the later card-only correction.
 
 `conversation_challenge.json` and `conversation_transfer.json` retain earlier
 development cases. Some predate the clarified source-only answer policy and are

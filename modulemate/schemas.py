@@ -83,8 +83,7 @@ CARD_SCHEMA = _object(
             "items": _object(
                 {
                     "front": STRING,
-                    "back": STRING,
-                    "source_id": {"type": "integer", "minimum": 1, "maximum": 48},
+                    "evidence_id": {"type": "integer", "minimum": 1},
                 }
             ),
         }
