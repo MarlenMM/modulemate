@@ -70,7 +70,8 @@ never silently falls back to a hosted API.
 - One local workspace replaces accounts. Existing account databases are backed up
   and migrated, preserving every course and its documents, chats and study tools.
 - Cards support spaced review and practice quizzes; a capacity-aware planner exports
-  deadlines to a calendar. Documents, courses and conversations can be managed locally.
+  deadlines to a calendar. Generated cards select actual source spans for their
+  backs and remove duplicates. Documents, courses and conversations can be managed locally.
 
 ## Supported materials
 

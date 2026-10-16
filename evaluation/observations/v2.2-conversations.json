@@ -16,7 +16,6 @@
       "source_changed_during_run": false,
       "name": "full-development-run",
       "note": "Before final source-footer cleanup; manual semantic errors remain below.",
-      "matches_retained_code": false,
       "constraint_checks_satisfied": 30,
       "turns": 32,
       "median_seconds": 17.29,
@@ -638,7 +637,8 @@
             }
           ]
         }
-      ]
+      ],
+      "matches_qa_checkpoint": false
     },
     {
       "model": "Qwen3.5 9B · on this Mac",
@@ -647,8 +647,7 @@
       "started_at": "2026-10-16T13:20:06.262690+00:00",
       "source_changed_during_run": false,
       "name": "presentation-recovery",
-      "note": "Focused rerun with retained final source. One phrase check misses seedling versus plant; unsupported attribution remains.",
-      "matches_retained_code": true,
+      "note": "Focused rerun at the QA checkpoint, before the later card-only correction. The plant/seedling phrase failure also contains an unsupported attribution; see semantic_limits.",
       "constraint_checks_satisfied": 6,
       "turns": 7,
       "median_seconds": 16.88,
@@ -804,7 +803,8 @@
             }
           ]
         }
-      ]
+      ],
+      "matches_qa_checkpoint": true
     },
     {
       "model": "Qwen3.5 9B · on this Mac",
@@ -814,7 +814,6 @@
       "source_changed_during_run": false,
       "name": "new-fact-probe",
       "note": "New facts written after general-set observations, before this probe was run; not independent population accuracy.",
-      "matches_retained_code": true,
       "constraint_checks_satisfied": 7,
       "turns": 8,
       "median_seconds": 9.61,
@@ -950,7 +949,10 @@
           "constraint_errors": [],
           "sources": []
         }
-      ]
+      ],
+      "matches_qa_checkpoint": true
     }
-  ]
+  ],
+  "qa_checkpoint_commit": "645a62d6ff184622975ebf247d1748765df4eaa9",
+  "subsequent_changes": "The later card-span protocol and duplicate-back correction do not change conversational answering logic. Those changes were tested separately."
 }
