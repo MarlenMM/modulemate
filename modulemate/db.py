@@ -1,12 +1,8 @@
-"""Transactional SQLite storage. Only authenticated Stores expose user content."""
+"""Transactional single-user storage, with lossless migration from account databases."""
 
 from __future__ import annotations
 
-import hashlib
-import hmac
 import json
-import re
-import secrets
 import sqlite3
 import time
 import uuid
@@ -14,18 +10,13 @@ from contextlib import contextmanager
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
-SCHEMA_VERSION = 2
-SESSION_SECONDS = 12 * 60 * 60
+SCHEMA_VERSION = 3
 MAX_DOCUMENTS = 100
 MAX_CHUNKS = 12000
 
 
 class UserError(ValueError):
     """A safe, actionable error that can be shown in the interface."""
-
-
-class AuthenticationError(UserError):
-    pass
 
 
 def uid() -> str:
@@ -43,51 +34,15 @@ def checked_text(value: str, label: str, limit: int) -> str:
     return value
 
 
-def password_hash(password: str, salt: str) -> str:
-    derived = hashlib.scrypt(
-        password.encode(), salt=bytes.fromhex(salt), n=32768, r=8, p=3, maxmem=128 * 1024 * 1024
-    ).hex()
-    return "scrypt$32768$8$3$" + derived
-
-
-def password_matches(password: str, user) -> bool:
-    stored = user["password"]
-    if stored.startswith("scrypt$32768$8$3$"):
-        derived = password_hash(password, user["salt"])
-    elif re.fullmatch(r"[0-9a-f]{128}", stored):
-        # Compatibility with early local development accounts; upgrade on login.
-        derived = hashlib.scrypt(
-            password.encode(), salt=bytes.fromhex(user["salt"]), n=16384, r=8, p=1
-        ).hex()
-    else:
-        return False
-    return hmac.compare_digest(derived, stored)
-
-
-def validate_password(password: str) -> None:
-    if not 12 <= len(password) <= 256:
-        raise UserError("Use a password with 12–256 characters, ideally a unique passphrase.")
-
-
-def token_hash(token: str) -> str:
-    return hashlib.sha256(token.encode()).hexdigest()
-
-
 SCHEMA = """
-CREATE TABLE users (
- id TEXT PRIMARY KEY, username TEXT NOT NULL UNIQUE, password TEXT NOT NULL,
- salt TEXT NOT NULL, created_at TEXT NOT NULL
+CREATE TABLE workspace (
+ id TEXT PRIMARY KEY CHECK(id='local'), name TEXT NOT NULL, created_at TEXT NOT NULL
 );
-CREATE TABLE sessions (
- token TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
- expires_at REAL NOT NULL
-);
-CREATE TABLE login_attempts (username TEXT PRIMARY KEY, failures INTEGER NOT NULL, started REAL NOT NULL);
 CREATE TABLE courses (
- id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL REFERENCES workspace(id) ON DELETE CASCADE,
  name TEXT NOT NULL, description TEXT NOT NULL, created_at TEXT NOT NULL
 );
-CREATE INDEX courses_owner ON courses(user_id);
+CREATE INDEX courses_owner ON courses(workspace_id);
 CREATE TABLE documents (
  id TEXT PRIMARY KEY, course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
  name TEXT NOT NULL, digest TEXT NOT NULL, text TEXT NOT NULL, warnings TEXT NOT NULL,
@@ -109,7 +64,7 @@ END;
 CREATE TABLE messages (
  id TEXT PRIMARY KEY, course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
  question TEXT NOT NULL, answer TEXT NOT NULL, sources TEXT NOT NULL, mode TEXT NOT NULL,
- created_at TEXT NOT NULL
+ created_at TEXT NOT NULL, metadata TEXT NOT NULL DEFAULT '{}'
 );
 CREATE INDEX messages_course ON messages(course_id, created_at);
 CREATE TABLE cards (
@@ -130,6 +85,11 @@ CREATE TABLE tasks (
  done INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL
 );
 CREATE INDEX tasks_course_due ON tasks(course_id, due);
+CREATE TABLE embeddings (
+ chunk_id INTEGER NOT NULL REFERENCES chunks(id) ON DELETE CASCADE,
+ model TEXT NOT NULL, digest TEXT NOT NULL, dimensions INTEGER NOT NULL,
+ vector BLOB NOT NULL, PRIMARY KEY(chunk_id, model)
+);
 """
 
 
@@ -137,6 +97,15 @@ class Database:
     def __init__(self, path: Path):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        # Back up the complete legacy database before changing any account tables.
+        # The online backup includes committed WAL content; copies are private and ignored.
+        if self.path.exists():
+            with sqlite3.connect(self.path) as source:
+                if source.execute("PRAGMA user_version").fetchone()[0] in (1, 2):
+                    backup = self.path.with_name(f"{self.path.stem}.pre-v3-{uid()[:8]}.sqlite3")
+                    with sqlite3.connect(backup) as target:
+                        source.backup(target)
+                    backup.chmod(0o600)
         with self.connect() as con:
             # Serialize first-run migration across sessions/processes.
             con.execute("BEGIN IMMEDIATE")
@@ -150,7 +119,8 @@ class Database:
                     if sqlite3.complete_statement(statement):
                         con.execute(statement)
                         statement = ""
-                version = 1
+                con.execute("INSERT INTO workspace VALUES ('local','My workspace',?)", (now_iso(),))
+                version = SCHEMA_VERSION
             if version < 2:
                 con.execute("""CREATE TABLE embeddings (
                     chunk_id INTEGER NOT NULL REFERENCES chunks(id) ON DELETE CASCADE,
@@ -158,6 +128,40 @@ class Database:
                     vector BLOB NOT NULL, PRIMARY KEY(chunk_id, model)
                 )""")
                 con.execute("ALTER TABLE messages ADD COLUMN metadata TEXT NOT NULL DEFAULT '{}'")
+            if version < 3:
+                # All previous local accounts now share this one workspace. Keep course
+                # IDs, names and every dependent record, including duplicate course names.
+                # SQLite renames update dependent foreign keys. Merge into an existing
+                # owner first, then remove credential columns without dropping a parent.
+                owner = con.execute(
+                    "SELECT id FROM users ORDER BY created_at,id LIMIT 1"
+                ).fetchone()
+                if owner:
+                    owner_id = owner[0]
+                    con.execute("UPDATE courses SET user_id=?", (owner_id,))
+                    con.execute("DELETE FROM sessions")
+                    con.execute("DELETE FROM users WHERE id!=?", (owner_id,))
+                else:
+                    owner_id = "local"
+                    con.execute("INSERT INTO users VALUES ('local','local','','',?)", (now_iso(),))
+                con.execute("DROP TABLE sessions")
+                con.execute("DROP TABLE login_attempts")
+                con.execute("ALTER TABLE users DROP COLUMN password")
+                con.execute("ALTER TABLE users DROP COLUMN salt")
+                con.execute("ALTER TABLE users RENAME COLUMN username TO name")
+                con.execute("ALTER TABLE users RENAME TO workspace")
+                con.execute("ALTER TABLE courses RENAME COLUMN user_id TO workspace_id")
+                con.execute("UPDATE workspace SET name='My workspace'")
+                # Legacy IDs can remain internal; the Store never needs a credential.
+            owner = con.execute("SELECT id FROM workspace LIMIT 1").fetchone()
+            if owner and owner[0] != "local":
+                # Canonicalize the internal owner without deleting/reinserting
+                # a parent (which would cascade through the user's library).
+                con.execute("PRAGMA defer_foreign_keys=ON")
+                con.execute("UPDATE workspace SET id='local' WHERE id=?", (owner[0],))
+                con.execute(
+                    "UPDATE courses SET workspace_id='local' WHERE workspace_id=?", (owner[0],)
+                )
             con.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
         self.path.chmod(0o600)
 
@@ -186,80 +190,6 @@ class Database:
         finally:
             con.close()
 
-    def register(self, username: str, password: str, *, allowed: bool = True) -> str:
-        if not allowed:
-            raise UserError("Registration is disabled by the operator.")
-        username = username.strip().lower()
-        if not re.fullmatch(r"[a-z0-9][a-z0-9_.-]{2,39}", username):
-            raise UserError(
-                "Username: 3–40 lowercase letters, numbers, dots, dashes or underscores."
-            )
-        validate_password(password)
-        salt = secrets.token_hex(16)
-        hashed = password_hash(password, salt)
-        with self.connect() as con:
-            con.execute("BEGIN IMMEDIATE")
-            if con.execute("SELECT count(*) FROM users").fetchone()[0] >= 100:
-                raise UserError("This installation has reached its 100-account limit.")
-            user_id = uid()
-            try:
-                con.execute(
-                    "INSERT INTO users VALUES (?,?,?,?,?)",
-                    (user_id, username, hashed, salt, now_iso()),
-                )
-            except sqlite3.IntegrityError as exc:
-                raise UserError("That username is unavailable.") from exc
-            return self._new_session(con, user_id)
-
-    def _new_session(self, con, user_id: str) -> str:
-        token = secrets.token_urlsafe(32)
-        con.execute("DELETE FROM sessions WHERE expires_at < ?", (time.time(),))
-        con.execute(
-            "INSERT INTO sessions VALUES (?,?,?)",
-            (token_hash(token), user_id, time.time() + SESSION_SECONDS),
-        )
-        return token
-
-    def login(self, username: str, password: str) -> str:
-        username = username.strip().lower()[:100]
-        if len(password) > 256:
-            raise AuthenticationError("Incorrect username or password.")
-        error = None
-        token = None
-        with self.connect() as con:
-            con.execute("BEGIN IMMEDIATE")
-            current = time.time()
-            con.execute("DELETE FROM login_attempts WHERE started < ?", (current - 900,))
-            attempt = con.execute(
-                "SELECT * FROM login_attempts WHERE username=?", (username,)
-            ).fetchone()
-            if attempt and attempt["failures"] >= 5:
-                raise AuthenticationError("Too many attempts. Try again in 15 minutes.")
-            user = con.execute("SELECT * FROM users WHERE username=?", (username,)).fetchone()
-            candidate = user or {"salt": "00" * 16, "password": "scrypt$32768$8$3$" + "00" * 64}
-            valid = password_matches(password, candidate)
-            if not user or not valid:
-                con.execute(
-                    "INSERT INTO login_attempts VALUES (?,1,?) ON CONFLICT(username) DO UPDATE SET failures=failures+1",
-                    (username, current),
-                )
-                error = "Incorrect username or password."
-            else:
-                if not user["password"].startswith("scrypt$"):
-                    con.execute(
-                        "UPDATE users SET password=? WHERE id=?",
-                        (password_hash(password, user["salt"]), user["id"]),
-                    )
-                con.execute("DELETE FROM login_attempts WHERE username=?", (username,))
-                token = self._new_session(con, user["id"])
-        if error:
-            raise AuthenticationError(error)
-        return token
-
-    def logout(self, token: str) -> None:
-        with self.connect() as con:
-            con.execute("DELETE FROM sessions WHERE token=?", (token_hash(token),))
-
     def backup(self, destination: Path) -> None:
         """SQLite online backup; operator only, never exposed through the UI."""
         if destination.exists():
@@ -271,88 +201,84 @@ class Database:
 
 
 class Store:
-    def __init__(self, db: Database, token: str):
+    def __init__(self, db: Database):
         self.db = db
-        self.token = token
 
     @contextmanager
     def transaction(self):
         with self.db.connect() as con:
             con.execute("BEGIN IMMEDIATE")
-            user = con.execute(
-                "SELECT u.* FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token=? AND s.expires_at>?",
-                (token_hash(self.token), time.time()),
-            ).fetchone()
-            if not user:
-                raise AuthenticationError("Your session expired. Sign in again.")
-            yield con, user
+            workspace = con.execute("SELECT * FROM workspace LIMIT 1").fetchone()
+            if not workspace:
+                raise UserError("The workspace is missing. Restore a database backup.")
+            yield con, workspace
 
-    def _course(self, con, user, course_id):
+    def _course(self, con, workspace, course_id):
         row = con.execute(
-            "SELECT * FROM courses WHERE id=? AND user_id=?", (course_id, user["id"])
+            "SELECT * FROM courses WHERE id=? AND workspace_id=?", (course_id, workspace["id"])
         ).fetchone()
         if not row:
-            raise UserError("Course not found in your account.")
+            raise UserError("Course not found in this workspace.")
         return row
 
-    def _document(self, con, user, document_id):
+    def _document(self, con, workspace, document_id):
         row = con.execute(
-            "SELECT d.* FROM documents d JOIN courses c ON c.id=d.course_id WHERE d.id=? AND c.user_id=?",
-            (document_id, user["id"]),
+            "SELECT d.* FROM documents d JOIN courses c ON c.id=d.course_id WHERE d.id=? AND c.workspace_id=?",
+            (document_id, workspace["id"]),
         ).fetchone()
         if not row:
-            raise UserError("Document not found in your account.")
+            raise UserError("Document not found in this workspace.")
         return row
 
     def profile(self):
-        with self.transaction() as (_, user):
-            return {"username": user["username"], "created_at": user["created_at"]}
+        with self.transaction() as (_, workspace):
+            return {"workspace": workspace["name"], "created_at": workspace["created_at"]}
 
     def courses(self):
-        with self.transaction() as (con, user):
+        with self.transaction() as (con, workspace):
             return [
                 dict(r)
                 for r in con.execute(
-                    "SELECT c.*, (SELECT count(*) FROM documents d WHERE d.course_id=c.id) AS documents FROM courses c WHERE user_id=? ORDER BY created_at,id",
-                    (user["id"],),
+                    "SELECT c.*, (SELECT count(*) FROM documents d WHERE d.course_id=c.id) AS documents FROM courses c WHERE workspace_id=? ORDER BY created_at,id",
+                    (workspace["id"],),
                 )
             ]
 
     def create_course(self, name, description=""):
         name = checked_text(name, "Course name", 100)
         description = description.strip()[:1000]
-        with self.transaction() as (con, user):
+        with self.transaction() as (con, workspace):
             if (
                 con.execute(
-                    "SELECT count(*) FROM courses WHERE user_id=?", (user["id"],)
+                    "SELECT count(*) FROM courses WHERE workspace_id=?", (workspace["id"],)
                 ).fetchone()[0]
                 >= 30
             ):
-                raise UserError("Limit: 30 courses per account. Remove an unused course first.")
+                raise UserError("Limit: 30 courses per workspace. Remove an unused course first.")
             course_id = uid()
             con.execute(
                 "INSERT INTO courses VALUES (?,?,?,?,?)",
-                (course_id, user["id"], name, description, now_iso()),
+                (course_id, workspace["id"], name, description, now_iso()),
             )
             return course_id
 
     def update_course(self, course_id, name, description):
         name = checked_text(name, "Course name", 100)
         description = description.strip()[:1000]
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             con.execute(
                 "UPDATE courses SET name=?,description=? WHERE id=?", (name, description, course_id)
             )
 
     def delete_course(self, course_id):
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             con.execute("DELETE FROM courses WHERE id=?", (course_id,))
 
     def documents(self, course_id):
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             return [
                 dict(r)
                 for r in con.execute(
@@ -362,12 +288,12 @@ class Store:
             ]
 
     def document(self, document_id):
-        with self.transaction() as (con, user):
-            return dict(self._document(con, user, document_id))
+        with self.transaction() as (con, workspace):
+            return dict(self._document(con, workspace, document_id))
 
     def document_passages(self, document_id):
-        with self.transaction() as (con, user):
-            self._document(con, user, document_id)
+        with self.transaction() as (con, workspace):
+            self._document(con, workspace, document_id)
             return [
                 dict(row)
                 for row in con.execute(
@@ -379,8 +305,8 @@ class Store:
     def add_document(self, course_id, parsed):
         from modulemate.search import index_text
 
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             existing = con.execute(
                 "SELECT id FROM documents WHERE course_id=? AND digest=?",
                 (course_id, parsed.digest),
@@ -414,22 +340,28 @@ class Store:
             con.executemany(
                 "INSERT INTO chunks(document_id,locator,text,search_text,position) VALUES (?,?,?,?,?)",
                 [
-                    (document_id, c.locator, c.text, index_text(c.text), i)
+                    (
+                        document_id,
+                        c.locator,
+                        c.text,
+                        index_text(f"{parsed.name}\n{c.locator}\n{c.text}"),
+                        i,
+                    )
                     for i, c in enumerate(parsed.chunks)
                 ],
             )
             return document_id, True
 
     def delete_document(self, document_id):
-        with self.transaction() as (con, user):
-            doc = self._document(con, user, document_id)
+        with self.transaction() as (con, workspace):
+            doc = self._document(con, workspace, document_id)
             # Chat text can paraphrase a removed source: clear the whole course history.
             con.execute("DELETE FROM messages WHERE course_id=?", (doc["course_id"],))
             con.execute("DELETE FROM documents WHERE id=?", (document_id,))
 
     def messages(self, course_id, limit=40):
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             rows = con.execute(
                 "SELECT * FROM messages WHERE course_id=? ORDER BY created_at DESC,id DESC LIMIT ?",
                 (course_id, min(max(limit, 1), 200)),
@@ -443,10 +375,10 @@ class Store:
     def add_message(self, course_id, question, answer, sources, mode, metadata=None):
         question = checked_text(question, "Question", 4000)
         answer = checked_text(answer, "Answer", 30000)
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             for source in sources:
-                doc = self._document(con, user, source["document_id"])
+                doc = self._document(con, workspace, source["document_id"])
                 if doc["course_id"] != course_id:
                     raise UserError("Source is not in the selected course.")
             con.execute(
@@ -468,17 +400,17 @@ class Store:
             )
 
     def clear_messages(self, course_id):
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             con.execute("DELETE FROM messages WHERE course_id=?", (course_id,))
 
     def add_card(self, course_id, front, back, document_id=None, locator="", *, today=None):
         front = checked_text(front, "Card question", 1000)
         back = checked_text(back, "Card answer", 4000)
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             if document_id:
-                doc = self._document(con, user, document_id)
+                doc = self._document(con, workspace, document_id)
                 if doc["course_id"] != course_id:
                     raise UserError("Card source is not in the selected course.")
                 if not con.execute(
@@ -512,8 +444,8 @@ class Store:
             return True
 
     def cards(self, course_id):
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             return [
                 dict(r)
                 for r in con.execute(
@@ -522,36 +454,36 @@ class Store:
                 )
             ]
 
-    def _card(self, con, user, card_id):
+    def _card(self, con, workspace, card_id):
         row = con.execute(
-            "SELECT k.* FROM cards k JOIN courses c ON c.id=k.course_id WHERE k.id=? AND c.user_id=?",
-            (card_id, user["id"]),
+            "SELECT k.* FROM cards k JOIN courses c ON c.id=k.course_id WHERE k.id=? AND c.workspace_id=?",
+            (card_id, workspace["id"]),
         ).fetchone()
         if not row:
-            raise UserError("Card not found in your account.")
+            raise UserError("Card not found in this workspace.")
         return row
 
     def update_card(self, card_id, front, back):
         front = checked_text(front, "Card question", 1000)
         back = checked_text(back, "Card answer", 4000)
-        with self.transaction() as (con, user):
-            self._card(con, user, card_id)
+        with self.transaction() as (con, workspace):
+            self._card(con, workspace, card_id)
             try:
                 con.execute("UPDATE cards SET front=?,back=? WHERE id=?", (front, back, card_id))
             except sqlite3.IntegrityError as exc:
                 raise UserError("An identical card already exists.") from exc
 
     def delete_card(self, card_id):
-        with self.transaction() as (con, user):
-            self._card(con, user, card_id)
+        with self.transaction() as (con, workspace):
+            self._card(con, workspace, card_id)
             con.execute("DELETE FROM cards WHERE id=?", (card_id,))
 
     def review_card(self, card_id, rating, *, today=None):
         from modulemate.study import schedule_review
 
         today = today or date.today()
-        with self.transaction() as (con, user):
-            card = self._card(con, user, card_id)
+        with self.transaction() as (con, workspace):
+            card = self._card(con, workspace, card_id)
             if date.fromisoformat(card["due"]) > today:
                 raise UserError("This card is not due yet. Use Practice for extra revision.")
             interval, repetitions = schedule_review(card["interval"], card["repetitions"], rating)
@@ -564,8 +496,8 @@ class Store:
             con.execute("INSERT INTO reviews VALUES (?,?,?,?)", (uid(), card_id, rating, now_iso()))
 
     def review_counts(self, course_id):
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             return dict(
                 con.execute(
                     "SELECT r.rating,count(*) FROM reviews r JOIN cards c ON c.id=r.card_id WHERE c.course_id=? GROUP BY r.rating",
@@ -581,8 +513,8 @@ class Store:
             raise UserError("Choose a valid due date.") from exc
         if isinstance(minutes, bool) or not isinstance(minutes, int) or not 5 <= minutes <= 2400:
             raise UserError("Estimate 5–2,400 minutes.")
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             if (
                 con.execute(
                     "SELECT count(*) FROM tasks WHERE course_id=?", (course_id,)
@@ -603,21 +535,21 @@ class Store:
             raise UserError("Choose a valid due date.") from exc
         if isinstance(minutes, bool) or not isinstance(minutes, int) or not 5 <= minutes <= 2400:
             raise UserError("Estimate 5–2,400 minutes.")
-        with self.transaction() as (con, user):
+        with self.transaction() as (con, workspace):
             row = con.execute(
-                "SELECT t.id FROM tasks t JOIN courses c ON c.id=t.course_id WHERE t.id=? AND c.user_id=?",
-                (task_id, user["id"]),
+                "SELECT t.id FROM tasks t JOIN courses c ON c.id=t.course_id WHERE t.id=? AND c.workspace_id=?",
+                (task_id, workspace["id"]),
             ).fetchone()
             if not row:
-                raise UserError("Task not found in your account.")
+                raise UserError("Task not found in this workspace.")
             con.execute(
                 "UPDATE tasks SET title=?,due=?,minutes=? WHERE id=?",
                 (title, due, minutes, task_id),
             )
 
     def tasks(self, course_id):
-        with self.transaction() as (con, user):
-            self._course(con, user, course_id)
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
             return [
                 dict(r)
                 for r in con.execute(
@@ -627,57 +559,36 @@ class Store:
             ]
 
     def modify_task(self, task_id, *, done=None, delete=False):
-        with self.transaction() as (con, user):
+        with self.transaction() as (con, workspace):
             row = con.execute(
-                "SELECT t.id FROM tasks t JOIN courses c ON c.id=t.course_id WHERE t.id=? AND c.user_id=?",
-                (task_id, user["id"]),
+                "SELECT t.id FROM tasks t JOIN courses c ON c.id=t.course_id WHERE t.id=? AND c.workspace_id=?",
+                (task_id, workspace["id"]),
             ).fetchone()
             if not row:
-                raise UserError("Task not found in your account.")
+                raise UserError("Task not found in this workspace.")
             if delete:
                 con.execute("DELETE FROM tasks WHERE id=?", (task_id,))
             elif isinstance(done, bool):
                 con.execute("UPDATE tasks SET done=? WHERE id=?", (int(done), task_id))
 
-    def change_password(self, old, new):
-        validate_password(new)
-        if len(old) > 256:
-            raise AuthenticationError("Incorrect password.")
-        with self.transaction() as (con, user):
-            if not password_matches(old, user):
-                raise AuthenticationError("Incorrect password.")
-            salt = secrets.token_hex(16)
-            con.execute(
-                "UPDATE users SET salt=?,password=? WHERE id=?",
-                (salt, password_hash(new, salt), user["id"]),
-            )
-            con.execute(
-                "DELETE FROM sessions WHERE user_id=? AND token!=?",
-                (user["id"], token_hash(self.token)),
-            )
-
-    def delete_account(self, password):
-        if len(password) > 256:
-            raise AuthenticationError("Incorrect password.")
-        with self.transaction() as (con, user):
-            if not password_matches(password, user):
-                raise AuthenticationError("Incorrect password.")
-            con.execute("DELETE FROM users WHERE id=?", (user["id"],))
-            con.execute("DELETE FROM login_attempts WHERE username=?", (user["username"],))
+    def reset_workspace(self):
+        """Clear study content; the local workspace remains usable immediately."""
+        with self.transaction() as (con, workspace):
+            con.execute("DELETE FROM courses WHERE workspace_id=?", (workspace["id"],))
 
     def export(self):
-        with self.transaction() as (con, user):
+        with self.transaction() as (con, workspace):
             output = {
-                "format": "modulemate-export-v1",
+                "format": "modulemate-export-v2",
                 "exported_at": now_iso(),
-                "username": user["username"],
+                "workspace": workspace["name"],
                 "courses": [],
             }
             for row in con.execute(
-                "SELECT * FROM courses WHERE user_id=? ORDER BY created_at", (user["id"],)
+                "SELECT * FROM courses WHERE workspace_id=? ORDER BY created_at", (workspace["id"],)
             ):
                 course = dict(row)
-                course.pop("user_id")
+                course.pop("workspace_id")
                 for table in ("documents", "cards", "tasks", "messages"):
                     course[table] = [
                         dict(r)

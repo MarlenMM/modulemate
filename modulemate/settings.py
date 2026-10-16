@@ -16,11 +16,14 @@ class Settings:
     ai_base_url: str = "https://api.openai.com/v1"
     ai_model: str = ""
     ai_api_key: str = ""
-    allow_registration: bool = True
 
     @property
     def ai_ready(self) -> bool:
-        return bool(self.ai_model and self.ai_api_key)
+        return bool(self.ai_model and (self.ai_api_key or self.provider_is_local))
+
+    @property
+    def provider_is_local(self) -> bool:
+        return urlparse(self.ai_base_url).hostname in {"localhost", "127.0.0.1", "::1"}
 
     @property
     def provider_host(self) -> str:
@@ -45,5 +48,4 @@ def load_settings() -> Settings:
         ai_base_url=url,
         ai_model=os.getenv("MODULEMATE_AI_MODEL", "").strip(),
         ai_api_key=os.getenv("MODULEMATE_AI_API_KEY", "").strip(),
-        allow_registration=os.getenv("MODULEMATE_ALLOW_REGISTRATION", "true").lower() == "true",
     )

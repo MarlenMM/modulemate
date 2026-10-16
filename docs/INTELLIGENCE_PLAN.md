@@ -1,5 +1,7 @@
 # ModuleMate intelligence improvement cycle — 15 October 2026
 
+Historical 2.1 plan. The [2.2 rebuild](INTELLIGENCE_REBUILD.md) supersedes this plan, including its account and extractive-first decisions.
+
 ## Evidence and diagnosis
 
 Reviewed the original two-page HIT AI/ML project brief in the local Education

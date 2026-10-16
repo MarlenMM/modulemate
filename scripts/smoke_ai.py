@@ -30,7 +30,7 @@ def main():
     results = {"provider": settings.provider_host, "model": settings.ai_model, "answers": {}}
     with tempfile.TemporaryDirectory() as tmp:
         db = Database(Path(tmp) / "smoke.sqlite3")
-        store = Store(db, db.register("smoke", "temporary smoke passphrase"))
+        store = Store(db)
         course = store.create_course("Original Learning Lab")
         store.add_document(
             course,

@@ -1,4 +1,4 @@
-"""Streamlit entry point. User data lives only behind authenticated Store calls."""
+"""Single-user local study workspace."""
 
 from __future__ import annotations
 
@@ -10,8 +10,9 @@ from zoneinfo import ZoneInfo
 
 import streamlit as st
 
-from modulemate.assistant import MODES, AIBackend, ProviderError, answer_question, generate_cards
-from modulemate.db import AuthenticationError, Database, Store, UserError
+from modulemate.assistant import MODES, AIBackend, answer_question, generate_cards
+from modulemate.db import Database, Store, UserError
+from modulemate.generation import GenerationError, chat_model_name, chat_status, local_backend
 from modulemate.ingest import SUPPORTED, parse_upload
 from modulemate.local_models import ModelUnavailable, get_local_models, model_status
 from modulemate.retrieval import prepare_index
@@ -46,57 +47,6 @@ def reset_session():
 def flash(message):
     st.session_state.flash = message
     st.rerun()
-
-
-def sign_in(db, settings):
-    st.title("Your materials. Your study space.")
-    st.write(
-        "Turn course notes into answers you can check, cards you can review, and a plan you can follow."
-    )
-    a, b, c = st.columns(3)
-    a.info(
-        "**Bring your own sources**\n\nUpload documents or paste notes. Every course starts with an empty library."
-    )
-    b.info(
-        "**Learn with evidence**\n\nAsk questions, connect ideas and practice recall with cited answers from your notes."
-    )
-    c.info(
-        "**Build a study habit**\n\nMake recall cards, review what is due, and plan your next session."
-    )
-    st.caption(
-        "No university materials are bundled. Local tools work without an AI key. Accounts belong to this installation."
-    )
-    action = st.radio("Account", ["Sign in", "Create account"], horizontal=True)
-    with st.form("authentication"):
-        username = st.text_input("Username", max_chars=40, autocomplete="username")
-        password = st.text_input(
-            "Password",
-            type="password",
-            max_chars=256,
-            help="At least 12 characters. Use a unique passphrase.",
-        )
-        repeat = (
-            st.text_input("Repeat password", type="password", max_chars=256)
-            if action == "Create account"
-            else None
-        )
-        submitted = st.form_submit_button(action, type="primary")
-    if submitted:
-        try:
-            if action == "Create account":
-                if password != repeat:
-                    raise UserError("Passwords do not match.")
-                token = db.register(username, password, allowed=settings.allow_registration)
-            else:
-                token = db.login(username, password)
-            reset_session()
-            st.session_state.token = token
-            st.rerun()
-        except UserError as exc:
-            st.error(str(exc))
-    st.caption(
-        "Passwords are hashed. Content is stored on this server; its operator can access it. There is no password recovery service, so keep your passphrase safe."
-    )
 
 
 def source_panel(sources, key):
@@ -255,45 +205,45 @@ def library(store, course_id):
 
 
 def render_answer(text):
-    # Permit paragraph/bullet/emphasis formatting, but neutralize links, images,
-    # HTML and escape sequences from both source text and model output.
-    for char in ["\\", "[", "]", "<", ">"]:
-        text = text.replace(char, "\\" + char)
+    # Preserve code, citations and LaTeX. Escaping every backslash used to break
+    # equations. Neutralize remote media/links and HTML without changing math.
+    segments = re.split(r"(```[\s\S]*?```|`[^`]*`)", text)
+    for i in range(0, len(segments), 2):
+        segments[i] = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", segments[i]).replace("![", "\\![")
+    text = "".join(segments)
     st.markdown(text, unsafe_allow_html=False)
 
 
-def assistant(store, course_id, settings, use_ai):
+def assistant(store, course_id, settings, backend):
+    use_ai = backend is not None
     st.header("Ask, understand, connect")
     docs = store.documents(course_id)
     if not docs:
-        st.info("Add material in Library first. Your assistant starts with your sources.")
-        return
+        st.info(
+            "Add materials in Library, or paste text into your question for help working with it."
+        )
     mode = st.selectbox("How would you like to study?", list(MODES), key=f"mode_{course_id}")
     doc_ids = select_documents(docs, f"assistant_docs_{course_id}")
     if mode == "Summarize":
         st.caption(
             "Summaries cover selected excerpts. Focus on one document or topic for more useful coverage."
         )
-    if not use_ai:
+    if backend:
+        st.caption(f"Conversational tutor · {backend.label}")
         st.caption(
-            "Local study assistant · Focused source-based answers, comparisons and recall prompts. No hosted AI requests."
-        )
-    status = model_status()
-    if status == "ready":
-        st.caption(
-            "Local semantic models installed · Understands similar wording and ranks relevant evidence."
+            "English answers from your materials or text you provide. Missing information is stated clearly; open Check sources to inspect the evidence."
         )
     else:
-        with st.expander("Improve matching with local machine learning"):
-            st.write(
-                "Install the local models once to match paraphrases and rank evidence. Model setup downloads public weights; your materials stay on this computer."
-            )
-            st.code("uv sync --extra ml\nuv run --extra ml python scripts/prepare_models.py")
-            st.caption(f"Local model status: {status}. Word matching remains available.")
-    if use_ai:
-        st.caption(
-            f"AI enabled · {settings.provider_host} · {settings.ai_model}. Check the evidence before relying on an answer."
+        st.warning(
+            "Excerpt mode is active. Enable a conversational model in the sidebar for explanations, examples and tutoring."
         )
+    status = model_status()
+    if status != "ready":
+        with st.expander("Set up semantic retrieval"):
+            st.code(
+                "uv sync --extra ml --extra local\nuv run --extra ml --extra local python scripts/prepare_models.py"
+            )
+            st.caption(f"Retrieval model status: {status}. Word matching is available.")
     messages = store.messages(course_id)
     if messages:
         with st.expander("Conversation options"):
@@ -318,6 +268,10 @@ def assistant(store, course_id, settings, use_ai):
             st.caption(message.get("metadata", {}).get("notice") or message["mode"])
             source_panel(message["sources"], message["id"])
     if messages:
+        if messages[-1].get("metadata", {}).get("kind") == "error" and st.button(
+            "Retry this question"
+        ):
+            st.session_state[f"pending_question_{course_id}"] = messages[-1]["question"]
         suggestions = messages[-1].get("metadata", {}).get("suggestions", [])
         for col, suggestion in zip(st.columns(max(1, len(suggestions))), suggestions, strict=False):
             if col.button(suggestion, key=f"followup_{messages[-1]['id']}_{suggestion}"):
@@ -328,7 +282,7 @@ def assistant(store, course_id, settings, use_ai):
         with st.chat_message("user"):
             st.text(question)
         with st.chat_message("assistant"):
-            with st.spinner("Finding evidence and preparing your answer…"):
+            with st.status("Reading your question…", expanded=False) as progress:
                 try:
                     engine = get_local_models()
                 except ModelUnavailable:
@@ -343,9 +297,11 @@ def assistant(store, course_id, settings, use_ai):
                     mode=mode,
                     document_ids=doc_ids,
                     use_ai=use_ai,
-                    backend=AIBackend(settings) if use_ai else None,
+                    backend=backend,
                     engine=engine,
+                    on_progress=lambda label: progress.update(label=label),
                 )
+                progress.update(label="Answer ready", state="complete")
             render_answer(result.text)
             if result.notice:
                 st.caption(result.notice)
@@ -353,7 +309,8 @@ def assistant(store, course_id, settings, use_ai):
         st.rerun()
 
 
-def cards_page(store, course_id, settings, use_ai, today):
+def cards_page(store, course_id, backend, today):
+    use_ai = backend is not None
     st.header("Recall beats recognition")
     st.write("Create focused cards, try the answer from memory, then check your source.")
     cards = store.cards(course_id)
@@ -441,11 +398,9 @@ def cards_page(store, course_id, settings, use_ai, today):
                 with st.spinner("Preparing card drafts…"):
                     try:
                         drafts = (
-                            generate_cards(passages, AIBackend(settings))
-                            if use_ai
-                            else cloze_cards(passages)
+                            generate_cards(passages, backend) if use_ai else cloze_cards(passages)
                         )
-                    except (ProviderError, ValueError, KeyError, TypeError):
+                    except (GenerationError, ValueError, KeyError, TypeError):
                         drafts = cloze_cards(passages)
                         st.warning(
                             "AI drafts could not be verified. Showing local cloze drafts instead."
@@ -611,13 +566,11 @@ def planner(store, course_id, today):
     )
 
 
-def account(store, db, settings, course_id):
-    st.header("Your data, your controls")
-    st.write(
-        "Your account is private within this app. The server operator can access its database; it is not encrypted end to end."
-    )
+def workspace_settings(store, course_id):
+    st.header("Workspace settings")
+    st.write("One local workspace. No account or password is needed.")
     st.caption(
-        "Uploaded originals are discarded after extraction. Notes, chat, cards, reviews and tasks persist in the local database. AI is off until you opt in for this session."
+        "Your notes, chats, cards and tasks stay in the local database. Uploaded originals are discarded after extraction."
     )
     st.download_button(
         "Export all my data (JSON)",
@@ -625,19 +578,7 @@ def account(store, db, settings, course_id):
         "modulemate-export.json",
         "application/json",
     )
-    st.caption(
-        "The export contains your content, not passwords or session tokens. Keep it private. JSON re-import is not currently supported."
-    )
-    with st.expander("Change password"), st.form("password_change", clear_on_submit=True):
-        old = st.text_input("Current password", type="password", max_chars=256)
-        new = st.text_input("New password", type="password", max_chars=256)
-        repeat = st.text_input("Repeat new password", type="password", max_chars=256)
-        if st.form_submit_button("Update password"):
-            if new != repeat:
-                st.error("New passwords do not match.")
-            else:
-                store.change_password(old, new)
-                st.success("Password changed. Other sessions have been signed out.")
+    st.caption("Keep exports private. JSON re-import is not currently supported.")
     if course_id:
         course = next(c for c in store.courses() if c["id"] == course_id)
         with st.expander("Course settings"):
@@ -652,41 +593,39 @@ def account(store, db, settings, course_id):
             )
             if st.button("Delete course permanently", disabled=not confirm):
                 store.delete_course(course_id)
-                token = st.session_state.token
                 reset_session()
-                st.session_state.token = token
                 flash("Course deleted.")
-    with st.expander("Delete my account"):
-        st.warning(
-            "This removes all of your data from the active database. Operator backups and copies already exported or sent to an AI provider are separate."
+    with st.expander("Clear workspace"):
+        st.write(
+            "Removes all courses and study content from the active database. Backups and exports are separate."
         )
-        with st.form("delete_account"):
-            password = st.text_input("Confirm your password", type="password", max_chars=256)
-            confirmed = st.checkbox("Permanently delete my account and all my courses")
-            if st.form_submit_button("Delete my account", disabled=not confirmed):
-                store.delete_account(password)
-                reset_session()
-                st.rerun()
+        confirmed = st.checkbox("Permanently delete all courses and study content")
+        if st.button("Clear all study content", disabled=not confirmed):
+            store.reset_workspace()
+            reset_session()
+            flash("Workspace cleared. Create a course to start again.")
 
 
 def main():
     settings = load_settings()
     db = Database(settings.data_dir / "modulemate.sqlite3")
-    if not st.session_state.get("token"):
-        sign_in(db, settings)
-        return
-    store = Store(db, st.session_state.token)
-    try:
-        profile = store.profile()
-    except AuthenticationError:
-        reset_session()
-        st.rerun()
+    store = Store(db)
     with st.sidebar:
         st.title("ModuleMate")
         st.caption("A little structure. A lot of progress.")
-        st.text(f"Signed in as {profile['username']}")
+        st.caption("Local workspace · No sign-in")
         courses = store.courses()
-        names = {c["id"]: c["name"] for c in courses}
+        duplicate_names = {
+            c["name"] for c in courses if sum(other["name"] == c["name"] for other in courses) > 1
+        }
+        names = {
+            c["id"]: (
+                f"{c['name']} · {c['documents']} documents · {c['id'][:4]}"
+                if c["name"] in duplicate_names
+                else c["name"]
+            )
+            for c in courses
+        }
         course_id = (
             st.selectbox("Current course", list(names), format_func=names.get) if courses else None
         )
@@ -701,7 +640,7 @@ def main():
             if st.form_submit_button("Create course"):
                 store.create_course(name, description)
                 flash("Course created. Choose it above and add your materials.")
-        page = st.radio("Workspace", ["Library", "Assistant", "Cards", "Planner", "Account"])
+        page = st.radio("Workspace", ["Library", "Assistant", "Cards", "Planner", "Settings"])
         st.divider()
         timezone = st.selectbox(
             "Your timezone",
@@ -720,31 +659,43 @@ def main():
         )
         today = datetime.now(ZoneInfo(timezone)).date()
         st.caption(f"Study date: {today.isoformat()}")
+        local_ready = chat_status() == "ready"
+        choices = []
+        if local_ready:
+            choices.append("On this Mac · " + chat_model_name())
         if settings.ai_ready:
-            st.caption(
-                f"Optional AI provider: {settings.provider_host}\nModel: {settings.ai_model}"
-            )
-            use_ai = st.checkbox(
-                "Enable AI for this session",
+            choices.append(f"Configured provider · {settings.ai_model}")
+        choices.append("Excerpts only")
+        selected_engine = st.selectbox("Answer engine", choices)
+        backend = None
+        if selected_engine.startswith("On this Mac"):
+            backend = local_backend()
+            st.caption("Local generation · Your materials stay on this computer.")
+        elif selected_engine.startswith("Configured provider"):
+            st.caption(f"Provider: {settings.provider_host}")
+            if st.checkbox(
+                "Enable provider requests",
                 key="ai_consent",
-                help="Sends your question, up to 8 source excerpts and the last 3 conversation turns to this provider. Drafting and support checks send source excerpts and drafts to this same provider. Review its data policy first.",
-            )
-            st.caption(
-                "Enabling AI shares selected text with this provider. Disable it to keep further requests local."
-            )
-        else:
-            use_ai = False
-            st.caption(
-                "Local mode · No AI provider configured. All core study tools are available."
-            )
-        if st.button("Sign out"):
-            db.logout(st.session_state.token)
-            reset_session()
-            st.rerun()
+                help="Sends your question, selected excerpts and recent conversation to the configured provider.",
+            ):
+                backend = AIBackend(settings)
+            else:
+                st.caption("Provider requests are off. Answers currently use excerpt mode.")
+        if not local_ready:
+            with st.expander("Set up a local conversational model"):
+                st.write(
+                    "On Apple Silicon, prepare the 9B instruction model once (about 6 GB of public weights). It runs offline after setup."
+                )
+                st.code(
+                    "uv sync --extra ml --extra local\nuv run --extra ml --extra local python scripts/prepare_chat_model.py"
+                )
+                st.caption(
+                    f"Local model: {chat_status()}. Other computers can use a compatible local server through the provider settings."
+                )
     if st.session_state.get("flash"):
         st.success(st.session_state.pop("flash"))
-    if page == "Account":
-        account(store, db, settings, course_id)
+    if page == "Settings":
+        workspace_settings(store, course_id)
     elif not course_id:
         st.title("Start with a course")
         st.write(
@@ -753,19 +704,14 @@ def main():
     elif page == "Library":
         library(store, course_id)
     elif page == "Assistant":
-        assistant(store, course_id, settings, use_ai)
+        assistant(store, course_id, settings, backend)
     elif page == "Cards":
-        cards_page(store, course_id, settings, use_ai, today)
+        cards_page(store, course_id, backend, today)
     elif page == "Planner":
         planner(store, course_id, today)
 
 
 try:
     main()
-except AuthenticationError as exc:
-    st.error(str(exc))
-    if st.button("Return to sign in"):
-        reset_session()
-        st.rerun()
 except UserError as exc:
     st.error(str(exc))

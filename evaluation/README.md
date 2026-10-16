@@ -1,5 +1,20 @@
 # Original evaluation material
 
+`general_documents.json` is the primary 2.2 conversation development set. Its nine
+original fictional documents cover events, history, biology, project requirements,
+practical notices, code and fiction. Requests and expected responses are English.
+It checks precise facts, conflicting versions, negative/conditional requirements,
+partial exercise help, missing evidence, follow-ups, text rewriting and hostile
+source instructions. Run `scripts/evaluate_conversations.py --suite general`.
+The runner records actual prose, source context, model calls, latency and code/data
+fingerprints in ignored `results/`. Phrase checks alone do not establish correctness.
+
+`conversation_challenge.json` and `conversation_transfer.json` retain earlier
+development cases. Some predate the clarified source-only answer policy and are
+historical experiments, rather than the current product acceptance criteria.
+
+The following retrieval/extraction observations describe the earlier 2.1 pipeline.
+
 These synthetic documents and utterances were written for this upgrade, not
 copied from HIT materials, user libraries, or the old gold set. Facts are simple
 teaching examples and invented course logistics. Intent training lives separately

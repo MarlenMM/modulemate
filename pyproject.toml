@@ -1,6 +1,6 @@
 [project]
 name = "modulemate"
-version = "2.1.0"
+version = "2.2.0"
 description = "A private study workspace for your own course materials"
 requires-python = ">=3.12,<3.14"
 dependencies = [
@@ -18,6 +18,10 @@ dependencies = [
 [project.optional-dependencies]
 ml = [
     "sentence-transformers>=5.1,<6",
+]
+local = [
+    "mlx-lm>=0.32,<0.33 ; platform_machine == 'arm64' and sys_platform == 'darwin'",
+    "outlines-core>=0.2.14,<0.3 ; platform_machine == 'arm64' and sys_platform == 'darwin'",
 ]
 
 [dependency-groups]

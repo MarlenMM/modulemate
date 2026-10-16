@@ -58,7 +58,7 @@ def evaluate(engine):
     }
     with tempfile.TemporaryDirectory() as tmp:
         db = Database(Path(tmp) / "evaluation.sqlite3")
-        store = Store(db, db.register("evaluation", "synthetic evaluation passphrase"))
+        store = Store(db)
         course = store.create_course("Original benchmark")
         data = load_fixture(store, course)
         report.update(

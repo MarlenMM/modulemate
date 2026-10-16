@@ -1,5 +1,8 @@
 # Validation — 14 October 2026
 
+Historical 2.0 results. The account flow described here was removed in 2.2.
+Use `VALIDATION_V22.md` for the current conversational engine and workspace checks.
+
 All fixtures are original synthetic text or programmatically generated files.
 No former university corpus, student submissions or group chats were used for
 these checks. Measurements below are local observations, not product guarantees.

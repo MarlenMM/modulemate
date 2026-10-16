@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from modulemate.assistant import answer_question
-from modulemate.db import SCHEMA, Database, Store, UserError
+from modulemate.db import Database, UserError
 from modulemate.dialogue import plan_turn, sentences
 from modulemate.ingest import parse_upload
 from modulemate.local_models import ModelUnavailable
@@ -53,13 +53,12 @@ def test_vectors_persist_and_deleted_documents_cascade(store, populated):
 
 def test_neural_scope_is_checked_before_inference(db, store, populated):
     course, doc = populated
-    stranger = Store(db, db.register("stranger", "another strong passphrase"))
     engine = TinyEngine()
     with pytest.raises(UserError):
-        retrieve(stranger, course, "retrieval", engine=engine)
-    other = stranger.create_course("Other")
+        retrieve(store, "missing-course", "retrieval", engine=engine)
+    other = store.create_course("Other")
     with pytest.raises(UserError):
-        retrieve(stranger, other, "retrieval", [doc], engine=engine)
+        retrieve(store, other, "retrieval", [doc], engine=engine)
     assert engine.encoded == []
     assert retrieve(store, course, "retrieval", [], engine=engine).passages == []
 
@@ -123,7 +122,12 @@ def test_model_failure_and_nan_return_explicit_fallback(store, populated):
 def test_version_one_migration_preserves_existing_data(tmp_path):
     path = tmp_path / "legacy.sqlite3"
     with sqlite3.connect(path) as con:
-        con.executescript(SCHEMA)
+        legacy = (
+            (Path(__file__).parent / "fixtures/legacy_v2.sql")
+            .read_text()
+            .split("CREATE TABLE embeddings")[0]
+        )
+        con.executescript(legacy)
         con.execute("PRAGMA user_version=1")
         con.execute("INSERT INTO users VALUES ('u','student','hash','salt','today')")
         con.execute("INSERT INTO courses VALUES ('c','u','Old course','','today')")
@@ -132,7 +136,7 @@ def test_version_one_migration_preserves_existing_data(tmp_path):
         )
     database = Database(path)
     with database.connect() as con:
-        assert con.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert con.execute("PRAGMA user_version").fetchone()[0] == 3
         assert con.execute("SELECT metadata FROM messages WHERE id='m'").fetchone()[0] == "{}"
         assert con.execute("SELECT name FROM courses WHERE id='c'").fetchone()[0] == "Old course"
 
@@ -304,3 +308,18 @@ def test_exact_identifiers_constrain_neural_and_lexical_candidates(store, course
         found = retrieve(store, course, "CS142 memory allocation", engine=engine)
         assert found.passages and {p.document_id for p in found.passages} == {selected}
         assert not retrieve(store, course, "CS999 memory allocation", engine=engine).passages
+
+
+def test_document_identifiers_do_not_exclude_later_sections(store, course):
+    doc = add(
+        store,
+        course,
+        "lec1.md",
+        "# CS142\nCourse introduction.\n\n## Median\nThe median is the middle value after sorting observations.",
+    )
+    add(store, course, "lec10.md", "The median appears in a different lecture.")
+    for engine in (None, TinyEngine()):
+        for question in ("CS142 median", "lec1 median"):
+            found = retrieve(store, course, question, engine=engine)
+            assert found.passages and all(p.document_id == doc for p in found.passages)
+            assert any("middle value" in p.text for p in found.passages)

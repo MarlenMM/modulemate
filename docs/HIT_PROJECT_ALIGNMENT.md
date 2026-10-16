@@ -1,50 +1,52 @@
 # HIT Summer School origin and current implementation
 
-ModuleMate originated as the Smart Chatbot project for HIT Summer School 2026's
-Artificial Intelligence and Machine Learning course. The current app includes
-subsequent portfolio engineering; it is not presented as an unchanged July submission.
+ModuleMate began as the Smart Chatbot project for HIT Summer School 2026's
+Artificial Intelligence and Machine Learning course. Version 2.2 is subsequent
+portfolio development, not an unchanged July submission.
 
-## Source review
+## Requirements checked against the source
 
-The 15 October review used the original two-page instructor project brief,
-`HIT summer course_AI and ML_project_July2026.pdf`, and the submitted project
-report in the user's private education archive. They are not redistributed here.
+The original two-page `HIT summer course_AI and ML_project_July2026.pdf` was read
+again on 16 October. The submitted project report was reviewed privately for its
+chosen objectives. Neither personal submissions nor instructor PDFs are bundled.
 
-The instructor brief requires an AI/ML-related project and a written report,
-with assessment of literature/background, project objectives and technologies,
-design/implementation/testing, and report quality. Smart Chatbot is one suggested
-topic. It explicitly permits AI assistance. It does **not** mandate a specific
-embedding model, dataset, four-class router or database. Those were choices in
-the submitted ModuleMate design.
+The instructor requires an AI/ML-related project and a 4000-word report (around
+25 pages, with appropriate diagrams). Assessment covers literature/background,
+objectives/significance/technologies, design/implementation/testing, and report
+quality. Smart Chatbot and AI-powered search engine are listed as separate topic
+suggestions. The brief permits AI assistance; it does not require a particular
+model, fixed corpus, four-class router, account system, or GPU training.
 
-## Traceability to the original design
+The four intent categories, retrieval/generation design, and numbered objectives
+below came from the student's proposed design, not additional instructor rules.
 
-| Original design objective | Version 2.1 implementation | Qualification |
+## Traceability
+
+| Original design objective | Current implementation | Qualification |
 |---|---|---|
-| O1: ground substantive answers in evidence | Local sentence selection; optional structured generation with quote and support checks | A relevant sentence is not proof that it answers every implication |
-| O2: cite document/location | Stable passage IDs, document names and original format locators | Local markers resolve in the source panel |
-| O3: decline weak evidence | Combined retrieval filters, missing-detail notices, insufficient-evidence responses | Thresholds are development heuristics, not calibrated confidence |
-| O4: classify intent | TF-IDF word/character features plus logistic regression; four original intent categories | Predictions guide style; only narrow social rules bypass evidence, so classifier mistakes do not block legitimate topics |
-| O5: conversational continuity | Resolved topics, comparison-side references, clarification and scope-aware history | Deterministic dialogue state, not unrestricted coreference understanding |
-| O6: measurable maintenance | Incremental indexing, preparation UI, ablations, separate training/evaluation fixtures and CI | Synthetic development results are not inherited course metrics |
-| FR1/FR8: ingestion and source visibility | Six supported file formats, bounded parsers, expandable passages | Scanned diagrams still need OCR or text descriptions |
-| FR2/FR5: persistent semantic retrieval | Local sentence-transformer vectors in SQLite, exact cosine search, word/dense rank fusion, sentence reranking and extractive reading | No managed vector service needed at the bounded course size |
-| FR6: generation | Optional provider adapter with consent and validation | Local mode remains extractive and is labeled accordingly |
-| FR9: refresh index | New uploads indexed incrementally; Prepare this course builds missing vectors | Current user library replaces the legacy fixed filesystem corpus |
-| FR10: evaluation | Retrieval ablations, intent evaluation, conversation regressions, real-model integration tests | No current LLM-judged groundedness percentage is claimed |
+| O1: ground substantive answers | Question-aware context, supporting citations, exact source-span selection, optional factual review and bounded correction | Explanations connect supplied material; missing information is disclosed. Labeled illustrations may demonstrate a provided concept. Citation validity is not proof of truth |
+| O2: cite documents and locations | Cited passage IDs, original names and page/slide/section/cell locators | Only cited evidence is attached to a generated answer |
+| O3: decline weak evidence | Explicit insufficient/clarification results survive the entire pipeline; invalid drafts are not replaced with unrelated answers | The model may still misjudge answerability; evaluation includes distractor/missing-policy cases |
+| O4: classify intent | Original four-label TF-IDF/logistic-regression experiment remains reproducible | The generative tutor follows the actual question instead of letting the tiny classifier block or misroute it |
+| O5: conversational continuity | Recent scoped turns, comparison references, topic changes, learner feedback and ordered lesson continuation | Context is bounded; new document selection drops incompatible history |
+| O6: measurable maintenance | Offline regression tests, real-weight checks, original conversation challenge and recorded model outputs/timing | Constraint checks are diagnostics, not a semantic accuracy percentage |
+| FR1/FR8: ingest and inspect sources | Six formats, isolated parsers, heading-aware chunks and source panels | Image-only pages/diagrams still need supplied OCR/text |
+| FR2/FR5: local semantic retrieval | Persistent local vectors, word/dense rank fusion, optional reranker/reader and context expansion | Pretrained weights are integrated, not trained on coursework |
+| FR6: generation | Offline MLX instruction model or explicitly enabled compatible provider | Excerpt mode remains available but is clearly a limited fallback |
+| FR9: refresh material | Incremental document/vector ingestion and deletion cascades | No inherited fixed university corpus is imported |
+| FR10: evaluate | Adversarial original fixtures, numerical routines, scope/migration/UI tests and manual reading of actual answers | Old report and 2.1 results remain historical |
 
-## Changes since the summer submission
+## What was trained and what was integrated
 
-The project now supports private accounts, multiple user-owned courses, document
-uploads, study cards and scheduling. The original single-course/no-account scope
-therefore no longer applies to the product. It still demonstrates NLP, supervised
-classification, pretrained neural representations, retrieval/reranking,
-conversation state, grounded response construction and empirical evaluation.
+The small intent classifier is trained on 120 original synthetic utterances.
+The encoder, reranker, extractive reader and instruction models use named pretrained
+weights with pinned revisions. No LLM or embedding model is fine-tuned on personal
+student data. Bounded numeric tools compute statistics/arithmetic directly; they
+are not a claim that a language model learned exact arithmetic.
 
-The current work **does not fine-tune an LLM or embedding model on student data**.
-The classifier learns from 120 original synthetic utterances. Encoder, reranker and reader
-weights come from named pretrained models with pinned revisions. This distinction
-is essential when explaining what was trained versus integrated.
-
-Historical report scores remain historical. Current scores are computed from the
-new original benchmark and published with denominators, failures and limitations.
+The current single-user local scope removes the later account system. Courses,
+uploads, conversation, cards and planning remain useful portfolio extensions.
+Documentation describes both the original course identity and the engineering
+changes since the submission. A project report can explain the retrieval/generation
+tradeoff, experiments, observed failures and limitations using the current source;
+new measurements must not be confused with historical submission results.

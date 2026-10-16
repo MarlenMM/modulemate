@@ -13,7 +13,7 @@ def db(tmp_path):
 
 @pytest.fixture
 def store(db):
-    return Store(db, db.register("student", "a strong password"))
+    return Store(db)
 
 
 @pytest.fixture
@@ -32,3 +32,4 @@ def populated(store, course):
 def no_implicit_models(monkeypatch):
     # Ordinary tests and UI flows must work offline without a local model cache.
     monkeypatch.setenv("MODULEMATE_LOCAL_ML", "off")
+    monkeypatch.setenv("MODULEMATE_CHAT", "off")

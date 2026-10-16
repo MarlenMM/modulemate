@@ -57,16 +57,23 @@ def cloze_cards(passages):
                 r"\b" + re.escape(word) + r"\b", "_____", sentence, flags=re.I
             )
             cards.append(
-                {
-                    "front": front,
-                    "back": word + "\n\n" + sentence,
-                    "document_id": passage.document_id,
-                    "locator": passage.locator,
-                }
+                (
+                    not bool(re.search(r"\b(means|refers to)\b", sentence, re.I)),
+                    passage.id,
+                    {
+                        "front": front,
+                        "back": word + "\n\n" + sentence,
+                        "document_id": passage.document_id,
+                        "locator": passage.locator,
+                    },
+                )
             )
             seen.add(sentence)
             break
-    return cards[:6]
+    # An overview samples locations rather than returning document order. Rank
+    # definitions globally so an assessment footer cannot displace the lesson.
+    cards.sort(key=lambda item: item[:2])
+    return [card for _, _, card in cards[:6]]
 
 
 def plan_tasks(tasks, daily_minutes=60, horizon=7, *, today=None):

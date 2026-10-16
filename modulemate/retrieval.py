@@ -136,13 +136,22 @@ def retrieve(
     limit = max(1, min(limit, 12))
     lexical = search(store, course_id, query, document_ids, limit=12)
     identifiers = _identifiers(query)
+    passages = None
     if identifiers:
-        lexical = [p for p in lexical if identifiers & set(tokens(p.text))]
+        passages = scoped_passages(store, course_id, document_ids)
+        matching_docs = {
+            p.document_id
+            for p in passages
+            if identifiers & set(tokens(p.name + " " + p.locator + " " + p.text))
+        }
+        # An identifier can name a whole lecture/report. Its definition or
+        # later sections need not repeat the code printed on the title page.
+        lexical = [p for p in lexical if p.document_id in matching_docs]
+        passages = [p for p in passages if p.document_id in matching_docs]
     if engine is None or not tokens(query):
         return Retrieval(lexical[:limit])
-    passages = scoped_passages(store, course_id, document_ids)
-    if identifiers:
-        passages = [p for p in passages if identifiers & set(tokens(p.text))]
+    if passages is None:
+        passages = scoped_passages(store, course_id, document_ids)
     if not passages:
         return Retrieval(method="hybrid")
     try:
