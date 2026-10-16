@@ -1,154 +1,117 @@
 # ModuleMate
 
-**A study chatbot grounded in your own materials.**
+A local chatbot for understanding and working with your own materials. Built from the
+HIT Summer School 2026 Smart Chatbot project, then extended as a portfolio project.
 
-Ask a question, connect two ideas, or practice explaining a concept. ModuleMate
-finds the relevant evidence and gives a concise, cited response. Local machine
-learning handles paraphrases without an API key; optional generated explanations
-can use an OpenAI-compatible provider or local model server.
+Ask questions, explain a passage, summarize, compare, work through a method, or
+rewrite text you provide. The same conversation system works across subjects and
+document types. Answers use your selected materials; if the information is missing,
+ModuleMate says so. It can explain the supported part of an exercise without
+inventing a complete solution. Use **Check sources** to inspect
+cited passages. The interface and answers are in English. No login, registration,
+or hosted deployment is required.
 
-Originally built for the **HIT Summer School 2026 AI and Machine Learning
-project**, ModuleMate is now a private, user-owned study workspace. The summer
-submission and the subsequent portfolio improvements are distinct;
-[HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md) explains that history.
-Every account starts empty. No university material is bundled.
+## Start on Apple Silicon
 
-![Local comparison and contextual follow-up](docs/screenshots/local-conversation.jpg)
+Python 3.12 or 3.13 and [uv](https://docs.astral.sh/uv/) are required.
 
-## What it does
-
-- **Understand your question:** hybrid word/semantic retrieval finds related
-  wording, and a local relevance model helps rank the evidence.
-- **Keep the conversation going:** ask “Explain the second one” after a comparison,
-  follow a topic into recall practice and compare your explanation with its
-  source, or switch to a new subject. Ambiguous
-  references prompt a clarification.
-- **Answer with sources:** a local extractive reader helps select the relevant
-  sentence, with concise cited answers, comparisons, extractive
-  study outlines and recall prompts work locally. The source panel shows the original passages for each citation. Unsupported details are identified rather than filled in.
-- **Organize your learning:** separate courses; PDF, DOCX, PPTX, Markdown, text,
-  notebook and pasted-note imports; source-linked flashcards, spaced reviews,
-  practice quizzes, deadlines and daily study planning.
-- **Keep control:** account isolation, document deletion, chat clearing, exports,
-  password changes and account deletion. Hosted generation requires session consent.
-
-Local answers select and arrange source sentences; they are **not free-form LLM
-reasoning**. The models are pretrained, not trained on your documents. The small
-intent classifier is trained on original example utterances shipped in this repo.
-
-## Start with local machine learning
-
-Requires Python **3.12 or 3.13** and [uv](https://docs.astral.sh/uv/).
-
-```bash
-uv sync --locked --extra ml
-uv run --extra ml python scripts/prepare_models.py
-uv run --extra ml streamlit run app.py
+```sh
+uv sync --locked --extra ml --extra local
+uv run --extra ml --extra local python scripts/prepare_models.py
+uv run --extra ml --extra local python scripts/prepare_chat_model.py
+uv run --extra ml --extra local streamlit run app.py
 ```
 
-Model preparation downloads about **310 MiB** of pinned public encoder, relevance
-and extractive-reader weights, once. Framework dependencies are additional. It does not upload documents. After setup, local inference works
-offline on CPU. Keep `--extra ml` in `uv run` commands so uv retains the optional
-model dependencies. No model download happens during a question.
+Open <http://127.0.0.1:8501>, create a course, and upload notes or add the original
+Learning Lab example. Model setup downloads pinned public weights into your home
+cache; it never uploads your study material. Subsequent local inference works offline.
+The 9B conversational model uses about 5.5 GiB of downloaded weights. A smaller
+candidate can be prepared with `MODULEMATE_CHAT_VARIANT=4b` (see validation for results).
+Keep that variable set when running the app to select it. No external GPU is needed.
 
-Open the local URL, create an account and course, and add your materials or the
-original **Learning Lab** example. New passages are indexed on the first question;
-use **Library → Prepare local semantic search** to prepare a larger course first.
-Existing vectors are reused and deleted with their source documents.
+The `ml` extra provides semantic retrieval, reranking and an extractive reader.
+The `local` extra provides MLX generation on Apple Silicon. Use both extras in
+`uv run` commands so uv preserves the installed runtimes.
 
-For a smaller installation without neural models:
+## Other computers and optional providers
 
-```bash
-uv sync --locked
-uv run streamlit run app.py
+All library, cards and planning tools also run with `uv sync` and
+`uv run streamlit run app.py`. Without a conversational model, the assistant
+explicitly shows **Excerpt mode**; it is a limited source-reading fallback.
+
+For a compatible local server (for example, an already installed Ollama server),
+copy `.env.example` to `.env`, set its base URL (such as
+`http://127.0.0.1:11434/v1`) and an installed model name. A loopback server needs no
+API key. Hosted providers require HTTPS, a model name and a key. Select the
+configured provider in the sidebar and explicitly enable provider requests.
+These send selected text and recent conversation to that provider. Local MLX
+never silently falls back to a hosted API.
+
+## What changed in 2.2
+
+- Genuine instruction-model conversations replace sentence selection as the main
+  prepared local experience. Short topics, examples, code explanations, learner
+  feedback and topic changes use the actual latest question and recent context.
+  Factual answers need supporting material. Text supplied in a question can also
+  be rewritten or organized without inventing a document citation.
+- Section-aware ingestion preserves headings; evidence assembly handles multiple
+  question parts, adjacent passages, complete short documents and ordered lessons
+  that continue through long material without claiming unseen coverage. Distinctive
+  topic terms keep supplies, dates and rules attached to the right document.
+- Bounded numeric tools handle explicitly supplied numbers. Examples that
+  illustrate a provided concept are distinguished from statements in the notes.
+- Source IDs and exact quotes are checked. An additional factual review can request
+  one correction supported by real evidence; its outage does not erase an otherwise valid primary response.
+  A model refusal remains a refusal, and rejected drafts are never disguised as
+  answers by substituting an unrelated quotation.
+- Local answers are written separately from their evidence metadata. Constrained
+  decoding keeps protocol fields out of the explanation; short-format requests,
+  quiz actions and learner replies have explicit conversation state.
+- One local workspace replaces accounts. Existing account databases are backed up
+  and migrated, preserving every course and its documents, chats and study tools.
+- Cards support spaced review and practice quizzes; a capacity-aware planner exports
+  deadlines to a calendar. Documents, courses and conversations can be managed locally.
+
+## Supported materials
+
+PDF, DOCX, PPTX, TXT, Markdown and IPYNB (15 MB per file). Notebook code is read as
+text and never executed. Image-only scans and diagrams require OCR or a text
+description supplied by you. No university corpus, personal student submission,
+credentials, runtime database or model weights are bundled in this repository.
+
+## Quality and project evidence
+
+```sh
+uv run --extra ml --extra local ruff check .
+uv run --extra ml --extra local pytest -q
+uv run --extra ml --extra local python scripts/evaluate_conversations.py
 ```
 
-This still provides the conversational extractive assistant, word matching,
-summary/comparison/recall workflows, cards and planning. It can miss paraphrases.
-The UI shows whether local semantic models are available. To repair a corrupt
-model cache, rerun preparation with `--force`.
+The default conversation challenge uses original fictional material spanning
+events, history, biology, project requirements, practical notices, code and fiction.
+It covers conflicting versions, precise questions, explanations, exercise help,
+follow-ups, transformations and missing evidence. It records
+actual prose, model calls and timing. Its automated phrase/length constraints are
+**diagnostics, not a claim of semantic accuracy**. Read the answers as well.
+Historical 2.1 retrieval and extraction scores do not measure this new generator.
 
-For pip deployments, install `requirements-ml.txt` for local ML or
-`requirements.txt` for the smaller installation. Both are exported from `uv.lock`.
-Then use `python scripts/prepare_models.py` (ML only) and
-`python -m streamlit run app.py`. The default binding is `127.0.0.1`.
-
-## Optional generated explanations
-
-Copy `.env.example` to `.env` only if `.env` does not already exist. Configure
-`MODULEMATE_AI_BASE_URL`, `MODULEMATE_AI_MODEL` and `MODULEMATE_AI_API_KEY` for a
-chat-completions provider supporting JSON-object output. A compatible local
-server can use a loopback HTTP URL and a placeholder key if none is required.
-There is no automatic provider/model switch.
-
-Generation remains off until the signed-in user enables it in the sidebar.
-Requests send the question, up to eight source excerpts, a resolved follow-up
-query and up to three recent conversation turns. Source filters also constrain
-conversation context. Card requests send excerpts. The provider's data terms
-apply; keys remain operator configuration, never account-export data.
-
-Responses must include valid source IDs and exact supporting quotes. A second
-request checks support. Invalid output, insufficient evidence or provider failure
-falls back to a local response. These checks reduce mistakes; they do not prove
-correctness, and the same model can repeat an error. Review the sources.
-
-## Measured improvements
-
-On an original **46-question development set** spanning 23 passages in seven
-documents, first-result retrieval improved from **82.6% lexical to 91.3% hybrid**;
-top-three retrieval improved from **93.5% to 100%**. Paraphrase first-result hits
-improved from **66.7% to 85.7%** (21 questions). All eight unrelated questions
-returned no evidence. Complete-answer reference-fact checks passed **45/46**
-development questions and **18/20** additional challenge questions. These are
-limited fact-coverage checks, not semantic correctness scores. The results are
-small synthetic observations, not a
-blinded evaluation or general accuracy claim.
-
-At 100 synthetic documents / 3,700 passages, preparing the neural index and first
-search took **67.72 seconds**; subsequent retrieval took **281 ms median / 316 ms
-p95**, with 100/100 exact-topic hits. These timings exclude model loading,
-answer composition and hosted generation. See [validation](docs/VALIDATION.md)
-for failures, model comparisons, test commands and limitations.
-
-## Development
-
-```bash
-uv run --extra ml pytest -q
-MODULEMATE_TEST_LOCAL_ML=1 uv run --extra ml pytest tests/test_local_models.py -q
-uv run --extra ml ruff check .
-uv run --extra ml ruff format --check .
-uv run --extra ml python scripts/evaluate_intelligence.py --local-ml
-uv run --extra ml python scripts/evaluate_answers.py --local-ml
-uv run --extra ml python scripts/evaluate_answers.py --local-ml --challenge
-uv run --extra ml python scripts/benchmark.py --local-ml
-uv run --extra ml pip-audit --progress-spinner off
-uv run --extra ml python scripts/check_release.py
-```
-
-Ordinary tests require no network/model downloads. Real-weight tests are explicit.
-CI runs the small installation on Python 3.12 and 3.13; manually dispatched CI
-also installs and tests the neural models. CI results are separate from local checks.
-
-## Limits and documentation
-
-Scans and diagrams need a searchable text layer or a pasted description. Local
-English models do not establish multilingual semantic quality; CJK word matching
-remains available. Summaries sample selected passages, not an entire long course.
-Extracted source text can itself be wrong or conflict with other text, and local
-sentence selection does not resolve every ambiguity or prove entailment.
-
-Extracted text, vectors and study data stay in `data/modulemate.sqlite3`; original
-uploads are processed in memory. Limits include 15 MB per file and 12,000 passages
-per course. This is a small local/self-hosted app, not an audited public SaaS service.
-
-- [Intelligence improvement plan](docs/INTELLIGENCE_PLAN.md)
-- [Architecture and model references](docs/ARCHITECTURE.md)
-- [Privacy, deployment and backup](docs/PRIVACY_AND_DEPLOYMENT.md)
-- [Migration](docs/MIGRATION.md)
+- [Rebuild plan and cycle log](docs/INTELLIGENCE_REBUILD.md)
+- [2.2 validation and observed limits](docs/VALIDATION_V22.md)
 - [HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md)
-- [Validation and known limits](docs/VALIDATION.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Local data and provider boundaries](docs/PRIVACY_AND_DEPLOYMENT.md)
+- [Migration](docs/MIGRATION.md)
 
-The current source tree excludes the former university corpus and personal
-runtime data. **Earlier Git commits and remote copies may still contain removed
-files.** A new commit does not erase history. See the migration guide before
-redistributing old history. Upload only material you have permission to use.
+The model can still make mistakes. A matching quote or model review does not prove
+that an explanation is correct; the source panel is there to help you inspect it.
+
+## Model and implementation references
+
+[MLX LM](https://github.com/ml-explore/mlx-lm),
+[Outlines Core](https://github.com/dottxt-ai/outlines-core),
+[Qwen3.5](https://huggingface.co/Qwen/Qwen3.5-9B), and
+[the pinned MLX conversion](https://huggingface.co/mlx-community/Qwen3.5-9B-4bit)
+provide the local generative runtime and weights. The app integrates pretrained
+models; it does not claim to have trained an LLM on student work.
+
+MIT license for the application. Model licenses remain with their respective authors.

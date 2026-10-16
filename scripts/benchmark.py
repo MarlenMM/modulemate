@@ -25,7 +25,7 @@ def main():
         parser.error("Install local models first")
     with tempfile.TemporaryDirectory() as tmp:
         db = Database(Path(tmp) / "benchmark.sqlite3")
-        store = Store(db, db.register("benchmark", "original synthetic benchmark"))
+        store = Store(db)
         course = store.create_course("Synthetic load")
         start = time.perf_counter()
         for i in range(100):

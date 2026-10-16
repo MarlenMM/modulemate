@@ -32,7 +32,7 @@ def evaluate(engine, *, challenge=False):
     rows, timings = [], []
     with tempfile.TemporaryDirectory() as tmp:
         db = Database(Path(tmp) / "answers.sqlite3")
-        store = Store(db, db.register("evaluation", "original evaluation passphrase"))
+        store = Store(db)
         course = store.create_course("Original answer evaluation")
         data = load_fixture(store, course)
         for row in gold["queries"] if challenge else data["queries"]:

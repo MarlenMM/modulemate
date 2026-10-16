@@ -61,19 +61,22 @@ class Plan:
     context_ids: list[int] = field(default_factory=list)
     intent: str = "conceptual"
     review_attempt: bool = False
+    resolved_question: str = ""
 
 
 def plan_turn(question, mode, history):
     selected = mode
     if mode == "Auto":
-        if re.search(
+        # The requested learning action outranks the concept being practised:
+        # 'quiz me on the difference between X and Y' is a quiz, not a comparison.
+        if re.search(r"\b(quiz me|test me|hint|socratic|practice question)\b", question, re.I):
+            selected = "Socratic tutor"
+        elif re.search(r"\b(summari[sz]e|summary|overview|outline)\b", question, re.I):
+            selected = "Summarize"
+        elif re.search(
             r"\b(compare|versus|vs\.?|difference between|differences between)\b", question, re.I
         ):
             selected = "Compare"
-        elif re.search(r"\b(summari[sz]e|summary|overview|outline)\b", question, re.I):
-            selected = "Summarize"
-        elif re.search(r"\b(quiz me|test me|hint|socratic|practice question)\b", question, re.I):
-            selected = "Socratic tutor"
         else:
             selected = "Explain"
     plan = Plan(question, question, selected, subjects=comparison_subjects(question))
@@ -86,7 +89,17 @@ def plan_turn(question, mode, history):
     )
     followup = bool(
         re.fullmatch(
-            r"(?:please )?(?:go deeper|give (?:me )?an example|another example|quiz me|test me|why|why not|how so|continue)[.!? ]*",
+            r"(?:please )?(?:go deeper|give (?:me )?an example|another example|quiz me|test me|why|why not|how so|continue|simplify|shorter|in simpler words|(?:give (?:me )?(?:only )?(?:a )?)?one[- ]sentence(?: definition| version| answer)?)[.!? ]*",
+            question,
+            re.I,
+        )
+    )
+    followup = followup or bool(
+        re.fullmatch(
+            r"(?:please\s+)?(?:(?:can|could|would) you\s+)?(?:give|show|provide)\s+(?:me\s+)?"
+            r"(?:(?:a|an|one|another|two|2)\s+)?"
+            r"(?:(?:tiny|small|practical|concrete|everyday|real[- ]world|simple|worked|brief|different|code|numeric|numerical)\s+){0,3}"
+            r"(?:examples?|analogy)(?:\s+please)?[.!? ]*",
             question,
             re.I,
         )
@@ -122,17 +135,54 @@ def plan_turn(question, mode, history):
             "shorter",
         }
     ]
-    contextual = followup or (referential and len(meaningful) <= 2)
-    grounded = [m for m in history if m.get("sources")]
-    previous_mode = grounded[-1].get("metadata", {}).get("resolved_mode") if grounded else None
-    if (
-        mode == "Auto"
-        and previous_mode == "Socratic tutor"
-        and "?" not in question
-        and re.match(
-            r"^(?:I think|my answer|my explanation|it means|it is|I don't know|not sure|maybe)\b",
+    format_followup = bool(
+        history
+        and (referential or followup)
+        and re.search(
+            r"\b(?:one[- ]sentence|shorter|simpler words|simplify|just the (?:answer|definition))\b",
             question,
             re.I,
+        )
+    )
+    contextual = followup or format_followup or (referential and len(meaningful) <= 2)
+    grounded = [
+        m
+        for m in history
+        if m.get("sources")
+        or (
+            m.get("metadata", {}).get("kind") in {"generated", "calculation"}
+            and m.get("metadata", {}).get("basis") in {"general", "mixed", "materials", "input"}
+        )
+    ]
+    previous_mode = grounded[-1].get("metadata", {}).get("resolved_mode") if grounded else None
+    awaiting_answer = bool(
+        grounded
+        and grounded[-1]
+        .get("metadata", {})
+        .get("awaiting_answer", previous_mode in {"Socratic tutor", "Teach"})
+    )
+    if history and "awaiting_answer" in history[-1].get("metadata", {}):
+        awaiting_answer = history[-1]["metadata"]["awaiting_answer"]
+    explicit_request = bool(
+        re.match(
+            r"^(?:explain|what|why|how|where|when|compare|summari[sz]e|teach|tutor|quiz|test|hint|continue|next|stop|actually|no,? I meant)\b",
+            question,
+            re.I,
+        )
+    )
+    if (
+        mode == "Auto"
+        and awaiting_answer
+        and "?" not in question
+        and not explicit_request
+        and not format_followup
+        and (
+            len(tokens(question)) <= 24
+            or re.match(
+                r"^(?:I think|my answer|my explanation|it means|it is|I don't know|not sure|maybe)\b",
+                question,
+                re.I,
+            )
         )
     ):
         plan.review_attempt = True
@@ -157,7 +207,15 @@ def plan_turn(question, mode, history):
                 )
                 return plan
             topic = previous_subjects[index]
-        if previous_subjects and not ordinal and re.search(r"\b(it|that|this)\b", question, re.I):
+            plan.resolved_question = question[: ordinal.start()] + topic + question[ordinal.end() :]
+        if (
+            len(previous_subjects) >= 2
+            and (previous_mode == "Compare" or comparison_subjects(previous["question"]))
+            and not ordinal
+            and not plan.review_attempt
+            and not format_followup
+            and re.search(r"\b(it|that|this)\b", question, re.I)
+        ):
             plan.clarification = f"Do you mean {previous_subjects[0]} or {previous_subjects[1]}?"
             return plan
         plan.query = (
@@ -167,6 +225,10 @@ def plan_turn(question, mode, history):
         )
         plan.topic = topic[:1000]
         plan.used_context = True
+        if not plan.resolved_question:
+            plan.resolved_question = question.rstrip(".!? ") + f" (about {topic[:300]})."
+        if format_followup:
+            plan.context_ids = [p["id"] for p in previous["sources"] if type(p.get("id")) is int]
         if not tokens(topic):
             plan.context_ids = [p["id"] for p in previous["sources"] if type(p.get("id")) is int]
         if selected == "Compare" and not plan.subjects:

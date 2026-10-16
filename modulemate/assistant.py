@@ -4,19 +4,26 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from dataclasses import dataclass, field
 from typing import Protocol
 
+from modulemate.calculations import direct_calculation
+from modulemate.context import build_context, teaching_request
+from modulemate.conversation import generate, remap_citations
 from modulemate.db import UserError, checked_text
 from modulemate.dialogue import compose_local, plan_turn, social_reply
+from modulemate.generation import GenerationError
 from modulemate.intent import classify
 from modulemate.retrieval import retrieve, scoped_passages
+from modulemate.schemas import CARD_SCHEMA, SUPPORT_SCHEMA
 from modulemate.search import Passage, _scope, overview
 from modulemate.settings import Settings
 
 MODES = {
     "Auto": "Choose the most useful response style for the question.",
-    "Explain": "Explain clearly with a short example only if supported by the sources.",
+    "Explain": "Explain the concept directly, with a useful example when needed.",
+    "Teach": "Teach the selected lecture or topic in a structured lesson, with examples and a check question.",
     "Summarize": "Summarize the selected passages as a study outline. This is a sampled overview, never claim to cover the whole document/course.",
     "Compare": "Compare the requested ideas. Identify missing evidence instead of filling gaps.",
     "Socratic tutor": "Give a small hint and ask one guiding question. Do not immediately reveal the full solution.",
@@ -31,7 +38,7 @@ spacing, do not claim it improves retention or explain how memory works. Summari
 should faithfully compress stated facts. Socratic questions should ask the learner
 to apply or explain the actual definition without assuming an unstated benefit.
 Do not claim citation validation proves that a statement is true. Follow the requested
-study mode. Answer in the user's language. Lead with the direct answer, then a
+study mode. Write in English. Lead with the direct answer, then a
 short explanation. Use two labeled paragraphs for comparisons; cover both sides or
 identify the missing side. Avoid repetitive introductions, raw excerpts, excessive
 headings, and generic study advice. A contextual follow-up should continue the
@@ -76,6 +83,8 @@ def check_support(backend, text, passages):
             {
                 "answer_to_check": text,
                 "sources": [{"source_id": i, "text": p.text} for i, p in enumerate(passages, 1)],
+                "_response_schema": SUPPORT_SCHEMA,
+                "_max_tokens": 128,
             },
         )
     )
@@ -87,41 +96,91 @@ class Backend(Protocol):
     def complete(self, system: str, payload: dict) -> str: ...
 
 
-class ProviderError(Exception):
+class ProviderError(GenerationError):
+    pass
+
+
+class ProviderRateLimit(ProviderError):
     pass
 
 
 class AIBackend:
     def __init__(self, settings: Settings):
         self.settings = settings
+        self.label = f"{settings.ai_model} · {settings.provider_host}"
+        self.local = settings.provider_is_local
+        self.supports_plain_text = self.local
+        self.last_stats = {}
+        self.cooldown_until = 0.0
 
     def complete(self, system: str, payload: dict) -> str:
         from openai import OpenAI
 
         if not self.settings.ai_ready:
             raise ProviderError("AI is not configured.")
+        if time.monotonic() < self.cooldown_until:
+            raise ProviderRateLimit(
+                "The provider's rate limit was reached. Please wait a moment before retrying, or select the local model."
+            )
         try:
             with OpenAI(
-                api_key=self.settings.ai_api_key,
+                api_key=self.settings.ai_api_key or "local",
                 base_url=self.settings.ai_base_url,
-                timeout=35,
+                timeout=90,
                 max_retries=0,
             ) as client:
                 response = client.chat.completions.create(
                     model=self.settings.ai_model,
                     messages=[
                         {"role": "system", "content": system},
-                        {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+                        {
+                            "role": "user",
+                            "content": json.dumps(
+                                {k: v for k, v in payload.items() if not k.startswith("_")},
+                                ensure_ascii=False,
+                            ),
+                        },
                     ],
-                    response_format={"type": "json_object"},
-                    max_tokens=2200,
+                    **(
+                        {}
+                        if payload.get("_plain_text")
+                        else {"response_format": {"type": "json_object"}}
+                    ),
+                    max_tokens=min(3500, max(350, payload.get("_max_tokens", 1800))),
+                    temperature=0,
+                    **({"reasoning_effort": "low"} if "gpt-oss" in self.settings.ai_model else {}),
                 )
+            self.last_stats = {
+                "finish_reason": response.choices[0].finish_reason if response.choices else None,
+                "prompt_tokens": response.usage.prompt_tokens if response.usage else None,
+                "completion_tokens": response.usage.completion_tokens if response.usage else None,
+            }
             if not response.choices or response.choices[0].finish_reason != "stop":
                 raise ProviderError("Incomplete provider response.")
             return response.choices[0].message.content or ""
         except ProviderError:
             raise
         except Exception as exc:
+            self.last_stats = {
+                "status": getattr(exc, "status_code", None),
+                "code": getattr(exc, "code", None),
+            }
+            if getattr(exc, "status_code", None) == 429:
+                try:
+                    delay = float(exc.response.headers.get("retry-after", 30))
+                except (ValueError, TypeError, AttributeError):
+                    delay = 30
+                self.cooldown_until = time.monotonic() + min(120, max(1, delay))
+                raise ProviderRateLimit(
+                    "The provider's rate limit was reached. Please wait a moment before retrying, or select the local model."
+                ) from exc
+            if getattr(exc, "code", None) == "json_validate_failed":
+                body = getattr(exc, "body", {})
+                error = body.get("error", body) if isinstance(body, dict) else {}
+                failed = error.get("failed_generation") if isinstance(error, dict) else None
+                if isinstance(failed, str) and len(failed) <= 40000:
+                    return failed  # Still passes the same strict parser and quote checks.
+                raise ValueError("provider_json_format") from exc
             # Provider errors may contain excerpts, keys or URLs; do not expose them.
             raise ProviderError("The AI provider did not return a usable answer.") from exc
 
@@ -216,6 +275,7 @@ def answer_question(
     use_ai=False,
     backend=None,
     engine=None,
+    on_progress=None,
 ):
     question = checked_text(question, "Question", 4000)
     if mode not in MODES:
@@ -229,7 +289,8 @@ def answer_question(
         history = [
             m
             for m in history
-            if m["sources"] and all(p["document_id"] in allowed for p in m["sources"])
+            if m.get("metadata", {}).get("document_scope") == sorted(allowed)
+            or (m["sources"] and all(p["document_id"] in allowed for p in m["sources"]))
         ]
     plan = plan_turn(question, mode, history)
     intent = classify(question)
@@ -244,7 +305,145 @@ def answer_question(
         "used_context": plan.used_context,
         "recall_review": plan.review_attempt,
     }
+    metadata["document_scope"] = sorted(document_ids) if document_ids is not None else None
+    calculation = direct_calculation(question)
+    if calculation:
+        text, values = calculation
+        notice = "Calculation · Computed locally with numeric routines"
+        metadata.update(
+            {"kind": "calculation", "basis": "general", "calculations": values, "notice": notice}
+        )
+        result = Answer(text, kind="calculation", notice=notice, metadata=metadata)
+        store.add_message(course_id, question, text, [], "Calculation", metadata)
+        return result
     reply = social_reply(question)
+    if use_ai and backend and not reply:
+        if on_progress:
+            on_progress("Reading the relevant material…")
+        context = build_context(
+            store, course_id, question, plan, history, document_ids, engine=engine
+        )
+        if context.clarification:
+            result = Answer(context.clarification, kind="clarification")
+            metadata.update(
+                {
+                    "kind": result.kind,
+                    "resolved_mode": "Teach",
+                    "awaiting_document": context.awaiting_document,
+                    "awaiting_answer": False,
+                    "lesson_session": context.lesson_session,
+                }
+            )
+            result.metadata = metadata
+            store.add_message(
+                course_id, question, result.text, [], "Teach · clarification", metadata
+            )
+            return result
+        try:
+            requested_mode = (
+                "Teach"
+                if mode == "Auto"
+                and (
+                    teaching_request(question)
+                    or context.lesson
+                    or (history and history[-1].get("metadata", {}).get("awaiting_document"))
+                )
+                else plan.mode
+            )
+            generated, repaired = generate(
+                backend, question, requested_mode, context, history, on_progress, plan=plan
+            )
+            # Store/display only cited passages, with compact stable numbering.
+            cited = [context.passages[i - 1] for i in generated.cited_ids]
+            remap = {old: new for new, old in enumerate(generated.cited_ids, 1)}
+            text = remap_citations(generated.text, remap)
+            notice = f"{getattr(backend, 'label', 'Conversational model')} · "
+            notice += {
+                "materials": "Based on your materials",
+                "general": "General explanation",
+                "input": "Working with the text you provided",
+                "mixed": "Materials with added examples or explanation",
+                "none": "Evidence missing or clarification needed",
+            }[generated.basis]
+            if not context.complete and context.passages:
+                notice += f" · Used selected context from {context.total_passages} passages"
+            if generated.review_unavailable:
+                notice += " · Citation checks passed; additional model review was unavailable"
+            if generated.history_omitted:
+                notice += " · Earlier conversation was shortened to fit the model context"
+            result = Answer(text, cited, generated.kind, notice, generated.suggestions)
+            if context.lesson and not context.lesson["complete"]:
+                result.text += "\n\n*This is one part of the selected lecture. Say **continue** to work through the next sections.*"
+                result.suggestions = [
+                    "Continue",
+                    *[s for s in result.suggestions if s.casefold() != "continue"],
+                ][:3]
+            metadata.update(
+                {
+                    "basis": generated.basis,
+                    "topic": generated.topic or plan.topic,
+                    "subjects": plan.subjects or generated.subjects,
+                    "baseline_intent": intent.label,
+                    "baseline_intent_score": round(intent.confidence, 3),
+                    "intent": generated.intent or intent.label,
+                    "intent_score": None if generated.intent else round(intent.confidence, 3),
+                    "model": getattr(backend, "label", "configured"),
+                    "repaired": repaired,
+                    "audited": generated.audited,
+                    "history_turns_omitted": generated.history_omitted,
+                    "retrieval": context.method,
+                    "context_complete": context.complete,
+                    "context_passages": len(context.passages),
+                    "context_characters": context.characters,
+                    "lesson": context.lesson,
+                    "lesson_session": context.lesson_session,
+                    "resolved_mode": requested_mode,
+                    "awaiting_answer": generated.kind == "generated"
+                    and ("?" in result.text or "？" in result.text)
+                    and (requested_mode in {"Teach", "Socratic tutor"} or plan.review_attempt),
+                    "notice": notice,
+                    "kind": result.kind,
+                    "suggestions": result.suggestions,
+                }
+            )
+            result.metadata = metadata
+            store.add_message(
+                course_id,
+                question,
+                result.text,
+                [p.to_dict() for p in result.passages],
+                f"{requested_mode} · {result.kind}",
+                metadata,
+            )
+            return result
+        except (GenerationError, ValueError, TypeError, KeyError) as exc:
+            # An outage/invalid draft is visible. An intentional insufficient
+            # answer returns above and MUST NOT turn into an irrelevant excerpt.
+            metadata["generation_failed"] = True
+            # Do not turn a rejected model answer into another unsupported
+            # answer by quoting the nearest sentence (including source commands).
+            result = Answer(
+                "I couldn't produce an answer that passed the checks. Please retry, narrow the document selection, or inspect the related passages below.",
+                context.passages[:4],
+                "error",
+                "The provider's rate limit was reached. Wait a moment before retrying, or select the local model."
+                if isinstance(exc, ProviderRateLimit)
+                else "The conversational model was unavailable or its answer failed validation.",
+                [],
+            )
+            metadata.update(
+                {"kind": result.kind, "notice": result.notice, "suggestions": result.suggestions}
+            )
+            result.metadata = metadata
+            store.add_message(
+                course_id,
+                question,
+                result.text,
+                [p.to_dict() for p in result.passages],
+                "Model · error",
+                metadata,
+            )
+            return result
     if reply:
         result = Answer(reply, kind="conversation")
     elif plan.clarification:
@@ -286,40 +485,15 @@ def answer_question(
                 kind="empty",
                 notice=found.notice,
             )
-        if use_ai and backend and passages:
-            try:
-                payload = _payload(passages, question, plan.mode, history)
-                payload["retrieval_question"] = plan.query
-                payload["intent_hint"] = {
-                    "admin": "Give the requested requirement, date or number first. Do not infer unstated policies.",
-                    "code_help": "Walk through the supplied code or algorithm; never claim to execute it.",
-                    "conceptual": "Define the idea first and then explain relationships supported by the sources.",
-                    "social": "Use the actual evidence to decide whether this question is covered.",
-                }[plan.intent]
-                text = validate_answer(backend.complete(SYSTEM, payload), passages)
-                if text:
-                    check_support(backend, text, passages)
-                    result = Answer(
-                        text,
-                        passages,
-                        "ai",
-                        "Check the cited passages. Source checks do not guarantee the explanation is correct.",
-                        result.suggestions,
-                    )
-                    if plan.mode == "Summarize":
-                        result.notice += " This covers selected passages, not every page."
-                else:
-                    result.notice = (
-                        "The AI found insufficient evidence. The local response below uses the closest source statements. "
-                        + result.notice
-                    )
-            except (ProviderError, ValueError, TypeError, KeyError):
-                result.notice = (
-                    "AI was unavailable or its answer could not be verified. Showing a local response. "
-                    + result.notice
-                )
         if found.notice and found.notice not in result.notice:
             result.notice = found.notice + " " + result.notice
+    if metadata.get("generation_failed"):
+        result.notice = (
+            "The conversational model was unavailable or returned an invalid answer. Excerpt fallback: check whether these passages address your question. "
+            + result.notice
+        )
+    elif result.kind == "local":
+        result.notice = "Excerpt mode · A conversational model is not enabled. " + result.notice
     metadata.update(
         {"notice": result.notice, "suggestions": result.suggestions, "kind": result.kind}
     )
@@ -336,9 +510,9 @@ def answer_question(
 
 
 def generate_cards(passages, backend):
-    obj = _json(
-        backend.complete(CARD_SYSTEM, _payload(passages, "Create recall flashcards", "Explain", []))
-    )
+    payload = _payload(passages, "Create recall flashcards", "Explain", [])
+    payload.update(_response_schema=CARD_SCHEMA, _max_tokens=1200)
+    obj = _json(backend.complete(CARD_SYSTEM, payload))
     cards = obj.get("cards")
     if not isinstance(cards, list) or len(cards) > 6:
         raise ValueError("Invalid cards")

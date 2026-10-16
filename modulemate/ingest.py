@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import unicodedata
@@ -74,6 +75,43 @@ def split_text(text: str, size: int = 1200, overlap: int = 150) -> list[str]:
     return result
 
 
+def structured_chunks(text: str) -> list[tuple[str, str]]:
+    """Keep Markdown sections together and carry their real heading hierarchy.
+
+    Headings inside fenced code are code. A small section is never glued to the
+    next unrelated concept merely to fill a character window.
+    """
+    sections, body, headings = [], [], []
+    fence = None
+
+    def flush():
+        content = "\n".join(body).strip()
+        if not content:
+            return
+        title = " › ".join(value for _, value in headings)
+        prefix = "\n".join("#" * level + " " + value for level, value in headings)
+        for piece in split_text(content):
+            sections.append((title, (prefix + "\n" + piece).strip()))
+
+    for line in text.splitlines():
+        marker = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if marker:
+            kind = marker[1][0]
+            fence = None if fence == kind else (kind if fence is None else fence)
+        match = re.match(r"^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$", line) if fence is None else None
+        if match:
+            flush()
+            body = []
+            level = len(match[1])
+            headings = [(n, title) for n, title in headings if n < level]
+            headings.append((level, match[2]))
+        else:
+            body.append(line)
+    flush()
+    # Preserve a heading-only note instead of silently producing an empty file.
+    return sections or [("", part) for part in split_text(text)]
+
+
 def _check_archive(data: bytes, extension: str) -> None:
     try:
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -107,7 +145,9 @@ def _extract(data: bytes, extension: str) -> tuple[list[tuple[str, str]], list[s
             raise UserError("Save text files as UTF-8, then upload again.") from exc
         if "\x00" in text:
             raise UserError("This looks like a binary file. Upload UTF-8 text instead.")
-        units = [(f"part {i}", part) for i, part in enumerate(split_text(text, 5000, 0), 1)]
+        # Splitting before recognizing sections used to orphan a heading from
+        # the definition it governs. Chunk only after parsing the structure.
+        units = [("part 1", text)]
     elif extension == ".ipynb":
         try:
             notebook = json.loads(data)
@@ -166,7 +206,8 @@ def _extract(data: bytes, extension: str) -> tuple[list[tuple[str, str]], list[s
                         "\n".join(" | ".join(cell.text for cell in row.cells) for row in block.rows)
                     )
                 else:
-                    lines.append(block.text)
+                    heading = re.match(r"Heading ([1-6])", block.style.name or "")
+                    lines.append(("#" * int(heading[1]) + " " if heading else "") + block.text)
             units = [
                 (f"section {i}", text)
                 for i, text in enumerate(split_text("\n".join(lines), 5000, 0), 1)
@@ -255,11 +296,12 @@ def parse_upload(name: str, data: bytes, *, isolated: bool = True) -> ParsedDocu
     chunks = []
     seen = set()
     for locator, text in units:
-        for part in split_text(text):
+        for heading, part in structured_chunks(text):
+            location = locator + (" · " + heading[:160] if heading else "")
             # Keep duplicate text on distinct pages: locators remain meaningful.
-            key = (locator, part)
+            key = (location, part)
             if key not in seen:
-                chunks.append(Chunk(locator, part))
+                chunks.append(Chunk(location, part))
                 seen.add(key)
     if len(chunks) > 3000:
         raise UserError("This file produces more than 3,000 passages. Split it first.")

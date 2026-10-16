@@ -1,178 +1,121 @@
-# Architecture
+# ModuleMate 2.2 architecture
 
-The UI is a thin authenticated client of Python service modules. No component
-loads an existing `corpus/` or `index_store/` directory.
+`app.py` is the Streamlit interface. There is one local workspace; `db.py` provides
+transactional course/document scoping and cascades. Schema 3 migrates previous
+account databases after an online backup, without rebuilding source IDs or losing
+study records. No runtime authentication code remains.
 
-```text
-Streamlit session (opaque token; AI consent defaults off)
-   -> Store (validates session + ownership on every operation)
-      -> SQLite users -> courses -> documents/chunks, chats, cards, tasks
-      -> local intent model + dialogue planner -> resolved question
-      -> FTS5 + local embeddings -> fused candidates
-      -> contextual sentence relevance + constrained extractive reader
-      -> extractive answer/comparison/outline/recall composer
-      -> optional AI provider -> JSON / citation / quote validation
-      -> local response fallback when provider output is missing or invalid
-```
+`ingest.py` runs format extraction in an isolated bounded subprocess, then chunks
+text along Markdown/heading boundaries while carrying the actual heading hierarchy.
+PDF pages and presentation slides preserve their locators. No notebook code runs.
+Documents expose text previews so extraction failures can be inspected.
 
-| Module | Responsibility |
-|---|---|
-| `app.py` | Sign-in, course navigation and study workflows |
-| `modulemate/db.py` | Versioned schema, auth, transactions, ownership, deletion, export |
-| `modulemate/ingest.py` | Type/size validation, extraction and deterministic chunking |
-| `modulemate/extract_worker.py` | Separate parser process, time/CPU/memory limits |
-| `modulemate/search.py` | Unicode tokens, CJK bigrams, BM25 and coverage ranking |
-| `modulemate/local_models.py` | Pinned local CPU inference, no implicit downloads |
-| `modulemate/retrieval.py` | Model-versioned vector persistence, fusion, reranking, scope revalidation |
-| `modulemate/reader.py` | Bounded SQuAD2 span selection with source offset validation |
-| `modulemate/intent.py` | Original-data TF-IDF/logistic classification |
-| `modulemate/dialogue.py` | Follow-up resolution, mode selection, sentence ranking and composition |
-| `modulemate/assistant.py` | Orchestration, provider boundary, validation and fallback |
-| `modulemate/study.py` | Cloze drafts, due dates, task allocation, calendar export |
-| `modulemate/settings.py` | Operator-only environment configuration |
+`search.py` provides Unicode FTS/BM25 matching and short-topic heading preference.
+`retrieval.py` adds normalized local embeddings, persistent digest-checked vectors,
+rank fusion and optional reranking. It validates scope before inference and source
+identity again before storing/returning results. Missing models retain word matching.
 
-## Data and transactions
+`context.py` assembles evidence for the actual question, comparison sides and
+subquestions. It adds adjacent passages from the same document, resolves named
+files, reads complete short selections, and budgets longer contexts by characters
+and estimated tokens. Lessons use contiguous ranges with a saved continuation
+cursor and document signature. Ambiguous lecture requests ask for the document.
+The cursor survives questions between sections. Filename/lecture-number aliases
+and document codes retain later sections that do not repeat a title-page code.
+Lesson parts have a few explicit topic targets. Framing/title pages and obvious
+model-directed instruction packets are not teaching targets. Each current target
+needs cited evidence before a generated lesson can advance; a roadmap mentioning
+later topics is not sufficient. Catalog heading previews sample across a long
+document, including its end, rather than truncating the outline at the first pages.
+Distinctive query terms focus factual context on relevant documents, retaining
+both sides of comparisons and collection-wide requests. History has a bounded
+token budget and retains the final check question when a long answer is shortened.
+The interface and answer instructions are English only; there is no query
+translation stage or language selector.
 
-SQLite schema version 2 is created/migrated atomically under `BEGIN IMMEDIATE`.
-The v1-to-v2 migration adds embeddings and message metadata without replacing
-accounts, sources or conversations; old messages receive empty metadata. Concurrent
-initialization handles the initial WAL transition's busy response. Foreign keys
-are enabled for each connection. Unknown newer schemas fail closed. Future
-schema changes require an explicit versioned migration and a backup/restore test.
-Connections are short lived; no user-content cache is shared between sessions.
+`conversation.py` instructs a generative tutor to answer the latest request, using
+recent turns for context rather than treating previous answers as evidence. Course
+claims require supplied sources. Explanations can paraphrase and connect those
+sources; missing information is disclosed rather than filled from model knowledge.
+Quoted text/code supplied by the user can be transformed with an explicit input
+basis. Labeled illustrations may demonstrate a provided concept.
+`calculations.py` executes bounded arithmetic and descriptive statistics through a
+small AST grammar and Python numeric routines, never `eval` or uploaded code.
+Numeric tools use explicitly supplied data. A narrow check can also catch explicit
+numeric assertions; it does not verify arbitrary prose maths. Lesson planning uses
+document headings and passage order across subjects.
 
-Every public Store operation revalidates an opaque session token (stored hashed
-in the database), resolves the owner, and checks the requested course/document/
-card/task. SQL parameters carry all user values; FTS expressions are quoted,
-normalized tokens. A document and all its chunks/index updates commit together.
-The extracted content hash deduplicates within a course, independently of its
-filename. Cross-course imports are allowed and remain independent.
+The local tutor writes natural Markdown first, then a separate labeling pass
+attaches evidence and conversation state. The evidence pass owns final citation
+numbers; incidental writer markers are removed without changing code literals.
+This keeps explanation writing separate from JSON formatting. The writer supplies
+a small response-type marker, removed
+before rendering; the evidence labeler cannot turn an ordinary answer into a
+clarification or override a missing-information response. A missing-information
+answer may still cite a source's explicit gap or useful preliminary facts.
+Unsolicited model-written source footers are removed before labeling, preventing
+invented bibliography quotations from competing with the app's actual source panel.
+Explicit source/quote requests and fenced code are preserved. Dangling closing
+reasoning tags are normalized; actual reasoning blocks are rejected.
+Text transformations request only the transformed result, rather than the Explain
+mode's commentary. Explicit short formats also constrain the final task payload.
+Explicit comparison subjects belong to the user's parsed request, not a model's
+labels for comparison aspects. Polite requests to rewrite/summarize are not
+clamped as short yes/no facts. Fact lookup, checklists and why-questions carry
+tasks suited to that request. Elliptical requests such
+as “an everyday example” explicitly carry the previous subject into the final
+request. Unrelated document outlines are omitted when focused retrieval finds
+no usable passages. Narrow “only the current fact” requests reject unsolicited
+archived comparisons and long digressions.
+Current-only requests exclude files explicitly named as retired/archived; historical
+comparisons retain them. This does not infer an unmarked document's publication status.
+`evidence.py` constructs contiguous source excerpts. The
+local labeler selects their IDs instead of regenerating quote text; the application
+binds those IDs to the original source. This prevents dropped or rewritten source
+sentences, but selecting an irrelevant excerpt is still possible.
+`schemas.py` constrains local metadata, review and card
+generation using Outlines Core. A small byte-preserving MLX adapter avoids the
+larger framework's unused disk/pickle cache dependency. Compatible hosted providers
+retain a one-call JSON path; local OpenAI-compatible servers can use the separated
+writing path.
 
-FTS5 maintains a content-external index via insert/delete triggers. Retrieval
-first filters to an authorized course and optional document IDs, then ranks up
-to 100 candidates using term coverage and BM25. Returned scores are not labeled
-as confidence or probability. No inference is made from the old model's calibrated
-similarity threshold. CJK bigrams improve substring matching; they are not a full
-multilingual semantic model.
+Responses have a typed envelope, real source IDs and exact supporting quotes.
+Presentation variants such as typographic citation brackets are normalized. Code
+subscripts are not citations. Only cited passages are saved as answer evidence,
+with compact numbering. A targeted review of precise course facts/code can trigger
+one correction;
+a short exact source statement has a deterministic path. Negative reviews must
+quote both the actual disputed draft and supporting source evidence (or reference
+computed numeric results). Negative verdicts without matching draft/evidence quotes
+are ignored. Missing-evidence responses without factual citations bypass the critic;
+incidental cited claims can be corrected without inventing the absent answer.
+This distinguishes an unknown identity from the false claim that nobody acted.
+Review outages
+are labeled and do not erase a valid primary answer. General conceptual lessons
+bypass the model critic after repeated false objections in development challenges.
+Review is not a correctness oracle. Invalid primary drafts produce a clear
+error with related source passages, never an unrelated sentence as an answer.
 
-Deleting a document cascades to chunks, vectors, source-linked cards and their reviews.
-It also clears the course's entire chat history because paraphrases can contain
-removed information. Manually authored unlinked cards remain the user's own
-content. Course/account deletion cascades through all descendants. SQLite secure
-delete is enabled, but no forensic-erasure promise is made for WAL, backups,
-provider logs or downloaded copies.
+`generation.py` manages an explicitly prepared MLX instruction model in one bounded
+worker process. The worker loads pinned local safetensors without remote code or
+network access, uses bounded prefill/cache/output, and restarts after a timeout.
+It uses seeded temperature/top-p/top-k sampling and permits ordinary JSON
+whitespace. Generic grammar indexes are cached; learner prompts and KV state are
+not. The worker releases per-request frames before waiting for the next request.
+Model role delimiters inside task data are JSON-escaped without changing the
+decoded text. Numeric tools, grammar/citation checks and the model remain distinct
+components; none gives a general guarantee of semantic correctness. If focused
+retrieval finds no context and the user has supplied no text to transform, the app
+reports missing material without generating an outside answer.
+`AIBackend` supports explicitly enabled compatible local/hosted servers and reports
+provider limits without exposing exceptions. A local failure never invokes hosting.
 
-## AI boundary
+The old `dialogue.py` extractive engine remains a clearly labeled Excerpt mode for
+installations without a generator. Its intent classifier and reader/retrieval
+ablations remain educational diagnostics, not evidence of generative accuracy.
 
-Local tools run local ML and never call a hosted generator. When the user opts in, evidence and a bounded recent
-history are sent to the operator-configured provider. Documents are JSON data,
-never system instructions. The model cannot invoke tools, execute code, access
-files or retrieve URLs. Source text and generated text render without HTML or
-remote-image execution in the chat.
-
-AI card answers must themselves be exact source excerpts (whitespace normalized); invalid drafts are dropped individually before the support check. The response validator rejects unknown IDs, fabricated quotes (whitespace differences are normalized),
-missing section evidence, excessive output and suspicious citation/link markup.
-A separate second request to the same provider checks semantic support and rejects unsupported answers/card batches. Both calls are bounded and failures fall back to local tools. A model can still attach a real quote to a bad inference; this is not a semantic
-entailment guarantee. The UI says so. Summaries explicitly disclose sampling.
-Provider timeouts/errors and invalid responses preserve local evidence access.
-There are no automatic paid retries or cross-provider fallbacks.
-
-## Scheduling
-
-Review intervals are deterministic, capped at one year. Again resets progress
-and schedules tomorrow; Hard grows slowly, Good uses 1/3/doubling day intervals,
-Easy starts at four days and grows faster. Due dates use the timezone selected
-in the UI. Practice quizzes do not alter scheduling. Ratings are self-assessment,
-not grades or a validated mastery score.
-
-Task planning sorts incomplete tasks by deadline and fills daily capacity in
-blocks of at most 50 minutes. Overdue tasks can use today's capacity; unallocated
-work is reported. Plans are recalculated from current tasks and estimates, not
-silently persisted as appointments. Calendar exports contain all-day deadline
-events with escaped, UTF-8-folded RFC 5545 content.
-
-## Local intelligence pipeline
-
-The initial stage normalizes Unicode and retrieves lexical candidates. A local
-384-dimensional encoder represents short windows of each authorized passage;
-normalized window vectors are averaged and normalized again. This reduces the
-risk of losing the tail of long passages at the encoder token limit, though very
-long words or dense non-English tokens can still truncate. The cache key includes
-the model revision and pooling version; the content digest includes document
-identity. Float32 vectors are shape/finite-value validated on read and write.
-Corrupt or obsolete vectors are rebuilt. No pickle or remote model code is loaded.
-
-Embedding reads/writes are short authenticated transactions. Inference happens
-outside database write locks. Each batch rechecks source identity/text before
-persisting vectors, and returned passages are revalidated after inference, so a
-deleted/replaced row cannot be resurrected. Only public model objects and the
-original-data classifier are cached globally. User text and query vectors are
-request-local; passage vectors persist only in the owning database.
-
-Search fuses lexical and dense ranks (reciprocal-rank constant 30), considers at
-most 32 candidates, and defaults to hybrid retrieval. Dense admission uses cosine
-0.20; final hybrid candidates require cosine 0.32 or a lexical match. An optional
-passage reranker is retained for reproducible ablations but is disabled by default:
-it reduced top-three development recall from 100% to 97.8%. Its alternate gates
-combine cosine 0.32, logit -3.5 and token coverage 0.6. These are engineering
-heuristics, **not calibrated probabilities or entailment tests**. Duplicate passage
-text is removed before context construction. Explicit alphanumeric identifiers
-(e.g. a course code) constrain candidates; unknown identifiers return no evidence.
-
-For comparisons, each side gets its own retrieval budget. Source sentence ranking
-combines lexical relevance, embedding similarity and a cross-encoder signal;
-local answers copy complete source sentences rather than paraphrasing them.
-English sentence relevance includes Snowball stemming, question detail hints
-(e.g. word count versus duration), ordering checks, a passage prior and a bounded
-cross-encoder contribution. Pronoun sentences are ranked with source context.
-
-A local MiniLM SQuAD2 reader then searches only the chosen source for a supporting
-span. It masks question/special/padding tokens, uses overlapping 384-token
-windows, and bounds spans to 40 tokens. Positive span-vs-null logit margins can
-provide sentence-location hints; margins are never compared across unrelated
-sources or shown as correctness probabilities. Every hint is revalidated by
-source ID and exact character offsets. The answer retains the whole supporting
-sentence and an antecedent when needed; a reader failure preserves lexical
-source access. Reader rejection alone cannot veto strong relevant material.
-Summary extraction uses TF-IDF centrality, heading relevance and source/section
-coverage. Detailed why/example/inventor/date requests have conservative missing-
-detail guards; these are English heuristics, not a complete factuality verifier.
-
-Auto mode chooses the task from explicit phrasing. A separate supervised intent
-classifier (120 original utterances, TF-IDF word/character n-grams and logistic
-regression, fixed seed 42) guides answer length and hosted style hints. Low-score
-predictions use conceptual defaults. Its social category never indiscriminately
-blocks retrieval. Exact greetings/help use conversational responses; evidence
-availability governs whether other questions can be answered.
-
-Dialogue metadata stores the resolved topic, comparison subjects, source context,
-response kind, notice and suggested follow-ups. Only grounded history in the
-current document filter can inform retrieval or reach the optional provider.
-Pronouns with no topic, or an ambiguous referent after a comparison, produce a
-clarification. Specific new-topic questions do not inherit the old subject.
-Recall mode asks the learner to explain before revealing source content; it does
-not grade mastery. A following learner explanation triggers source comparison
-for self-assessment. Source-driven prompts are not claims of free-form reasoning.
-
-## Model and method references
-
-- [Sentence-BERT paper](https://arxiv.org/abs/1908.10084): sentence representation
-  learning for similarity and retrieval.
-- [all-MiniLM-L6-v2 model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2):
-  deployed encoder; exact revision is pinned in `local_models.py`.
-- [MiniLM extractive QA model card](https://huggingface.co/deepset/minilm-uncased-squad2):
-  reader by deepset, based on Microsoft MiniLM and trained on SQuAD2; CC BY 4.0
-  model license. This software downloads the unmodified pinned weights separately;
-  the repository does not redistribute them.
-- [Transformers question-answering documentation](https://huggingface.co/docs/transformers/tasks/question_answering):
-  token-offset-based extractive inference. The application uses the model directly,
-  because the old question-answering pipeline is unavailable in Transformers v5.
-- [Retrieve and rerank documentation](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html):
-  efficient candidate retrieval followed by pairwise relevance scoring.
-- [Logistic regression documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html):
-  supervised linear classifier used for intent hints.
-- [Multi-QA candidate model card](https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1):
-  evaluated as an alternative and rejected after worse development results.
-
-See `evaluation/results-local.json` for the deployed configuration and
-`evaluation/results-multiqa-candidate.json` for the rejected alternative.
+`study.py` handles draft cloze cards, spaced scheduling, practice and calendar
+export. All saved artifacts remain course scoped. The public conversation fixture
+and offline tests exercise filters, migration, continuation, numeric routines,
+citation binding, errors and UI flows. Real-weight checks are separate from
+network-free CI. We do not fine-tune a language model on private coursework.

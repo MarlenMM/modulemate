@@ -1,56 +1,30 @@
-# Migration from the fixed-corpus prototype
+# Upgrading to ModuleMate 2.2
 
-Version 2 replaces the former shared university index and course-specific intent
-classifier with per-account, user-supplied libraries. The old corpus, OCR caches,
-course manifests, evaluation answers and reports are removed from the current
-tree. They are not imported into the new database. The old accuracy figures do
-not describe this implementation and must not be reused in new claims.
+Stop the old app, update the source, and run the setup commands in README.md.
+Start the app normally: the library opens immediately with no login.
 
-The implementation migration preserved a private copy of the original code and
-local course artifacts outside the repository. This archive is a local recovery
-copy, not part of the software distribution. Do not upload it or copy the old
-`corpus`, `index_store`, `results`, `.env`, runtime database or personal exports
-into a public release. The legacy `.env` is kept untracked; configuring the new
-provider variables is a separate local step.
+On the first schema 1/2 database open, ModuleMate writes a private online backup
+named `modulemate.pre-v3-<id>.sqlite3` beside the database. It then migrates
+atomically to schema 3. Every previous account's courses are retained in the one
+local workspace, including duplicate course names. Document/chunk/message/card/
+review/task IDs and existing vector data are preserved. Password, salt, session
+and login-attempt storage is removed from the active schema. A second open does
+not migrate again. Do not run an old account-based app against the upgraded file.
 
-## Git history and public copies
+The default database remains `data/modulemate.sqlite3`; `MODULEMATE_DATA_DIR`
+continues to override it. `MODULEMATE_ALLOW_REGISTRATION` no longer has any effect
+and can be removed. Provider keys/settings remain outside the database.
 
-Deleting a tracked file affects the new tree, not earlier commits, tags, forks,
-clones, cached pages or release assets. The existing repository was public when
-this migration was performed. A normal update cannot guarantee that its previous
-course material is no longer accessible.
+Backups are retained for recovery and are not part of a public release. To restore,
+stop the app, preserve the current file and its WAL companions, then restore the
+chosen backup using SQLite's backup API. Opening it with 2.2 migrates it again.
+JSON exports are portable readouts; JSON re-import is not implemented.
 
-For a distribution with no inherited history, export only the verified current
-commit:
+Prepared retrieval weights remain compatible. Conversational weights are a separate
+explicit setup, outside the repository. Use the same `MODULEMATE_CHAT_VARIANT`
+when preparing and running a local model. Unsupported hardware can use a compatible
+local server, an explicitly enabled provider, or the limited excerpt fallback.
 
-```bash
-git archive --format=zip --prefix=modulemate/ HEAD -o /private/path/modulemate-source.zip
-```
-
-Review that archive before publishing. It contains tracked files only and no Git
-history. A separate history-removal operation on the existing remote would need
-a complete path/content audit, backup, rewriting every affected branch/tag,
-coordinated force updates, and review of hosting caches/releases/forks. Do not
-claim that operation has happened merely because the latest branch is clean.
-GitHub support may be needed for retained/cached objects; third-party clones are
-outside this project's control.
-
-## New installation
-
-1. Install with `uv sync --locked` (Python 3.12/3.13).
-2. Start the app, create an account and a course.
-3. Add only material you are permitted to use. There is no implicit filesystem
-   crawl, university download, legacy index loading or automatic corpus rebuild.
-4. Use local tools immediately. Configure optional AI and explicitly opt in from
-   the sidebar if desired.
-5. Keep the data directory private and back it up with the documented backup API.
-
-## Version 2.0 to 2.1
-
-Back up the private database before starting the new version. The schema migration
-adds vector storage and conversation metadata without removing existing material.
-Install the optional `ml` extra and run model preparation to enable semantic
-matching. The weights are public; earlier course corpora are not restored.
-Without the extra, the enhanced extractive dialogue layer uses lexical retrieval.
-The original v2.0 validation is preserved in `VALIDATION_V2.md`; new observations
-are reported in `VALIDATION.md`.
+Historical 2.1 benchmark files describe that version's extractive behavior. The
+new conversation challenge records its own model identity, actual answers and
+latencies; do not quote old scores as a measure of the new generator.

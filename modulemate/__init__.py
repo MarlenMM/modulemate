@@ -1,3 +1,3 @@
-"""ModuleMate: user-owned materials, evidence, and study tools."""
+"""ModuleMate: a local conversational study workspace."""
 
-__version__ = "2.0.0"
+__version__ = "2.2.0"

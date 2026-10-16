@@ -40,7 +40,7 @@ QUERIES = [
 def run():
     with tempfile.TemporaryDirectory() as tmp:
         db = Database(Path(tmp) / "evaluation.sqlite3")
-        store = Store(db, db.register("evaluation", "synthetic test passphrase"))
+        store = Store(db)
         course = store.create_course("Original evaluation fixtures")
         for name, text in FIXTURES.items():
             store.add_document(course, parse_upload(name, text.encode()))

@@ -1,117 +1,38 @@
-# Privacy and deployment
+# Local data and provider boundaries
 
-## Intended deployment
+ModuleMate 2.2 is a single-user local application for a GitHub portfolio/demo.
+It has no account, password, session token, sign-in or registration flow. Anyone
+who can access this local app shares the same workspace. Its checked-in server
+configuration binds to `127.0.0.1`; public/shared hosting is outside its scope.
 
-Run locally or on a small trusted self-hosted installation. The checked-in server
-configuration binds to loopback and enables XSRF/CORS protection. Do not expose
-the development server directly to the internet. For shared access use HTTPS,
-a reverse proxy with request/authentication rate limits, private persistent disk,
-process/container resource limits, backups and an operator who accepts access
-to stored materials. Close registration after provisioning accounts if appropriate.
-An external identity provider, MFA, password recovery, malware scanning and a
-formal security audit are outside this release.
+The SQLite database stores courses, extracted text, passages, local vectors,
+conversation, cards, reviews and tasks. Uploaded original files are discarded
+after extraction. Data files have private filesystem permissions and are ignored
+by Git. They are not encrypted by ModuleMate. JSON exports contain study content;
+keep them private. Deleting a document removes its passages/vectors/linked cards
+and clears that course's chat, which may contain paraphrases of the source.
 
-## Stored and transmitted data
+Local model setup explicitly downloads public weights. Inference uses local files,
+disables Hub networking/telemetry in the generative worker, and loads no custom
+remote model code. The worker is bounded, serializes requests and discards its
+prompt cache after each call. Text is not retained in a global conversation cache.
+Only the database retains saved conversation. No Kaggle/Colab training is required.
 
-- Usernames, salted scrypt password hashes, expiring hashed session tokens and
-  short-lived login failure counters.
-- Courses, extracted document text, local FTS index, model-versioned vectors,
-  saved chats and dialogue metadata, cards, review
-  events and tasks. No uploaded originals, provider keys or raw passwords in DB.
-- Local mode sends no material to an AI service. Streamlit usage stats are off.
-- Optional AI shares selected excerpts and recent conversation with the displayed
-  provider only after the user opts in. A second request sends the draft and excerpts to the same provider to check support. Consent is session-local and clears on
-  sign-out or browser reload. The operator controls the endpoint/model.
-- The server operator can read the database. This is not end-to-end encryption.
-  Use encrypted storage and OS account controls where needed.
-- Account exports contain private content; store them safely. Source deletion
-  clears linked cards/reviews and course chats. Operator backups and previously
-  downloaded or transmitted copies are not automatically removed.
+A configured hosted provider is separate: the sidebar requires explicit activation.
+It receives questions, bounded selected passages, recent turns, drafts and review
+requests. Keys remain in `.env` or the process environment, never in SQLite or
+exports. Errors shown in the app contain no raw provider responses. There is no
+silent network fallback when the local generator fails.
 
-## Configuration
+Legacy account databases are backed up before the schema 3 upgrade. All previous
+accounts' courses become accessible in this one workspace, retaining their IDs
+and dependent content. Password/session tables are removed from the active schema.
+Backups preserve the old database and therefore can contain old credential hashes;
+keep those local. Clearing the active workspace does not erase backups or exports.
 
-| Variable | Default / purpose |
-|---|---|
-| `MODULEMATE_DATA_DIR` | `./data`; use a persistent private directory outside web roots |
-| `MODULEMATE_AI_BASE_URL` | `https://api.openai.com/v1`; HTTPS required except loopback |
-| `MODULEMATE_AI_MODEL` | Empty: no default model commitment |
-| `MODULEMATE_AI_API_KEY` | Empty: local tools still work |
-| `MODULEMATE_LOCAL_ML` | `auto`; uses prepared local weights, `off` forces word matching |
-| `MODULEMATE_MODEL_DIR` | `~/.cache/modulemate/models`; public model files only |
-| `MODULEMATE_ALLOW_REGISTRATION` | `true`; set `false` to close new account creation |
-
-There are no per-user provider overrides. Only trusted operators should change
-environment configuration. Restart the app after changing provider settings.
-Password hashing uses scrypt N=32768, r=8, p=3 (32 MiB working memory), one of the configurations in the [OWASP password storage guidance](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html). Passwords require 12–256 characters; five failed logins per username in 15
-minutes cause a temporary lockout. Sessions expire after 12 hours; password
-change revokes other sessions. There is no recovery email or admin backdoor.
-
-## Resource limits
-
-- 100 accounts per installation, 30 courses per account.
-- 100 documents / 12,000 passages per course.
-- 15 MB per file; five files / 30 MB per batch.
-- 2 million extracted characters / 3,000 passages per document.
-- 500 PDF pages, slides or notebook cells; office archives at most 2,500 entries,
-  60 MB expanded total and 12 MB per member. External-entity XML is rejected.
-- 25-second parser wall timeout, 15 CPU seconds on POSIX; 768 MB address space
-  ceiling on Linux. macOS uses CPU/wall limits; Windows has wall timeout only.
-- 2,000 cards and 1,000 tasks per course; the most recent 200 chat exchanges are
-  retained. UI displays the latest 40; full account export includes all retained.
-
-The parser process is a fault/resource boundary, **not an OS security sandbox**.
-For untrusted public uploads, container isolation, malware scanning and additional
-CPU/disk/network quotas are required. Parser libraries remain part of the trusted
-computing base. No remote URL fetching, notebook execution or macros are enabled.
-
-## Backup and restore
-
-Create a consistent backup using SQLite's backup API, not a live copy of only the
-main DB file while WAL writes are in flight:
-
-```bash
-uv run python scripts/backup.py /private/backups/modulemate-2026-10-14.sqlite3
-```
-
-The destination must not exist; backups receive owner-only file permissions.
-They include all accounts, password hashes and sessions and must stay private.
-To restore: stop the server, preserve the existing data directory as a separate
-backup, put the backup at `MODULEMATE_DATA_DIR/modulemate.sqlite3` in a fresh
-private directory, and restart. Do not mix an old main DB with another database's
-`-wal` or `-shm` files. Invalidate restored sessions using `scripts/backup.py
---revoke-sessions` before serving. Test restoration before relying on backups.
-
-The account JSON export is a portable human/machine-readable copy; automatic
-JSON account re-import is not supported in this release.
-
-## Technical references
-
-Implementation choices were checked against the official
-[Streamlit upload documentation](https://docs.streamlit.io/develop/api-reference/widgets/st.file_uploader),
-[server configuration](https://docs.streamlit.io/develop/api-reference/configuration/config.toml),
-and [Chat Completions response formats](https://platform.openai.com/docs/api-reference/chat).
-Upload extension filters alone are not validation; the application also validates
-content and parser limits. JSON mode alone is not grounding; application-side
-source validation still runs.
-
-## Local models and schema upgrade
-
-Run `uv sync --extra ml` and `uv run --extra ml python scripts/prepare_models.py`
-to download pinned public encoder, relevance and reader weights (about 310 MiB, plus framework dependencies). Downloads contact Hugging Face
-for those public files; no course text is sent. Runtime inference loads local
-safetensors with remote code disabled and local-files-only mode. It does not
-fall back to a hosted embedding service. Keep the model directory writable only
-by trusted operators. `MODULEMATE_LOCAL_ML=off` disables neural inference.
-
-The application uses CPU inference with two Torch threads and batches passages
-outside write transactions. Large new courses can take tens of seconds or more
-to prepare. Use Library's preparation control before chatting. Exact vector
-search is bounded by the existing 12,000-passage course limit. This is not a
-high-concurrency inference service; additional deployment quotas remain necessary.
-
-Before upgrading an existing installation, back it up with SQLite's backup API.
-Schema v2 adds vectors and message metadata transactionally. It preserves v1
-accounts and content. A rollback to v1 code requires restoring the pre-upgrade
-backup; old code deliberately rejects newer schemas. Embeddings are derived
-private data, receive source-deletion cascades and are included in operator DB
-backups. Human-readable account exports omit vectors but include chat metadata.
+Document and course selection still constrain retrieval and model context. Changing
+filters excludes earlier turns that relied on unselected documents. The project
+release check excludes runtime data, private corpora, model weights and credentials.
+Source text is untrusted input: it cannot grant the assistant permissions or make
+it execute notebook code. Citation checks and model review reduce some errors but
+are not guarantees of factual correctness or resistance to every adversarial input.

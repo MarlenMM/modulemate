@@ -1,5 +1,7 @@
 # Validation — 16 October 2026
 
+Historical version 2.1 measurements. These do not measure the 2.2 generator or account-free application; see [the current rebuild](INTELLIGENCE_REBUILD.md).
+
 This upgrade was developed across 15–16 October using original synthetic
 material. No private HIT documents, submissions, chats or user library contents
 are test fixtures. The instructor brief and original project report were reviewed

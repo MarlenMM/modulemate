@@ -82,10 +82,21 @@ def search(store, course_id, query, document_ids=None, limit=6) -> list[Passage]
             + " ORDER BY rank,c.id LIMIT 100",
             [expression, *params],
         ).fetchall()
+
         # Exact term coverage first; BM25 breaks ties. No fabricated probability score.
-        rows = sorted(
-            rows, key=lambda r: (-len(set(terms) & set(tokens(r["text"]))), r["rank"], r["id"])
-        )
+        def rank(row):
+            heading = row["locator"] + " " + " ".join(row["text"].splitlines()[:2])
+            # A short named concept should lead to its definition, rather than
+            # a broad introductory paragraph that merely mentions the word.
+            heading_hits = len(set(terms) & set(tokens(heading))) if len(terms) <= 3 else 0
+            return (
+                -heading_hits,
+                -len(set(terms) & set(tokens(row["text"]))),
+                row["rank"],
+                row["id"],
+            )
+
+        rows = sorted(rows, key=rank)
         chosen, seen = [], set()
         for row in rows:
             key = (row["document_id"], row["locator"], row["text"])

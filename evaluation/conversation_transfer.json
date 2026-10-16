@@ -1,0 +1,315 @@
+{
+  "description": "Original transfer challenges frozen before the first transfer run. Development diagnostics, not an independent benchmark or a measure of general intelligence.",
+  "documents": [
+    {
+      "name": "Systems lecture.md",
+      "text": "# Systems concepts\n## Caching\nA cache stores copies of data so that later requests can use a faster storage layer. A cache hit finds the requested data there; a cache miss must obtain it elsewhere. A cache can return stale data if changes are not invalidated. A higher hit rate does not by itself guarantee correctness.\n## Latency and throughput\nLatency is the time needed for one operation. Throughput is the number of operations completed per unit of time. More parallel workers can improve throughput without reducing one operation's latency.\n## Deadlock\nDeadlock is a situation in which tasks wait indefinitely for resources held by one another. Circular waiting can produce deadlock. A long-running task alone is not necessarily a deadlock.\n## Atomicity\nAn atomic transaction either commits all of its changes or leaves none of them applied. Atomicity is not the same as a transaction's isolation from concurrent work.\n## Networking\nTCP provides an ordered byte stream and retransmits lost data. UDP sends independent datagrams without that transport-level guarantee. An application can build reliability on top of UDP. Neither protocol alone encrypts application content.\n"
+    },
+    {
+      "name": "Physics lecture.md",
+      "text": "# Motion and measurement\n## Speed and velocity\nAverage speed is total distance travelled divided by elapsed time. Average velocity is displacement divided by elapsed time. Distance is a scalar path length, whereas displacement is a vector from the initial position to the final position. A runner returning to the start has zero displacement but may have travelled a positive distance.\n## Acceleration\nAcceleration is the rate of change of velocity. An object can accelerate at constant speed when its direction changes. Speed alone cannot establish whether acceleration is zero.\n## Units\nSpeed has units of metres per second, written m/s. Acceleration has units m/s squared. A graph's slope is a change in its vertical quantity divided by a change in its horizontal quantity.\n## Kinetic energy\nFor an object of mass m moving at speed v in the nonrelativistic regime, kinetic energy is one half of m times v squared. Doubling the speed at fixed mass multiplies this energy by four.\n"
+    },
+    {
+      "name": "Lab handbook current.md",
+      "text": "# Lab handbook — issued 3 October 2026\nThis handbook replaces the archived September instructions for Report B2.\n## Report B2\nReport B2 requires 2200 words excluding appendices. Submit a PDF by 2 December 2026 at 16:00 UTC. It is worth 30 percent of the module grade. The deadline is stated in UTC, not in the learner's local timezone.\n## Experiment E4\nThe optional E4 reflection suggests 900 words. It is ungraded. Its suggested length and status do not apply to Report B2.\n## Absence\nA missed laboratory requires a make-up session only when the teaching office approves it. Sending a request does not itself grant permission. This handbook gives no automatic attendance exemption.\n## Equipment\nLaser demonstrations must be supervised by the instructor. Students may analyse the provided measurements independently, but they may not operate the laser alone.\n## Not announced\nThe handbook does not announce the final exam's room, start time or duration. Study groups may use 20-minute revision blocks; these are not exam timings.\n"
+    },
+    {
+      "name": "Lab handbook archived.md",
+      "text": "# Archived lab instructions — issued 1 September 2026\nThese instructions are superseded by the handbook issued 3 October 2026.\nReport B2 previously required 1800 words and was due on 25 November 2026. These are archived requirements and must not be used as current rules.\n"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "unseen-topic",
+      "turns": [
+        {
+          "question": "deadlock",
+          "required": [
+            "wait",
+            "resource"
+          ],
+          "max_words": 130,
+          "expected_kind": "generated"
+        },
+        {
+          "question": "Make it one sentence.",
+          "required": [
+            "wait"
+          ],
+          "max_words": 50,
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "correction-transfer",
+      "turns": [
+        {
+          "question": "Explain throughput briefly.",
+          "required": [
+            "operation",
+            "time"
+          ],
+          "expected_kind": "generated"
+        },
+        {
+          "question": "Actually I meant latency. Explain that, without comparing it to anything.",
+          "required": [
+            "time"
+          ],
+          "forbidden": [
+            "unlike",
+            "whereas"
+          ],
+          "max_words": 90,
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "subtle-distinction",
+      "turns": [
+        {
+          "question": "Can acceleration be nonzero when speed is constant? Explain with one example.",
+          "required": [
+            "direction"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "wrong-premise-transfer",
+      "turns": [
+        {
+          "question": "UDP always means an application cannot be reliable, right?",
+          "required": [
+            "application",
+            "reliab"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "specific-current-rule",
+      "turns": [
+        {
+          "question": "For B2, give only the current word count and what it excludes.",
+          "required": [
+            "2200",
+            "appendic"
+          ],
+          "forbidden": [
+            "900",
+            "1800",
+            "December"
+          ],
+          "max_words": 65,
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "timezone-precision",
+      "turns": [
+        {
+          "question": "Give the current Report B2 deadline including its timezone.",
+          "required": [
+            "2 December",
+            "16:00",
+            "UTC"
+          ],
+          "forbidden": [
+            "25 November",
+            "KST"
+          ],
+          "max_words": 90,
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "conditional-permission",
+      "turns": [
+        {
+          "question": "I emailed a request to miss the lab. Does that automatically excuse me?",
+          "required": [
+            "approv"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "negated-permission",
+      "turns": [
+        {
+          "question": "Can I operate the laser independently like I can analyse the data?",
+          "required": [
+            "supervis"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "absence-vs-distractor",
+      "turns": [
+        {
+          "question": "How many minutes is the final exam?",
+          "allowed_kinds": [
+            "insufficient",
+            "generated"
+          ],
+          "required": [
+            "not"
+          ],
+          "forbidden": [
+            "exam is 20",
+            "lasts 20",
+            "40 minutes"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "selected-course-fact-gap",
+      "documents": [
+        "Physics lecture.md"
+      ],
+      "turns": [
+        {
+          "question": "According to this selected document, when is Report B2 due?",
+          "expected_kind": "insufficient",
+          "forbidden": [
+            "2 December",
+            "25 November"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "exact-quotation-gap",
+      "turns": [
+        {
+          "question": "Quote the exact line in these notes defining quantum entanglement.",
+          "expected_kind": "insufficient",
+          "forbidden": [
+            "2200"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unseen-general-concept",
+      "turns": [
+        {
+          "question": "Explain binary classification in two easy sentences.",
+          "required": [
+            "two"
+          ],
+          "expected_kind": "generated",
+          "max_words": 90
+        },
+        {
+          "question": "Give me an everyday example.",
+          "expected_kind": "generated",
+          "max_words": 140
+        }
+      ]
+    },
+    {
+      "id": "quiz-transfer",
+      "turns": [
+        {
+          "question": "Quiz me on speed versus velocity. Ask one question and wait.",
+          "require_question": true,
+          "expected_kind": "generated",
+          "max_words": 90
+        },
+        {
+          "question": "I think distance and displacement are the same, so speed and velocity are always the same.",
+          "required": [
+            "displacement"
+          ],
+          "require_question": true,
+          "expected_kind": "generated",
+          "max_words": 200
+        }
+      ]
+    },
+    {
+      "id": "math-plus-reasoning",
+      "turns": [
+        {
+          "question": "Find the mean of 2, 3, 10 and explain why it is different from the median.",
+          "required": [
+            "5",
+            "3"
+          ],
+          "expected_kind": "generated",
+          "max_words": 160
+        }
+      ]
+    },
+    {
+      "id": "scope-continuity",
+      "documents": [
+        "Physics lecture.md"
+      ],
+      "turns": [
+        {
+          "question": "Compare speed and velocity.",
+          "required": [
+            "distance",
+            "displacement"
+          ],
+          "expected_kind": "generated"
+        },
+        {
+          "question": "Explain the second one with the runner example from the notes.",
+          "required": [
+            "displacement",
+            "zero"
+          ],
+          "expected_kind": "generated",
+          "max_words": 180
+        }
+      ]
+    },
+    {
+      "id": "lesson-transfer",
+      "documents": [
+        "Systems lecture.md"
+      ],
+      "turns": [
+        {
+          "question": "Teach this lecture fully.",
+          "required": [
+            "cache",
+            "latency",
+            "throughput",
+            "deadlock"
+          ],
+          "require_question": true,
+          "expected_kind": "generated",
+          "min_words": 170,
+          "max_words": 550
+        },
+        {
+          "question": "Continue the lecture",
+          "required": [
+            "atomic",
+            "TCP",
+            "UDP"
+          ],
+          "require_question": true,
+          "min_words": 120,
+          "max_words": 500,
+          "expected_kind": "generated"
+        }
+      ]
+    }
+  ]
+}

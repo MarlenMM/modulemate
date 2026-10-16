@@ -1,0 +1,146 @@
+{
+  "description": "Original English transfer probe written after reading the general-set failures, before testing the resulting corrections. It probes analogous behavior on new facts, not independent population accuracy.",
+  "documents": [
+    {
+      "name": "Willow current.md",
+      "text": "# Willow music circle — current rules\nThe current circle has five rehearsal places. This replaces the retired edition. Members may revise their outline before the coordinator's review without asking permission. Revisions after that review require the coordinator's approval. A digital outline is required; printing it is optional. These rules do not name a funder or set a fee."
+    },
+    {
+      "name": "Willow retired.md",
+      "text": "# Willow music circle — retired rules\nThis retired edition offered nine rehearsal places. The current rules replace it."
+    },
+    {
+      "name": "Orchard library.md",
+      "text": "# Orchard library loans\nA loan lasts seven days. A reader may renew it once if nobody else has reserved the book. A reservation prevents renewal. This note does not state overdue charges. The librarian records the checkout date and the renewal date separately."
+    },
+    {
+      "name": "Paper sculpture.md",
+      "text": "# Building a paper sculpture\nFold two strips into loops, then join the loops using the small slot in each strip. Tape is optional; the slots provide the join. The directions describe assembly but do not specify the sculpture's weight or a way to calculate it. The author is Iven Moss."
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "current-quantity",
+      "turns": [
+        {
+          "question": "Give only the current number of Willow rehearsal places.",
+          "required_any": [
+            [
+              "five",
+              "5"
+            ]
+          ],
+          "forbidden": [
+            "nine",
+            "retired",
+            "previous"
+          ],
+          "expected_kind": "generated",
+          "max_words": 35
+        }
+      ]
+    },
+    {
+      "id": "explicit-permission",
+      "turns": [
+        {
+          "question": "Can I revise my Willow outline before the review without approval?",
+          "required": [
+            "before"
+          ],
+          "expected_kind": "generated",
+          "max_words": 60
+        }
+      ]
+    },
+    {
+      "id": "optional-item",
+      "turns": [
+        {
+          "question": "Do I have to print my Willow outline?",
+          "required": [
+            "digital",
+            "optional"
+          ],
+          "expected_kind": "generated",
+          "max_words": 60
+        }
+      ]
+    },
+    {
+      "id": "missing-funder",
+      "turns": [
+        {
+          "question": "Who funds the Willow circle?",
+          "expected_kind": "insufficient",
+          "forbidden": [
+            "Iven"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apply-condition",
+      "turns": [
+        {
+          "question": "Another reader has reserved my Orchard library book. Can I renew it?",
+          "required_any": [
+            [
+              "cannot",
+              "can't",
+              "no"
+            ]
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "assembly-help",
+      "turns": [
+        {
+          "question": "I need to calculate this paper sculpture's weight. How can the directions help?",
+          "required": [
+            "assembly"
+          ],
+          "required_any": [
+            [
+              "not",
+              "no",
+              "missing"
+            ]
+          ],
+          "expected_kind": "generated",
+          "max_words": 140
+        }
+      ]
+    },
+    {
+      "id": "exact-story-fact",
+      "turns": [
+        {
+          "question": "Who wrote the paper sculpture directions?",
+          "required": [
+            "Iven Moss"
+          ],
+          "expected_kind": "generated",
+          "max_words": 40
+        }
+      ]
+    },
+    {
+      "id": "input-transformation",
+      "turns": [
+        {
+          "question": "Can you rewrite this more politely: \"Send your outline today. I need to review it before our rehearsal.\"",
+          "required": [
+            "outline",
+            "today"
+          ],
+          "expected_kind": "generated",
+          "expected_basis": "input"
+        }
+      ]
+    }
+  ]
+}

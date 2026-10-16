@@ -81,7 +81,7 @@ class LocalModels:
         self.key = f"{encoder_name}@{encoder_revision}:mean-v1"
         try:
             import torch
-            from sentence_transformers import CrossEncoder, SentenceTransformer
+            from sentence_transformers import SentenceTransformer
 
             torch.set_num_threads(2)
             self.encoder = SentenceTransformer(
@@ -91,14 +91,8 @@ class LocalModels:
                 trust_remote_code=False,
                 model_kwargs={"use_safetensors": True},
             )
-            self.reranker = CrossEncoder(
-                str(Path(directory) / RERANKER_REVISION),
-                device="cpu",
-                local_files_only=True,
-                trust_remote_code=False,
-                model_kwargs={"use_safetensors": True},
-                max_length=512,
-            )
+            self._reranker = None
+            self._reranker_path = str(Path(directory) / RERANKER_REVISION)
             # Chunking uses short sentence windows below this limit, including
             # for CJK, where a character can occupy an entire tokenizer token.
             self.encoder.max_seq_length = 256
@@ -123,8 +117,19 @@ class LocalModels:
     def rerank(self, query, texts):
         try:
             with self._lock:
+                if self._reranker is None:
+                    from sentence_transformers import CrossEncoder
+
+                    self._reranker = CrossEncoder(
+                        self._reranker_path,
+                        device="cpu",
+                        local_files_only=True,
+                        trust_remote_code=False,
+                        model_kwargs={"use_safetensors": True},
+                        max_length=512,
+                    )
                 values = np.asarray(
-                    self.reranker.predict(
+                    self._reranker.predict(
                         [(query, text) for text in texts], batch_size=16, show_progress_bar=False
                     ),
                     dtype=float,

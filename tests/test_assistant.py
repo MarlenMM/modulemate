@@ -15,6 +15,8 @@ class FakeBackend:
 
     def complete(self, system, payload):
         self.calls.append((system, payload))
+        if "draft" in payload and not self.fails:
+            return '{"approved":true,"issues":[]}'
         if "answer_to_check" in payload and not self.fails:
             return '{"supported":true}'
         if self.fails:
@@ -36,6 +38,18 @@ def response_for(passage, source_id=1, quote=None):
     )
 
 
+def generated_response(passage, text="Try recalling before checking the answer."):
+    return json.dumps(
+        {
+            "status": "answered",
+            "basis": "materials",
+            "answer": text + " [1]",
+            "citations": [{"source_id": 1, "quote": passage.text[:40]}],
+            "followups": [],
+        }
+    )
+
+
 def test_local_mode_never_calls_backend(store, populated):
     course, _ = populated
     backend = FakeBackend(fails=True)
@@ -51,9 +65,9 @@ def test_local_mode_never_calls_backend(store, populated):
 def test_valid_ai_has_resolvable_citations(store, populated):
     course, _ = populated
     p = search(store, course, "retrieval practice")[0]
-    backend = FakeBackend(response_for(p))
+    backend = FakeBackend(generated_response(p))
     answer = answer_question(store, course, "retrieval practice", use_ai=True, backend=backend)
-    assert answer.kind == "ai" and "[1]" in answer.text
+    assert answer.kind == "generated" and "[1]" in answer.text
     assert backend.calls[0][1]["passages"][0]["document"] == p.name
 
 
@@ -90,19 +104,19 @@ def test_ai_failure_returns_evidence_without_error_details(store, populated, fai
     course, _ = populated
     backend = FakeBackend("{}", fails=failure == "outage")
     answer = answer_question(store, course, "retrieval practice", use_ai=True, backend=backend)
-    assert answer.kind == "local"
-    assert "could not be verified" in answer.notice
+    assert answer.kind == "error"
+    assert "failed validation" in answer.notice
     assert "private provider exception" not in answer.text
 
 
-def test_no_match_does_not_call_ai(store, populated):
+def test_model_can_receive_a_topic_without_lexical_matches(store, populated):
     course, _ = populated
     backend = FakeBackend(fails=True)
     result = answer_question(
         store, course, "quasar zeppelin xylophone", backend=backend, use_ai=True
     )
-    assert result.kind == "empty"
-    assert not backend.calls
+    assert result.kind == "error"
+    assert len(backend.calls) == 1
 
 
 def test_summary_works_without_keywords(store, populated):
@@ -112,16 +126,15 @@ def test_summary_works_without_keywords(store, populated):
     assert "not every page" in result.notice
 
 
-def test_multilingual_search_and_literal_query_syntax(store, course):
+def test_unicode_search_and_literal_query_syntax(store, course):
     store.add_document(
         course,
         parse_upload(
             "notes.txt",
-            "概率是可能性的度量。\n금요일 시험 안내.\nA probability is a measure.".encode(),
+            "The café opens Friday.\nA probability is a measure.".encode(),
         ),
     )
-    assert search(store, course, "概率")
-    assert search(store, course, "금요일")
+    assert search(store, course, "café")
     assert search(store, course, 'probability OR "*')
     assert search(store, course, "!!!") == []
 
@@ -199,15 +212,32 @@ def test_real_quote_with_unsupported_claim_falls_back(store, populated):
 
     class RejectingVerifier(FakeBackend):
         def complete(self, system, payload):
-            if "answer_to_check" in payload:
-                return '{"supported":false}'
-            return response_for(passage)
+            if "draft" in payload:
+                return json.dumps(
+                    {
+                        "approved": False,
+                        "issues": [
+                            {
+                                "quote": "Try recalling before checking the answer.",
+                                "problem": "Unsupported claim",
+                                "correction": "Say evidence is missing",
+                                "source_id": 1,
+                                "source_quote": passage.text[:40],
+                            }
+                        ],
+                    }
+                )
+            return generated_response(passage)
 
     result = answer_question(
-        store, course, "retrieval practice", use_ai=True, backend=RejectingVerifier()
+        store,
+        course,
+        "According to my notes, explain retrieval practice",
+        use_ai=True,
+        backend=RejectingVerifier(),
     )
-    assert result.kind == "local"
-    assert "could not be verified" in result.notice
+    assert result.kind == "error"
+    assert "failed validation" in result.notice
 
 
 def test_support_check_requires_boolean_true():

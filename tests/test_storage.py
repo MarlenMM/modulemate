@@ -5,9 +5,9 @@ from datetime import date
 
 import pytest
 
-from modulemate.db import AuthenticationError, Database, Store, UserError, token_hash
+from modulemate.db import Database, Store, UserError
 from modulemate.ingest import parse_upload
-from modulemate.search import overview, search
+from modulemate.search import search
 
 
 def test_schema_initialization_is_concurrent_and_idempotent(tmp_path):
@@ -15,89 +15,8 @@ def test_schema_initialization_is_concurrent_and_idempotent(tmp_path):
     with ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(lambda _: Database(path), range(4)))
     with sqlite3.connect(path) as con:
-        assert con.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert con.execute("PRAGMA user_version").fetchone()[0] == 3
         assert con.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
-
-
-def test_password_and_session_are_hashed(db, store):
-    with db.connect() as con:
-        user = con.execute("SELECT * FROM users").fetchone()
-        session = con.execute("SELECT * FROM sessions").fetchone()
-        assert user["password"] != "a strong password"
-        assert session["token"] != store.token
-        assert session["token"] == token_hash(store.token)
-    other = Store(db, db.login("STUDENT", "a strong password"))
-    assert other.profile()["username"] == "student"
-    db.logout(other.token)
-    with pytest.raises(AuthenticationError):
-        other.profile()
-
-
-def test_rate_limit_failures_survive_transaction(db, store):
-    for _ in range(5):
-        with pytest.raises(AuthenticationError, match="Incorrect"):
-            db.login("student", "wrong")
-    with pytest.raises(AuthenticationError, match="Too many"):
-        db.login("student", "a strong password")
-
-
-def test_expired_session_cannot_read(db, store):
-    with db.connect() as con:
-        con.execute("UPDATE sessions SET expires_at=0")
-    with pytest.raises(AuthenticationError):
-        store.courses()
-
-
-def test_registration_validation(db):
-    for name, password in [("bad space", "a valid password"), ("valid", "short")]:
-        with pytest.raises(UserError):
-            db.register(name, password)
-    with pytest.raises(UserError, match="disabled"):
-        db.register("valid", "a valid password", allowed=False)
-
-
-def test_cross_account_operations_are_denied(db, store, populated):
-    course, document = populated
-    store.add_card(course, "What?", "This.", document, "part 1")
-    card = store.cards(course)[0]["id"]
-    store.add_task(course, "Read", "2026-10-20", 30)
-    task = store.tasks(course)[0]["id"]
-    other = Store(db, db.register("second", "another password"))
-    own_course = other.create_course("Other")
-    parsed = parse_upload("secret.txt", b"This is confidential source material.")
-    operations = [
-        lambda: other.documents(course),
-        lambda: other.document(document),
-        lambda: other.document_passages(document),
-        lambda: other.delete_document(document),
-        lambda: other.delete_course(course),
-        lambda: other.update_course(course, "stolen", ""),
-        lambda: other.add_document(course, parsed),
-        lambda: search(other, course, "retrieval"),
-        lambda: overview(other, course),
-        lambda: other.messages(course),
-        lambda: other.add_message(course, "question", "answer", [], "mode"),
-        lambda: other.clear_messages(course),
-        lambda: other.cards(course),
-        lambda: other.add_card(course, "q", "a"),
-        lambda: other.review_counts(course),
-        lambda: other.update_card(card, "changed", "answer"),
-        lambda: other.review_card(card, "Good"),
-        lambda: other.delete_card(card),
-        lambda: other.tasks(course),
-        lambda: other.modify_task(task, done=True),
-        lambda: other.modify_task(task, delete=True),
-        lambda: other.add_task(course, "x", "2026-10-20", 20),
-        lambda: other.add_card(own_course, "q", "a", document, "part 1"),
-        lambda: search(other, own_course, "retrieval", [document]),
-        lambda: other.add_message(own_course, "q", "a", [{"document_id": document}], "x"),
-    ]
-    for operation in operations:
-        with pytest.raises(UserError):
-            operation()
-    assert search(other, own_course, "retrieval") == []
-    assert "retrieval practice" not in json.dumps(other.export()).lower()
-    assert store.document(document)["name"] == "Learning Lab.md"
 
 
 def test_course_filters_do_not_cross_even_for_same_user(store, populated):
@@ -135,37 +54,10 @@ def test_deletion_cascades_and_fts_is_fresh(db, store, populated):
         con.execute("INSERT INTO chunk_search(chunk_search,rank) VALUES('integrity-check',1)")
 
 
-def test_password_change_invalidates_other_sessions(db, store):
-    other = Store(db, db.login("student", "a strong password"))
-    store.change_password("a strong password", "replacement password")
-    assert store.profile()["username"] == "student"
-    with pytest.raises(AuthenticationError):
-        other.profile()
-    with pytest.raises(AuthenticationError):
-        db.login("student", "a strong password")
-    assert db.login("student", "replacement password")
-
-
-def test_export_and_delete_account(db, store, populated):
-    course, _ = populated
-    store.add_card(course, "q", "a")
-    store.add_task(course, "read", "2026-10-20", 30)
-    exported = store.export()
-    assert exported["courses"][0]["documents"]
-    raw = json.dumps(exported)
-    assert store.token not in raw and "password" not in raw
-    with pytest.raises(AuthenticationError):
-        store.delete_account("wrong password")
-    store.delete_account("a strong password")
-    with db.connect() as con:
-        for table in ("users", "sessions", "courses", "documents", "chunks", "cards", "tasks"):
-            assert con.execute(f"SELECT count(*) FROM {table}").fetchone()[0] == 0
-
-
 def test_online_backup_roundtrip(db, store, populated, tmp_path):
     path = tmp_path / "backup.sqlite3"
     db.backup(path)
-    restored = Store(Database(path), store.token)
+    restored = Store(Database(path))
     assert restored.export()["courses"] == store.export()["courses"]
     with pytest.raises(UserError):
         db.backup(path)
@@ -182,29 +74,151 @@ def test_failed_ingestion_is_atomic(db, store, course):
     assert store.documents(course) == []
 
 
-def test_password_hash_parameters_and_legacy_upgrade(db, store):
-    import hashlib
-
-    with db.connect() as con:
-        user = con.execute("SELECT * FROM users").fetchone()
-        assert user["password"].startswith("scrypt$32768$8$3$")
-        legacy = hashlib.scrypt(
-            b"a strong password", salt=bytes.fromhex(user["salt"]), n=16384, r=8, p=1
-        ).hex()
-        con.execute("UPDATE users SET password=?", (legacy,))
-    assert db.login("student", "a strong password")
-    with db.connect() as con:
-        assert con.execute("SELECT password FROM users").fetchone()[0].startswith("scrypt$")
-
-
 def test_task_edit_preserves_id_and_enforces_ownership(db, store, course):
     store.add_task(course, "Read", "2026-10-20", 20)
     task_id = store.tasks(course)[0]["id"]
     store.update_task(task_id, "Read more", "2026-10-21", 40)
     updated = store.tasks(course)[0]
     assert updated["id"] == task_id and updated["minutes"] == 40
-    other = Store(db, db.register("second", "another password"))
     with pytest.raises(UserError):
-        other.update_task(task_id, "Stolen", "2026-10-21", 40)
+        store.update_task("missing-task", "Missing", "2026-10-21", 40)
     with pytest.raises(UserError):
         store.update_task(task_id, "Invalid", "not-a-date", 40)
+
+
+def test_local_workspace_has_no_credentials_and_is_shared(db, store, populated):
+    assert Store(db).courses() == store.courses()
+    with db.connect() as con:
+        names = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+        assert not names & {"users", "sessions", "login_attempts"}
+        assert {r[1] for r in con.execute("PRAGMA table_info(workspace)")} == {
+            "id",
+            "name",
+            "created_at",
+        }
+    raw = json.dumps(store.export())
+    assert '"password"' not in raw and '"token"' not in raw
+    store.reset_workspace()
+    assert store.courses() == []
+    assert store.create_course("Start again")
+
+
+def test_v2_migration_preserves_all_accounts_and_dependent_data(tmp_path):
+    from pathlib import Path
+
+    path = tmp_path / "legacy.sqlite3"
+    with sqlite3.connect(path) as con:
+        con.executescript((Path(__file__).parent / "fixtures/legacy_v2.sql").read_text())
+        for i in (1, 2):
+            con.execute(
+                "INSERT INTO users VALUES (?,?,?,?,?)",
+                (str(i), f"student{i}", "legacy-hash", "legacy-salt", "2026-01-01"),
+            )
+            con.execute("INSERT INTO sessions VALUES (?,?,?)", (f"token{i}", str(i), 9999999999))
+            con.execute(
+                "INSERT INTO courses VALUES (?,?,?,?,?)",
+                (f"course{i}", str(i), "Same name", "", "2026-01-01"),
+            )
+            con.execute(
+                "INSERT INTO documents VALUES (?,?,?,?,?,?,?)",
+                (
+                    f"doc{i}",
+                    f"course{i}",
+                    "Notes",
+                    f"digest{i}",
+                    f"Private fact {i}",
+                    "[]",
+                    "2026-01-01",
+                ),
+            )
+            con.execute(
+                "INSERT INTO chunks VALUES (?,?,?,?,?,?)",
+                (i, f"doc{i}", "part 1", f"Private fact {i}", f"private fact {i}", 0),
+            )
+            con.execute(
+                "INSERT INTO embeddings VALUES (?,?,?,?,?)", (i, "test", "digest", 1, b"1234")
+            )
+            con.execute(
+                "INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?)",
+                (
+                    f"card{i}",
+                    f"course{i}",
+                    f"doc{i}",
+                    "Question",
+                    "Answer",
+                    "part 1",
+                    "2026-01-01",
+                    0,
+                    0,
+                    "2026-01-01",
+                ),
+            )
+            con.execute(
+                "INSERT INTO reviews VALUES (?,?,?,?)",
+                (f"review{i}", f"card{i}", "Good", "2026-01-01"),
+            )
+            con.execute(
+                "INSERT INTO tasks VALUES (?,?,?,?,?,?,?)",
+                (f"task{i}", f"course{i}", "Read", "2026-01-01", 30, 0, "2026-01-01"),
+            )
+            con.execute(
+                "INSERT INTO messages VALUES (?,?,?,?,?,?,?,?)",
+                (
+                    f"message{i}",
+                    f"course{i}",
+                    "Question",
+                    "Answer",
+                    "[]",
+                    "Explain",
+                    "2026-01-01",
+                    '{"topic":"preserved"}',
+                ),
+            )
+    store = Store(Database(path))
+    assert [c["id"] for c in store.courses()] == ["course1", "course2"]
+    assert store.document("doc2")["text"] == "Private fact 2"
+    assert store.messages("course1")[0]["metadata"]["topic"] == "preserved"
+    with store.db.connect() as con:
+        assert con.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
+        assert not con.execute("PRAGMA foreign_key_check").fetchall()
+        assert con.execute("SELECT id FROM workspace").fetchone()[0] == "local"
+        for table in (
+            "courses",
+            "documents",
+            "chunks",
+            "embeddings",
+            "cards",
+            "reviews",
+            "tasks",
+            "messages",
+        ):
+            assert con.execute(f"SELECT count(*) FROM {table}").fetchone()[0] == 2
+    backups = list(tmp_path.glob("legacy.pre-v3-*.sqlite3"))
+    assert len(backups) == 1
+    with sqlite3.connect(backups[0]) as backup:
+        assert backup.execute("SELECT count(*) FROM users").fetchone()[0] == 2
+    Database(path)
+    assert len(list(tmp_path.glob("legacy.pre-v3-*.sqlite3"))) == 1
+
+
+@pytest.mark.parametrize("legacy_version", [1, 2])
+def test_empty_legacy_workspace_starts_without_an_account(tmp_path, legacy_version):
+    from pathlib import Path
+
+    path = tmp_path / "empty-legacy.sqlite3"
+    with sqlite3.connect(path) as con:
+        con.executescript((Path(__file__).parent / "fixtures/legacy_v2.sql").read_text())
+        if legacy_version == 1:
+            con.execute("DROP TABLE embeddings")
+            con.execute("ALTER TABLE messages DROP COLUMN metadata")
+            con.execute("PRAGMA user_version=1")
+    migrated = Store(Database(path))
+    assert migrated.courses() == []
+    course = migrated.create_course("First local course")
+    assert migrated.courses()[0]["id"] == course
+    with migrated.db.connect() as con:
+        assert not con.execute("PRAGMA foreign_key_check").fetchall()
+    backups = list(tmp_path.glob("empty-legacy.pre-v3-*.sqlite3"))
+    assert len(backups) == 1
+    with sqlite3.connect(backups[0]) as backup:
+        assert backup.execute("PRAGMA user_version").fetchone()[0] == legacy_version

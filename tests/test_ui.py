@@ -27,11 +27,6 @@ def test_complete_local_study_journey(tmp_path, monkeypatch):
         Path(__file__).resolve().parents[1] / "app.py", default_timeout=30
     ).run()
     assert not app.exception
-    widget(app.radio, "Account").set_value("Create account").run()
-    widget(app.text_input, "Username").set_value("ui_student")
-    widget(app.text_input, "Password").set_value("a unique passphrase")
-    widget(app.text_input, "Repeat password").set_value("a unique passphrase")
-    click(app, "Create account")
     widget(app.text_input, "Course name").set_value("Learning Lab")
     click(app, "Create course")
     click(app, "Add original Learning Lab example")
@@ -60,7 +55,7 @@ def test_complete_local_study_journey(tmp_path, monkeypatch):
     assert app.dataframe
     click(app, "Mark done")
     assert any("All tasks are complete" in s.value for s in app.success)
-    page(app, "Account")
+    page(app, "Settings")
     assert not app.exception
     assert any(d.label == "Export all my data (JSON)" for d in app.get("download_button"))
     page(app, "Library")
@@ -71,22 +66,23 @@ def test_complete_local_study_journey(tmp_path, monkeypatch):
     assert any("Your library is empty" in s.value for s in app.info)
     page(app, "Cards")
     assert any(m.label == "Saved cards" and m.value == "0" for m in app.metric)
-    click(app, "Sign out")
-    assert any(t.value == "Your materials. Your study space." for t in app.title)
+
+    assert not any(e.label in {"Username", "Password", "Repeat password"} for e in app.text_input)
+    assert not any(e.label == "Sign out" for e in app.button)
 
 
-def test_session_does_not_leak_to_another_browser(tmp_path, monkeypatch):
+def test_new_browser_opens_same_local_workspace_without_login(tmp_path, monkeypatch):
     monkeypatch.setenv("MODULEMATE_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("MODULEMATE_CHAT", "off")
     app = AppTest.from_file(
         Path(__file__).resolve().parents[1] / "app.py", default_timeout=30
     ).run()
-    widget(app.radio, "Account").set_value("Create account").run()
-    widget(app.text_input, "Username").set_value("private_user")
-    widget(app.text_input, "Password").set_value("a unique passphrase")
-    widget(app.text_input, "Repeat password").set_value("a unique passphrase")
-    click(app, "Create account")
+    widget(app.text_input, "Course name").set_value("Local learning")
+    click(app, "Create course")
     second = AppTest.from_file(
         Path(__file__).resolve().parents[1] / "app.py", default_timeout=30
     ).run()
-    assert any(t.value == "Your materials. Your study space." for t in second.title)
-    assert not any(r.label == "Workspace" for r in second.radio)
+    assert not second.exception
+    assert widget(second.selectbox, "Current course").value
+    assert any(r.label == "Workspace" for r in second.radio)
+    assert not any(r.label == "Account" for r in second.radio)
