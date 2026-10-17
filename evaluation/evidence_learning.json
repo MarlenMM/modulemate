@@ -1,0 +1,1850 @@
+{
+  "schema": 1,
+  "license": "CC0-1.0",
+  "description": "Original fictional evidence learning examples authored for ModuleMate. All passages and questions belonging to a document stay in one split. Positives require every listed gold passage; related text alone is not a complete answer. Generated negatives are local or from other documents in the same split. Small synthetic diagnostic, not representative user data.",
+  "documents": [
+    {
+      "id": "forge",
+      "split": "train",
+      "subject": "events",
+      "name": "Forge workshop",
+      "passages": [
+        {
+          "id": "forge-0",
+          "text": "The Forge workshop runs on 6 March in Cedar Room. The morning session starts at 09:40."
+        },
+        {
+          "id": "forge-1",
+          "text": "A seat costs 7 tokens. Visitors may watch the demonstration for free, but watching does not reserve a seat."
+        },
+        {
+          "id": "forge-2",
+          "text": "Participants must bring closed shoes. Gloves are supplied. A personal drill is optional."
+        },
+        {
+          "id": "forge-3",
+          "text": "A participant can transfer a booking after notifying the organiser. The note gives no refund deadline."
+        }
+      ],
+      "questions": [
+        {
+          "id": "forge-q0",
+          "text": "Where is the Forge workshop held?",
+          "gold": [
+            "forge-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "forge-q1",
+          "text": "How much does a seat at the Forge workshop cost?",
+          "gold": [
+            "forge-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "forge-q2",
+          "text": "Does a Forge participant have to bring gloves?",
+          "gold": [
+            "forge-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "forge-q3",
+          "text": "Can I give my Forge booking to someone else?",
+          "gold": [
+            "forge-3"
+          ],
+          "related": []
+        },
+        {
+          "id": "forge-q4",
+          "text": "Give the Forge workshop location and seat price.",
+          "gold": [
+            "forge-0",
+            "forge-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "forge-q5",
+          "text": "What is the last date to request a Forge refund?",
+          "gold": [],
+          "related": [
+            "forge-3"
+          ]
+        },
+        {
+          "id": "forge-q6",
+          "text": "Where is Forge held and who founded it?",
+          "gold": [],
+          "related": [
+            "forge-0"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tide",
+      "split": "train",
+      "subject": "ecology",
+      "name": "Tide pool field notes",
+      "passages": [
+        {
+          "id": "tide-0",
+          "text": "A limpet scrapes algae from the rock using a toothed feeding structure called a radula."
+        },
+        {
+          "id": "tide-1",
+          "text": "The observation team counted animals in square frames of equal area. The count alone is not a measurement of animal mass."
+        },
+        {
+          "id": "tide-2",
+          "text": "Keep the sampling area constant when comparing counts from different shore levels. Record the tide and time."
+        },
+        {
+          "id": "tide-3",
+          "text": "The notes name no predator of the observed limpets and contain no population estimate for the whole coast."
+        }
+      ],
+      "questions": [
+        {
+          "id": "tide-q0",
+          "text": "What do the observed limpets eat?",
+          "gold": [
+            "tide-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "tide-q1",
+          "text": "Did the tide pool team measure animal weight?",
+          "gold": [
+            "tide-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "tide-q2",
+          "text": "What should stay the same when comparing shore counts?",
+          "gold": [
+            "tide-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "tide-q3",
+          "text": "Do the field notes estimate the entire coastal population?",
+          "gold": [
+            "tide-3"
+          ],
+          "related": []
+        },
+        {
+          "id": "tide-q4",
+          "text": "Explain how limpets feed and how the team counted animals.",
+          "gold": [
+            "tide-0",
+            "tide-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "tide-q5",
+          "text": "Which bird hunted the limpets?",
+          "gold": [],
+          "related": [
+            "tide-3"
+          ]
+        },
+        {
+          "id": "tide-q6",
+          "text": "Describe the sampling method and give the measured salinity.",
+          "gold": [],
+          "related": [
+            "tide-1",
+            "tide-2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cache",
+      "split": "train",
+      "subject": "programming",
+      "name": "Cache helper",
+      "passages": [
+        {
+          "id": "cache-0",
+          "text": "The helper stores a result under a string key after computing it. A later lookup of the same key returns the stored value."
+        },
+        {
+          "id": "cache-1",
+          "text": "Deleting a key removes its saved value. It does not erase entries under other keys."
+        },
+        {
+          "id": "cache-2",
+          "text": "The cache has a limit of 40 entries. When full, it removes the least recently accessed entry before inserting a new one."
+        },
+        {
+          "id": "cache-3",
+          "text": "The example runs inside one process. It does not describe disk persistence or concurrent access."
+        }
+      ],
+      "questions": [
+        {
+          "id": "cache-q0",
+          "text": "What happens when the Cache helper sees a key again?",
+          "gold": [
+            "cache-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "cache-q1",
+          "text": "Does deleting one Cache helper key clear every entry?",
+          "gold": [
+            "cache-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "cache-q2",
+          "text": "Which entry is removed when the Cache helper fills up?",
+          "gold": [
+            "cache-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "cache-q3",
+          "text": "Does this cache survive a program restart?",
+          "gold": [],
+          "related": [
+            "cache-3"
+          ]
+        },
+        {
+          "id": "cache-q4",
+          "text": "Describe lookup reuse and the Cache helper capacity.",
+          "gold": [
+            "cache-0",
+            "cache-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "cache-q5",
+          "text": "How many worker threads can safely write to the cache?",
+          "gold": [],
+          "related": [
+            "cache-3"
+          ]
+        },
+        {
+          "id": "cache-q6",
+          "text": "Explain cache deletion and name its database engine.",
+          "gold": [],
+          "related": [
+            "cache-1",
+            "cache-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "loans",
+      "split": "train",
+      "subject": "library",
+      "name": "Maple reading room",
+      "passages": [
+        {
+          "id": "loans-0",
+          "text": "The Maple reading room lends printed books for 18 days. Reference atlases remain in the room."
+        },
+        {
+          "id": "loans-1",
+          "text": "A borrower may renew once if nobody has reserved the book. A reservation prevents renewal even before the due date."
+        },
+        {
+          "id": "loans-2",
+          "text": "Returning a book after 17:00 records the return on the next opening day. The return box is beside the west door."
+        },
+        {
+          "id": "loans-3",
+          "text": "The notice does not state a late-return fine. It gives an email address for questions about accessibility."
+        }
+      ],
+      "questions": [
+        {
+          "id": "loans-q0",
+          "text": "How long can I borrow a Maple printed book?",
+          "gold": [
+            "loans-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "loans-q1",
+          "text": "Can I renew a reserved Maple book?",
+          "gold": [
+            "loans-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "loans-q2",
+          "text": "Where is the Maple book return box?",
+          "gold": [
+            "loans-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "loans-q3",
+          "text": "What happens if I return a Maple book after five in the afternoon?",
+          "gold": [
+            "loans-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "loans-q4",
+          "text": "Give the Maple loan period and renewal condition.",
+          "gold": [
+            "loans-0",
+            "loans-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "loans-q5",
+          "text": "What is the Maple late-return charge?",
+          "gold": [],
+          "related": [
+            "loans-3"
+          ]
+        },
+        {
+          "id": "loans-q6",
+          "text": "Where is the return box and who manages the reading room?",
+          "gold": [],
+          "related": [
+            "loans-2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ash",
+      "split": "train",
+      "subject": "geology",
+      "name": "Ash layers",
+      "passages": [
+        {
+          "id": "ash-0",
+          "text": "A layer of pale volcanic ash lies above the dark clay in the fictional sample. In this undisturbed sequence, the upper ash was deposited later."
+        },
+        {
+          "id": "ash-1",
+          "text": "The glass fragments in the ash are angular. The note describes their shape, not a measured cooling rate."
+        },
+        {
+          "id": "ash-2",
+          "text": "Two samples can be compared using both mineral composition and position in the sequence. Similar colour alone does not establish a match."
+        },
+        {
+          "id": "ash-3",
+          "text": "No numerical age or eruption date was measured for these layers."
+        }
+      ],
+      "questions": [
+        {
+          "id": "ash-q0",
+          "text": "Which came first in the sample, dark clay or pale ash?",
+          "gold": [
+            "ash-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "ash-q1",
+          "text": "What shape are the ash glass fragments?",
+          "gold": [
+            "ash-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "ash-q2",
+          "text": "Is matching colour enough to identify the same ash layer?",
+          "gold": [
+            "ash-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "ash-q3",
+          "text": "Which layer lies above the clay?",
+          "gold": [
+            "ash-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "ash-q4",
+          "text": "Describe the layer order and the recommended comparison evidence.",
+          "gold": [
+            "ash-0",
+            "ash-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "ash-q5",
+          "text": "In what year did the ash eruption occur?",
+          "gold": [],
+          "related": [
+            "ash-3"
+          ]
+        },
+        {
+          "id": "ash-q6",
+          "text": "Describe the glass shape and calculate the cooling speed.",
+          "gold": [],
+          "related": [
+            "ash-1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tram",
+      "split": "train",
+      "subject": "transport",
+      "name": "Birch shuttle",
+      "passages": [
+        {
+          "id": "tram-0",
+          "text": "The Birch shuttle leaves the museum stop at 10:10 and reaches the orchard stop at 10:35 on its published route."
+        },
+        {
+          "id": "tram-1",
+          "text": "A single journey costs 3 credits. Children under six travel without a fare when accompanied by an adult."
+        },
+        {
+          "id": "tram-2",
+          "text": "Bicycles are accepted only when the rear rack has space. Buying a ticket does not reserve bicycle space."
+        },
+        {
+          "id": "tram-3",
+          "text": "The leaflet gives no timetable for public holidays and no contact name for the driver."
+        }
+      ],
+      "questions": [
+        {
+          "id": "tram-q0",
+          "text": "When does the Birch shuttle reach the orchard?",
+          "gold": [
+            "tram-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "tram-q1",
+          "text": "Does a five-year-old with an adult need a Birch fare?",
+          "gold": [
+            "tram-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "tram-q2",
+          "text": "Does a Birch ticket guarantee space for my bicycle?",
+          "gold": [
+            "tram-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "tram-q3",
+          "text": "How much is a Birch single journey?",
+          "gold": [
+            "tram-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "tram-q4",
+          "text": "Give the museum departure time and the bicycle condition.",
+          "gold": [
+            "tram-0",
+            "tram-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "tram-q5",
+          "text": "What is the Birch public-holiday timetable?",
+          "gold": [],
+          "related": [
+            "tram-3"
+          ]
+        },
+        {
+          "id": "tram-q6",
+          "text": "What is the fare and what is the driver's name?",
+          "gold": [],
+          "related": [
+            "tram-1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "battery",
+      "split": "train",
+      "subject": "electronics",
+      "name": "Sensor battery guide",
+      "passages": [
+        {
+          "id": "battery-0",
+          "text": "The soil sensor uses two AA cells. Insert both with the polarity shown inside the compartment."
+        },
+        {
+          "id": "battery-1",
+          "text": "A slow amber flash indicates low charge. A steady amber light indicates that pairing is in progress."
+        },
+        {
+          "id": "battery-2",
+          "text": "Disconnect external power before opening the battery compartment. The enclosure should remain dry during replacement."
+        },
+        {
+          "id": "battery-3",
+          "text": "The guide supplies no battery-life estimate and does not specify a rechargeable-cell brand."
+        }
+      ],
+      "questions": [
+        {
+          "id": "battery-q0",
+          "text": "How many cells power the soil sensor?",
+          "gold": [
+            "battery-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "battery-q1",
+          "text": "What does a slowly flashing amber sensor light mean?",
+          "gold": [
+            "battery-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "battery-q2",
+          "text": "What must I disconnect before replacing sensor cells?",
+          "gold": [
+            "battery-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "battery-q3",
+          "text": "Does a steady amber light mean low charge?",
+          "gold": [
+            "battery-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "battery-q4",
+          "text": "Name the required cells and the replacement precaution.",
+          "gold": [
+            "battery-0",
+            "battery-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "battery-q5",
+          "text": "How many months will the sensor batteries last?",
+          "gold": [],
+          "related": [
+            "battery-3"
+          ]
+        },
+        {
+          "id": "battery-q6",
+          "text": "Describe the pairing light and name the recommended charger.",
+          "gold": [],
+          "related": [
+            "battery-1",
+            "battery-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bridge",
+      "split": "train",
+      "subject": "history",
+      "name": "Stoneford crossing",
+      "passages": [
+        {
+          "id": "bridge-0",
+          "text": "The first Stoneford crossing was a wooden footbridge completed in 1842. The stone replacement opened in 1870."
+        },
+        {
+          "id": "bridge-1",
+          "text": "The drawing dated 1838 is a proposal, not a record of a finished bridge. Its designer is not identified."
+        },
+        {
+          "id": "bridge-2",
+          "text": "The old timber footbridge was dismantled after the replacement opened. The two structures were not open together afterward."
+        },
+        {
+          "id": "bridge-3",
+          "text": "The local account does not give either bridge's construction cost."
+        }
+      ],
+      "questions": [
+        {
+          "id": "bridge-q0",
+          "text": "When did the stone Stoneford replacement open?",
+          "gold": [
+            "bridge-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "bridge-q1",
+          "text": "Does the 1838 drawing prove the Stoneford bridge was finished then?",
+          "gold": [
+            "bridge-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "bridge-q2",
+          "text": "What happened to the timber bridge after the replacement opened?",
+          "gold": [
+            "bridge-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "bridge-q3",
+          "text": "Was the first Stoneford crossing made of stone?",
+          "gold": [
+            "bridge-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "bridge-q4",
+          "text": "Contrast the proposal date and the replacement opening date.",
+          "gold": [
+            "bridge-0",
+            "bridge-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "bridge-q5",
+          "text": "Who drew the Stoneford proposal?",
+          "gold": [],
+          "related": [
+            "bridge-1"
+          ]
+        },
+        {
+          "id": "bridge-q6",
+          "text": "Give the first bridge's material and its construction budget.",
+          "gold": [],
+          "related": [
+            "bridge-0",
+            "bridge-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "repair",
+      "split": "train",
+      "subject": "service",
+      "name": "Repair bench rules",
+      "passages": [
+        {
+          "id": "repair-0",
+          "text": "The repair bench accepts lamps and small radios. It does not accept microwave ovens."
+        },
+        {
+          "id": "repair-1",
+          "text": "Book a 25-minute slot before visiting. A booking covers inspection, not a promise that the device will be repaired."
+        },
+        {
+          "id": "repair-2",
+          "text": "Owners must bring the power cable if the device uses a detachable cable. Replacement parts are charged separately."
+        },
+        {
+          "id": "repair-3",
+          "text": "No fixed price list or warranty duration is published in these rules."
+        }
+      ],
+      "questions": [
+        {
+          "id": "repair-q0",
+          "text": "Can I take a microwave to the repair bench?",
+          "gold": [
+            "repair-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "repair-q1",
+          "text": "Does a repair bench booking guarantee a successful fix?",
+          "gold": [
+            "repair-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "repair-q2",
+          "text": "What should I bring for a device with a detachable cable?",
+          "gold": [
+            "repair-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "repair-q3",
+          "text": "How long is a repair bench appointment?",
+          "gold": [
+            "repair-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "repair-q4",
+          "text": "List accepted devices and explain what a booking covers.",
+          "gold": [
+            "repair-0",
+            "repair-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "repair-q5",
+          "text": "How long is the repair warranty?",
+          "gold": [],
+          "related": [
+            "repair-3"
+          ]
+        },
+        {
+          "id": "repair-q6",
+          "text": "Explain the cable requirement and state the exact inspection fee.",
+          "gold": [],
+          "related": [
+            "repair-2",
+            "repair-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recipe",
+      "split": "train",
+      "subject": "food",
+      "name": "Oat jar instructions",
+      "passages": [
+        {
+          "id": "recipe-0",
+          "text": "Mix 60 grams of oats with 120 millilitres of milk in a clean jar. The quantities are for one jar."
+        },
+        {
+          "id": "recipe-1",
+          "text": "Leave the covered jar in a refrigerator overnight. The instructions do not call for cooking the oats."
+        },
+        {
+          "id": "recipe-2",
+          "text": "Add the chopped pear just before serving so it retains its texture. Cinnamon is optional."
+        },
+        {
+          "id": "recipe-3",
+          "text": "The recipe gives no calorie count and does not describe a milk-free substitute."
+        }
+      ],
+      "questions": [
+        {
+          "id": "recipe-q0",
+          "text": "How much milk goes into one oat jar?",
+          "gold": [
+            "recipe-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "recipe-q1",
+          "text": "Do the oat jar instructions require cooking?",
+          "gold": [
+            "recipe-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "recipe-q2",
+          "text": "When should I add the pear to the oat jar?",
+          "gold": [
+            "recipe-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "recipe-q3",
+          "text": "Is cinnamon compulsory in the oat jar?",
+          "gold": [
+            "recipe-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "recipe-q4",
+          "text": "Give the oat amount and explain the overnight storage.",
+          "gold": [
+            "recipe-0",
+            "recipe-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "recipe-q5",
+          "text": "How many calories are in the oat jar?",
+          "gold": [],
+          "related": [
+            "recipe-3"
+          ]
+        },
+        {
+          "id": "recipe-q6",
+          "text": "Give the pear timing and a tested dairy-free replacement.",
+          "gold": [],
+          "related": [
+            "recipe-2",
+            "recipe-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "radio",
+      "split": "train",
+      "subject": "physics",
+      "name": "Radio pulse exercise",
+      "passages": [
+        {
+          "id": "radio-0",
+          "text": "A radio pulse carries information by varying a property of a carrier wave. In the example, amplitude is varied while carrier frequency stays fixed."
+        },
+        {
+          "id": "radio-1",
+          "text": "The receiver compares the incoming amplitude with a reference level. A larger recorded amplitude does not by itself establish a more distant transmitter."
+        },
+        {
+          "id": "radio-2",
+          "text": "The exercise asks students to sketch amplitude against time. Label the vertical axis in arbitrary units."
+        },
+        {
+          "id": "radio-3",
+          "text": "No numeric wave speed or transmitter distance is supplied."
+        }
+      ],
+      "questions": [
+        {
+          "id": "radio-q0",
+          "text": "Which carrier property varies in the radio example?",
+          "gold": [
+            "radio-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "radio-q1",
+          "text": "Does a larger received amplitude prove the transmitter is farther away?",
+          "gold": [
+            "radio-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "radio-q2",
+          "text": "What belongs on the vertical axis of the radio sketch?",
+          "gold": [
+            "radio-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "radio-q3",
+          "text": "Is the carrier frequency changing in this example?",
+          "gold": [
+            "radio-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "radio-q4",
+          "text": "Describe the modulation and the requested sketch axes.",
+          "gold": [
+            "radio-0",
+            "radio-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "radio-q5",
+          "text": "How far away is the radio transmitter?",
+          "gold": [],
+          "related": [
+            "radio-3"
+          ]
+        },
+        {
+          "id": "radio-q6",
+          "text": "Identify the changing property and calculate propagation time.",
+          "gold": [],
+          "related": [
+            "radio-0",
+            "radio-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "story",
+      "split": "train",
+      "subject": "fiction",
+      "name": "The silver envelope",
+      "passages": [
+        {
+          "id": "story-0",
+          "text": "Mira found a silver envelope inside the library's returned atlas. She left it unopened on the librarian's desk."
+        },
+        {
+          "id": "story-1",
+          "text": "The librarian, Oren, read the address and put the envelope in the outgoing post tray. Mira did not read the letter."
+        },
+        {
+          "id": "story-2",
+          "text": "The final scene takes place that evening at the closed library door. Rain begins after Oren locks it."
+        },
+        {
+          "id": "story-3",
+          "text": "The story leaves the sender unnamed and does not explain why the envelope was inside the atlas."
+        }
+      ],
+      "questions": [
+        {
+          "id": "story-q0",
+          "text": "Where did Mira find the silver envelope?",
+          "gold": [
+            "story-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "story-q1",
+          "text": "Who placed the silver envelope in the post tray?",
+          "gold": [
+            "story-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "story-q2",
+          "text": "Did Mira read the silver letter?",
+          "gold": [
+            "story-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "story-q3",
+          "text": "When did the rain begin in the silver envelope story?",
+          "gold": [
+            "story-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "story-q4",
+          "text": "Describe Mira's discovery and Oren's response.",
+          "gold": [
+            "story-0",
+            "story-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "story-q5",
+          "text": "Why had the sender hidden the envelope in the atlas?",
+          "gold": [],
+          "related": [
+            "story-3"
+          ]
+        },
+        {
+          "id": "story-q6",
+          "text": "Name the librarian and explain the sender's childhood.",
+          "gold": [],
+          "related": [
+            "story-1",
+            "story-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "weaving",
+      "split": "calibration",
+      "subject": "craft",
+      "name": "Linen weaving note",
+      "passages": [
+        {
+          "id": "weaving-0",
+          "text": "The sample uses linen for the lengthwise warp and wool for the crosswise weft. The note distinguishes thread position from fibre type."
+        },
+        {
+          "id": "weaving-1",
+          "text": "Pass the shuttle through the open shed, then beat the new weft into place. Beating happens after the shuttle pass."
+        },
+        {
+          "id": "weaving-2",
+          "text": "A broken warp thread must be repaired before continuing. Changing the weft colour is optional."
+        },
+        {
+          "id": "weaving-3",
+          "text": "The note contains no finished cloth dimensions or estimate of sale price."
+        }
+      ],
+      "questions": [
+        {
+          "id": "weaving-q0",
+          "text": "Which fibre forms the warp of the weaving sample?",
+          "gold": [
+            "weaving-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "weaving-q1",
+          "text": "When is the weft beaten into place?",
+          "gold": [
+            "weaving-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "weaving-q2",
+          "text": "Can I continue the weaving sample with a broken warp?",
+          "gold": [
+            "weaving-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "weaving-q3",
+          "text": "Is changing the weft colour required?",
+          "gold": [
+            "weaving-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "weaving-q4",
+          "text": "Identify the warp and describe the shuttle sequence.",
+          "gold": [
+            "weaving-0",
+            "weaving-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "weaving-q5",
+          "text": "How wide is the completed linen cloth?",
+          "gold": [],
+          "related": [
+            "weaving-3"
+          ]
+        },
+        {
+          "id": "weaving-q6",
+          "text": "Explain warp repair and give the finished sale price.",
+          "gold": [],
+          "related": [
+            "weaving-2",
+            "weaving-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cleanup",
+      "split": "calibration",
+      "subject": "volunteering",
+      "name": "Cove cleanup",
+      "passages": [
+        {
+          "id": "cleanup-0",
+          "text": "The Cove cleanup meets at South Pier at 08:20 on 19 May. Teams leave the pier together."
+        },
+        {
+          "id": "cleanup-1",
+          "text": "Volunteers sort rope and plastic into separate bags. Sharp objects should be reported to the team leader rather than picked up."
+        },
+        {
+          "id": "cleanup-2",
+          "text": "Participation is free. Volunteers under sixteen must work beside their registered guardian."
+        },
+        {
+          "id": "cleanup-3",
+          "text": "The notice does not name the sponsor or state a maximum number of volunteers."
+        }
+      ],
+      "questions": [
+        {
+          "id": "cleanup-q0",
+          "text": "Where do Cove cleanup teams meet?",
+          "gold": [
+            "cleanup-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "cleanup-q1",
+          "text": "What should a Cove volunteer do with a sharp object?",
+          "gold": [
+            "cleanup-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "cleanup-q2",
+          "text": "Can a fifteen-year-old join Cove without a guardian?",
+          "gold": [
+            "cleanup-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "cleanup-q3",
+          "text": "Is there a Cove participation charge?",
+          "gold": [
+            "cleanup-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "cleanup-q4",
+          "text": "Give the Cove meeting time and the sorting instructions.",
+          "gold": [
+            "cleanup-0",
+            "cleanup-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "cleanup-q5",
+          "text": "Who sponsors the Cove cleanup?",
+          "gold": [],
+          "related": [
+            "cleanup-3"
+          ]
+        },
+        {
+          "id": "cleanup-q6",
+          "text": "State the meeting point and the total volunteer capacity.",
+          "gold": [],
+          "related": [
+            "cleanup-0",
+            "cleanup-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "poem",
+      "split": "calibration",
+      "subject": "literature",
+      "name": "Lantern poem notes",
+      "passages": [
+        {
+          "id": "poem-0",
+          "text": "The poem 'Lantern at Dawn' is attributed to the fictional writer Sela Venn. Its speaker watches a neighbour carry a lantern."
+        },
+        {
+          "id": "poem-1",
+          "text": "The final stanza repeats the opening image with a change from darkness to dawn. Repetition connects the beginning and ending."
+        },
+        {
+          "id": "poem-2",
+          "text": "The notes describe the lantern as an image of companionship. They do not identify the speaker as the author."
+        },
+        {
+          "id": "poem-3",
+          "text": "No publication year or biographical birthplace is given."
+        }
+      ],
+      "questions": [
+        {
+          "id": "poem-q0",
+          "text": "Who wrote Lantern at Dawn according to the notes?",
+          "gold": [
+            "poem-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "poem-q1",
+          "text": "How does the last stanza connect to the opening?",
+          "gold": [
+            "poem-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "poem-q2",
+          "text": "Do the notes say the poem's speaker is its author?",
+          "gold": [
+            "poem-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "poem-q3",
+          "text": "What meaning do the notes associate with the lantern?",
+          "gold": [
+            "poem-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "poem-q4",
+          "text": "Name the attributed writer and explain the repeated image.",
+          "gold": [
+            "poem-0",
+            "poem-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "poem-q5",
+          "text": "In which city was Sela Venn born?",
+          "gold": [],
+          "related": [
+            "poem-3"
+          ]
+        },
+        {
+          "id": "poem-q6",
+          "text": "Explain the lantern image and give the first publication date.",
+          "gold": [],
+          "related": [
+            "poem-2",
+            "poem-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nursery",
+      "split": "calibration",
+      "subject": "horticulture",
+      "name": "Cutting nursery",
+      "passages": [
+        {
+          "id": "nursery-0",
+          "text": "Root the mint cuttings in moist compost under bright indirect light. Each cutting should have at least one leaf node below the surface."
+        },
+        {
+          "id": "nursery-1",
+          "text": "Keep the compost damp rather than waterlogged. A transparent cover reduces moisture loss but must allow ventilation."
+        },
+        {
+          "id": "nursery-2",
+          "text": "New roots may form before visible new leaves appear. A leaf count alone is not a direct measurement of root length."
+        },
+        {
+          "id": "nursery-3",
+          "text": "The nursery note provides no measured rooting times or recommended fertiliser dosage."
+        }
+      ],
+      "questions": [
+        {
+          "id": "nursery-q0",
+          "text": "Where should the mint cutting's leaf node be placed?",
+          "gold": [
+            "nursery-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "nursery-q1",
+          "text": "Should the cutting compost be flooded with water?",
+          "gold": [
+            "nursery-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "nursery-q2",
+          "text": "Does counting new leaves measure mint root length?",
+          "gold": [
+            "nursery-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "nursery-q3",
+          "text": "What lighting does the mint cutting note recommend?",
+          "gold": [
+            "nursery-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "nursery-q4",
+          "text": "Explain moisture management and the cover's purpose.",
+          "gold": [
+            "nursery-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "nursery-q5",
+          "text": "How many days will these mint cuttings take to root?",
+          "gold": [],
+          "related": [
+            "nursery-3"
+          ]
+        },
+        {
+          "id": "nursery-q6",
+          "text": "Describe the compost conditions and give the fertiliser dose.",
+          "gold": [],
+          "related": [
+            "nursery-1",
+            "nursery-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "delivery",
+      "split": "calibration",
+      "subject": "software design",
+      "name": "Parcel app brief",
+      "passages": [
+        {
+          "id": "delivery-0",
+          "text": "The parcel prototype must accept a tracking code and show the last stored scan. Live carrier integration is optional."
+        },
+        {
+          "id": "delivery-1",
+          "text": "A scan record includes a timestamp and location. The timestamp records a scan, not a promised delivery time."
+        },
+        {
+          "id": "delivery-2",
+          "text": "The prototype review is on 22 August. The source archive is due on 20 August, two days before the review."
+        },
+        {
+          "id": "delivery-3",
+          "text": "The brief does not select a framework, database or hosting provider."
+        }
+      ],
+      "questions": [
+        {
+          "id": "delivery-q0",
+          "text": "Does the parcel prototype require live carrier integration?",
+          "gold": [
+            "delivery-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "delivery-q1",
+          "text": "Does the parcel scan timestamp promise delivery then?",
+          "gold": [
+            "delivery-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "delivery-q2",
+          "text": "When is the parcel source archive due?",
+          "gold": [
+            "delivery-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "delivery-q3",
+          "text": "What fields belong in a stored parcel scan?",
+          "gold": [
+            "delivery-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "delivery-q4",
+          "text": "Describe the required tracking feature and the review date.",
+          "gold": [
+            "delivery-0",
+            "delivery-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "delivery-q5",
+          "text": "Which database must the parcel team use?",
+          "gold": [],
+          "related": [
+            "delivery-3"
+          ]
+        },
+        {
+          "id": "delivery-q6",
+          "text": "Give the archive deadline and the hosting budget.",
+          "gold": [],
+          "related": [
+            "delivery-2",
+            "delivery-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stars",
+      "split": "test",
+      "subject": "astronomy",
+      "name": "Dome observation card",
+      "passages": [
+        {
+          "id": "stars-0",
+          "text": "The Dome session observes Jupiter on 11 January, starting at 19:30. Meet at the north entrance of the observatory."
+        },
+        {
+          "id": "stars-1",
+          "text": "Use the low-power eyepiece first to locate the planet. Increase magnification only after the object is centred."
+        },
+        {
+          "id": "stars-2",
+          "text": "The session costs 5 tokens. Members aged twelve or older may attend without a guardian; younger members need an accompanying adult."
+        },
+        {
+          "id": "stars-3",
+          "text": "The card gives no weather forecast or distance measurement for Jupiter."
+        }
+      ],
+      "questions": [
+        {
+          "id": "stars-q0",
+          "text": "At which entrance should Dome observers meet?",
+          "gold": [
+            "stars-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "stars-q1",
+          "text": "Which eyepiece should Dome observers use first?",
+          "gold": [
+            "stars-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "stars-q2",
+          "text": "May an eleven-year-old attend Dome alone?",
+          "gold": [
+            "stars-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "stars-q3",
+          "text": "How much does the Dome session cost?",
+          "gold": [
+            "stars-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "stars-q4",
+          "text": "Give the Dome starting time and explain the eyepiece order.",
+          "gold": [
+            "stars-0",
+            "stars-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "stars-q5",
+          "text": "Will the sky be clear during Dome?",
+          "gold": [],
+          "related": [
+            "stars-3"
+          ]
+        },
+        {
+          "id": "stars-q6",
+          "text": "Give the session price and Jupiter's measured distance.",
+          "gold": [],
+          "related": [
+            "stars-2",
+            "stars-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "split": "test",
+      "subject": "music",
+      "name": "Ensemble rehearsal",
+      "passages": [
+        {
+          "id": "music-0",
+          "text": "The Reed ensemble rehearses in Studio Four at 18:15 every Thursday. The notice concerns rehearsals, not public concerts."
+        },
+        {
+          "id": "music-1",
+          "text": "Players should tune before the first group exercise. The leader starts with a slow unison phrase, then separates the parts."
+        },
+        {
+          "id": "music-2",
+          "text": "Bring a music stand and pencil. Printed scores are supplied, so players do not need to print their own."
+        },
+        {
+          "id": "music-3",
+          "text": "The notice does not name a concert venue or list membership fees."
+        }
+      ],
+      "questions": [
+        {
+          "id": "music-q0",
+          "text": "Where does the Reed ensemble rehearse?",
+          "gold": [
+            "music-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "music-q1",
+          "text": "What happens before Reed separates into parts?",
+          "gold": [
+            "music-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "music-q2",
+          "text": "Must Reed players print their own scores?",
+          "gold": [
+            "music-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "music-q3",
+          "text": "What should I bring to Reed rehearsal?",
+          "gold": [
+            "music-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "music-q4",
+          "text": "Give the rehearsal day and describe the first group exercise.",
+          "gold": [
+            "music-0",
+            "music-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "music-q5",
+          "text": "How much does Reed membership cost?",
+          "gold": [],
+          "related": [
+            "music-3"
+          ]
+        },
+        {
+          "id": "music-q6",
+          "text": "Name the rehearsal room and the public concert venue.",
+          "gold": [],
+          "related": [
+            "music-0",
+            "music-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "filter",
+      "split": "test",
+      "subject": "chemistry",
+      "name": "Sand filter demonstration",
+      "passages": [
+        {
+          "id": "filter-0",
+          "text": "Pour cloudy water through the gravel and sand layers into a clean collecting cup. The filter traps some suspended solid particles."
+        },
+        {
+          "id": "filter-1",
+          "text": "Clear-looking filtered water is not proof that the water is safe to drink. The demonstration does not remove every dissolved substance."
+        },
+        {
+          "id": "filter-2",
+          "text": "Measure the collected volume using a graduated cylinder. Compare the same starting volume in repeated trials."
+        },
+        {
+          "id": "filter-3",
+          "text": "The demonstration sheet supplies no dissolved-salt concentration or bacterial test results."
+        }
+      ],
+      "questions": [
+        {
+          "id": "filter-q0",
+          "text": "What does the sand filter trap?",
+          "gold": [
+            "filter-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "filter-q1",
+          "text": "Can I assume clear sand-filtered water is safe to drink?",
+          "gold": [
+            "filter-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "filter-q2",
+          "text": "How should the collected filter volume be measured?",
+          "gold": [
+            "filter-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "filter-q3",
+          "text": "Does the sand demonstration remove every dissolved substance?",
+          "gold": [
+            "filter-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "filter-q4",
+          "text": "Explain the filter's purpose and a fair repeated-trial condition.",
+          "gold": [
+            "filter-0",
+            "filter-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "filter-q5",
+          "text": "What is the filtered water's dissolved salt concentration?",
+          "gold": [],
+          "related": [
+            "filter-3"
+          ]
+        },
+        {
+          "id": "filter-q6",
+          "text": "Describe the volume measurement and report the bacterial count.",
+          "gold": [],
+          "related": [
+            "filter-2",
+            "filter-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "portal",
+      "split": "test",
+      "subject": "archives",
+      "name": "Archive request portal",
+      "passages": [
+        {
+          "id": "portal-0",
+          "text": "The archive portal lets a reader search catalogue titles and request a scan. A request is reviewed by staff before any scan is released."
+        },
+        {
+          "id": "portal-1",
+          "text": "Digital scans are delivered through the reader's inbox. A printed copy can be collected by arrangement but is optional."
+        },
+        {
+          "id": "portal-2",
+          "text": "Readers may submit three pending requests at once. Completing a request frees one place; there is no stated lifetime request limit."
+        },
+        {
+          "id": "portal-3",
+          "text": "The guide does not state a response-time guarantee or identify the scanning software."
+        }
+      ],
+      "questions": [
+        {
+          "id": "portal-q0",
+          "text": "Does submitting an archive request immediately release a scan?",
+          "gold": [
+            "portal-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "portal-q1",
+          "text": "Are printed archive copies mandatory?",
+          "gold": [
+            "portal-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "portal-q2",
+          "text": "How many archive requests can be pending together?",
+          "gold": [
+            "portal-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "portal-q3",
+          "text": "Where are digital archive scans delivered?",
+          "gold": [
+            "portal-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "portal-q4",
+          "text": "Describe scan approval and the pending-request limit.",
+          "gold": [
+            "portal-0",
+            "portal-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "portal-q5",
+          "text": "Which program does the archive use to scan?",
+          "gold": [],
+          "related": [
+            "portal-3"
+          ]
+        },
+        {
+          "id": "portal-q6",
+          "text": "Explain digital delivery and state the guaranteed response time.",
+          "gold": [],
+          "related": [
+            "portal-1",
+            "portal-3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "market",
+      "split": "test",
+      "subject": "community",
+      "name": "Frost market",
+      "passages": [
+        {
+          "id": "market-0",
+          "text": "The Frost market opens at 11:20 on 8 December in Willow Square. Stallholders may enter one hour before visitors."
+        },
+        {
+          "id": "market-1",
+          "text": "A craft stall costs 9 credits. General visitors pay no entry fee."
+        },
+        {
+          "id": "market-2",
+          "text": "Stallholders must bring their own table. A canopy is optional unless a later weather notice requires one."
+        },
+        {
+          "id": "market-3",
+          "text": "The notice gives no closing time or cancellation refund policy."
+        }
+      ],
+      "questions": [
+        {
+          "id": "market-q0",
+          "text": "Where does the Frost market take place?",
+          "gold": [
+            "market-0"
+          ],
+          "related": []
+        },
+        {
+          "id": "market-q1",
+          "text": "Do Frost visitors pay the craft stall fee?",
+          "gold": [
+            "market-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "market-q2",
+          "text": "Must Frost stallholders bring a table?",
+          "gold": [
+            "market-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "market-q3",
+          "text": "Is a canopy always required at Frost?",
+          "gold": [
+            "market-2"
+          ],
+          "related": []
+        },
+        {
+          "id": "market-q4",
+          "text": "Give the Frost visitor opening time and craft stall cost.",
+          "gold": [
+            "market-0",
+            "market-1"
+          ],
+          "related": []
+        },
+        {
+          "id": "market-q5",
+          "text": "When does Frost close?",
+          "gold": [],
+          "related": [
+            "market-3"
+          ]
+        },
+        {
+          "id": "market-q6",
+          "text": "Give the table requirement and the refund conditions.",
+          "gold": [],
+          "related": [
+            "market-2",
+            "market-3"
+          ]
+        }
+      ]
+    }
+  ]
+}

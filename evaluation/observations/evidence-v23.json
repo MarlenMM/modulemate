@@ -1,0 +1,2550 @@
+{
+  "diagnostic_only": true,
+  "scope": "Original synthetic grouped model tests and real local conversation comparisons. Constraint passes are not semantic accuracy. Source text checked against parsed original fixture chunks.",
+  "evidence_models": {
+    "lexical": {
+      "model": "modulemate-evidence-lexical-v2",
+      "split": "test",
+      "documents": [
+        "stars",
+        "music",
+        "filter",
+        "portal",
+        "market"
+      ],
+      "relevance": {
+        "count": 315,
+        "positive_count": 80,
+        "average_precision": 0.9235,
+        "roc_auc": 0.958,
+        "balanced_accuracy_at_half": 0.8952,
+        "brier": 0.0632,
+        "training_prevalence": 0.248677,
+        "training_rate_baseline_brier": 0.1895,
+        "ece_10_bins": 0.0502,
+        "calibration_bins": [
+          {
+            "count": 178,
+            "predicted": 0.0437,
+            "observed": 0.0112
+          },
+          {
+            "count": 16,
+            "predicted": 0.1506,
+            "observed": 0.125
+          },
+          {
+            "count": 26,
+            "predicted": 0.2412,
+            "observed": 0.2308
+          },
+          {
+            "count": 9,
+            "predicted": 0.3565,
+            "observed": 0.2222
+          },
+          {
+            "count": 4,
+            "predicted": 0.4443,
+            "observed": 0.0
+          },
+          {
+            "count": 7,
+            "predicted": 0.5516,
+            "observed": 0.7143
+          },
+          {
+            "count": 7,
+            "predicted": 0.6475,
+            "observed": 0.2857
+          },
+          {
+            "count": 11,
+            "predicted": 0.7385,
+            "observed": 0.5455
+          },
+          {
+            "count": 4,
+            "predicted": 0.8543,
+            "observed": 0.75
+          },
+          {
+            "count": 53,
+            "predicted": 0.9784,
+            "observed": 0.9811
+          }
+        ],
+        "selective": [
+          {
+            "threshold": 0.3,
+            "accepted": 95,
+            "coverage": 0.3016,
+            "error": 0.2632
+          },
+          {
+            "threshold": 0.5,
+            "accepted": 82,
+            "coverage": 0.2603,
+            "error": 0.1707
+          },
+          {
+            "threshold": 0.7,
+            "accepted": 68,
+            "coverage": 0.2159,
+            "error": 0.1029
+          },
+          {
+            "threshold": 0.85,
+            "accepted": 55,
+            "coverage": 0.1746,
+            "error": 0.0364
+          },
+          {
+            "threshold": 0.95,
+            "accepted": 44,
+            "coverage": 0.1397,
+            "error": 0.0
+          }
+        ]
+      },
+      "answerability": {
+        "count": 315,
+        "positive_count": 45,
+        "average_precision": 0.9028,
+        "roc_auc": 0.9773,
+        "balanced_accuracy_at_half": 0.9,
+        "brier": 0.0451,
+        "training_prevalence": 0.140212,
+        "training_rate_baseline_brier": 0.1225,
+        "ece_10_bins": 0.043,
+        "calibration_bins": [
+          {
+            "count": 228,
+            "predicted": 0.0142,
+            "observed": 0.0044
+          },
+          {
+            "count": 15,
+            "predicted": 0.1559,
+            "observed": 0.2
+          },
+          {
+            "count": 9,
+            "predicted": 0.2408,
+            "observed": 0.1111
+          },
+          {
+            "count": 4,
+            "predicted": 0.3617,
+            "observed": 0.25
+          },
+          {
+            "count": 9,
+            "predicted": 0.4598,
+            "observed": 0.1111
+          },
+          {
+            "count": 6,
+            "predicted": 0.5555,
+            "observed": 0.3333
+          },
+          {
+            "count": 3,
+            "predicted": 0.648,
+            "observed": 0.3333
+          },
+          {
+            "count": 9,
+            "predicted": 0.7641,
+            "observed": 0.5556
+          },
+          {
+            "count": 9,
+            "predicted": 0.853,
+            "observed": 0.7778
+          },
+          {
+            "count": 23,
+            "predicted": 0.954,
+            "observed": 1.0
+          }
+        ],
+        "selective": [
+          {
+            "threshold": 0.3,
+            "accepted": 63,
+            "coverage": 0.2,
+            "error": 0.3651
+          },
+          {
+            "threshold": 0.5,
+            "accepted": 50,
+            "coverage": 0.1587,
+            "error": 0.24
+          },
+          {
+            "threshold": 0.7,
+            "accepted": 41,
+            "coverage": 0.1302,
+            "error": 0.1463
+          },
+          {
+            "threshold": 0.85,
+            "accepted": 28,
+            "coverage": 0.0889,
+            "error": 0.0357
+          },
+          {
+            "threshold": 0.95,
+            "accepted": 12,
+            "coverage": 0.0381,
+            "error": 0.0
+          }
+        ],
+        "errors_at_half": [
+          {
+            "query": "stars-q2",
+            "source": "stars-2",
+            "expected": true,
+            "probability": 0.1935
+          },
+          {
+            "query": "stars-q3",
+            "source": "stars-2",
+            "expected": true,
+            "probability": 0.238
+          },
+          {
+            "query": "stars-q5",
+            "source": "stars-bundle",
+            "expected": false,
+            "probability": 0.5577
+          },
+          {
+            "query": "music-q3",
+            "source": "music-2",
+            "expected": true,
+            "probability": 0.178
+          },
+          {
+            "query": "music-q4",
+            "source": "music-1",
+            "expected": false,
+            "probability": 0.8027
+          },
+          {
+            "query": "music-q6",
+            "source": "music-bundle",
+            "expected": false,
+            "probability": 0.7907
+          },
+          {
+            "query": "filter-q4",
+            "source": "filter-bundle",
+            "expected": true,
+            "probability": 0.0769
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-1",
+            "expected": false,
+            "probability": 0.6374
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-3",
+            "expected": false,
+            "probability": 0.7645
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-bundle",
+            "expected": false,
+            "probability": 0.8877
+          },
+          {
+            "query": "portal-q1",
+            "source": "portal-1",
+            "expected": true,
+            "probability": 0.4031
+          },
+          {
+            "query": "portal-q2",
+            "source": "portal-2",
+            "expected": true,
+            "probability": 0.1906
+          },
+          {
+            "query": "portal-q5",
+            "source": "portal-0",
+            "expected": false,
+            "probability": 0.513
+          },
+          {
+            "query": "portal-q5",
+            "source": "portal-bundle",
+            "expected": false,
+            "probability": 0.5876
+          },
+          {
+            "query": "portal-q6",
+            "source": "portal-3",
+            "expected": false,
+            "probability": 0.6562
+          },
+          {
+            "query": "portal-q6",
+            "source": "portal-bundle",
+            "expected": false,
+            "probability": 0.5967
+          },
+          {
+            "query": "market-q0",
+            "source": "market-0",
+            "expected": true,
+            "probability": 0.3871
+          },
+          {
+            "query": "market-q4",
+            "source": "market-1",
+            "expected": false,
+            "probability": 0.7864
+          },
+          {
+            "query": "market-q5",
+            "source": "market-bundle",
+            "expected": false,
+            "probability": 0.7874
+          }
+        ]
+      },
+      "ranking": {
+        "lexical": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "stars-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "learned": {
+          "count": 25,
+          "hit_at_1": 0.96,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.98,
+          "misses": [
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            }
+          ]
+        },
+        "blend_0.0": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "stars-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "blend_0.25": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "stars-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "blend_0.5": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "stars-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "blend_1.0": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "stars-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        }
+      },
+      "dataset_sha256": "62b2301c558d9ca9fb8da02a51fe3cd280043d23dfbbd2d239481ded5ffc7701",
+      "diagnostic_only": true
+    },
+    "semantic": {
+      "model": "modulemate-evidence-semantic-v2",
+      "split": "test",
+      "documents": [
+        "stars",
+        "music",
+        "filter",
+        "portal",
+        "market"
+      ],
+      "relevance": {
+        "count": 315,
+        "positive_count": 80,
+        "average_precision": 0.9145,
+        "roc_auc": 0.9537,
+        "balanced_accuracy_at_half": 0.891,
+        "brier": 0.0655,
+        "training_prevalence": 0.248677,
+        "training_rate_baseline_brier": 0.1895,
+        "ece_10_bins": 0.0466,
+        "calibration_bins": [
+          {
+            "count": 181,
+            "predicted": 0.0356,
+            "observed": 0.0221
+          },
+          {
+            "count": 23,
+            "predicted": 0.1373,
+            "observed": 0.087
+          },
+          {
+            "count": 10,
+            "predicted": 0.2487,
+            "observed": 0.1
+          },
+          {
+            "count": 8,
+            "predicted": 0.3482,
+            "observed": 0.25
+          },
+          {
+            "count": 9,
+            "predicted": 0.4617,
+            "observed": 0.3333
+          },
+          {
+            "count": 9,
+            "predicted": 0.5498,
+            "observed": 0.3333
+          },
+          {
+            "count": 8,
+            "predicted": 0.6547,
+            "observed": 0.625
+          },
+          {
+            "count": 6,
+            "predicted": 0.7605,
+            "observed": 1.0
+          },
+          {
+            "count": 14,
+            "predicted": 0.8449,
+            "observed": 0.5714
+          },
+          {
+            "count": 47,
+            "predicted": 0.9747,
+            "observed": 0.9787
+          }
+        ],
+        "selective": [
+          {
+            "threshold": 0.3,
+            "accepted": 101,
+            "coverage": 0.3206,
+            "error": 0.2772
+          },
+          {
+            "threshold": 0.5,
+            "accepted": 84,
+            "coverage": 0.2667,
+            "error": 0.1905
+          },
+          {
+            "threshold": 0.7,
+            "accepted": 67,
+            "coverage": 0.2127,
+            "error": 0.1045
+          },
+          {
+            "threshold": 0.85,
+            "accepted": 54,
+            "coverage": 0.1714,
+            "error": 0.0741
+          },
+          {
+            "threshold": 0.95,
+            "accepted": 39,
+            "coverage": 0.1238,
+            "error": 0.0
+          }
+        ]
+      },
+      "answerability": {
+        "count": 315,
+        "positive_count": 45,
+        "average_precision": 0.8962,
+        "roc_auc": 0.9774,
+        "balanced_accuracy_at_half": 0.8833,
+        "brier": 0.0426,
+        "training_prevalence": 0.140212,
+        "training_rate_baseline_brier": 0.1225,
+        "ece_10_bins": 0.0261,
+        "calibration_bins": [
+          {
+            "count": 227,
+            "predicted": 0.0102,
+            "observed": 0.0044
+          },
+          {
+            "count": 20,
+            "predicted": 0.1379,
+            "observed": 0.1
+          },
+          {
+            "count": 4,
+            "predicted": 0.2455,
+            "observed": 0.25
+          },
+          {
+            "count": 10,
+            "predicted": 0.3436,
+            "observed": 0.3
+          },
+          {
+            "count": 9,
+            "predicted": 0.4404,
+            "observed": 0.2222
+          },
+          {
+            "count": 5,
+            "predicted": 0.6747,
+            "observed": 0.4
+          },
+          {
+            "count": 9,
+            "predicted": 0.7531,
+            "observed": 0.6667
+          },
+          {
+            "count": 14,
+            "predicted": 0.8535,
+            "observed": 0.7857
+          },
+          {
+            "count": 17,
+            "predicted": 0.9629,
+            "observed": 1.0
+          }
+        ],
+        "selective": [
+          {
+            "threshold": 0.3,
+            "accepted": 64,
+            "coverage": 0.2032,
+            "error": 0.3594
+          },
+          {
+            "threshold": 0.5,
+            "accepted": 45,
+            "coverage": 0.1429,
+            "error": 0.2
+          },
+          {
+            "threshold": 0.7,
+            "accepted": 40,
+            "coverage": 0.127,
+            "error": 0.15
+          },
+          {
+            "threshold": 0.85,
+            "accepted": 26,
+            "coverage": 0.0825,
+            "error": 0.0385
+          },
+          {
+            "threshold": 0.95,
+            "accepted": 12,
+            "coverage": 0.0381,
+            "error": 0.0
+          }
+        ],
+        "errors_at_half": [
+          {
+            "query": "stars-q0",
+            "source": "stars-0",
+            "expected": true,
+            "probability": 0.4623
+          },
+          {
+            "query": "stars-q2",
+            "source": "stars-2",
+            "expected": true,
+            "probability": 0.3244
+          },
+          {
+            "query": "stars-q3",
+            "source": "stars-2",
+            "expected": true,
+            "probability": 0.2898
+          },
+          {
+            "query": "music-q1",
+            "source": "music-1",
+            "expected": true,
+            "probability": 0.1293
+          },
+          {
+            "query": "music-q3",
+            "source": "music-2",
+            "expected": true,
+            "probability": 0.164
+          },
+          {
+            "query": "music-q4",
+            "source": "music-1",
+            "expected": false,
+            "probability": 0.8173
+          },
+          {
+            "query": "music-q6",
+            "source": "music-bundle",
+            "expected": false,
+            "probability": 0.7148
+          },
+          {
+            "query": "filter-q4",
+            "source": "filter-bundle",
+            "expected": true,
+            "probability": 0.0477
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-1",
+            "expected": false,
+            "probability": 0.602
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-3",
+            "expected": false,
+            "probability": 0.6979
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-bundle",
+            "expected": false,
+            "probability": 0.8862
+          },
+          {
+            "query": "portal-q1",
+            "source": "portal-1",
+            "expected": true,
+            "probability": 0.3451
+          },
+          {
+            "query": "portal-q2",
+            "source": "portal-2",
+            "expected": true,
+            "probability": 0.3409
+          },
+          {
+            "query": "portal-q5",
+            "source": "portal-0",
+            "expected": false,
+            "probability": 0.6977
+          },
+          {
+            "query": "portal-q5",
+            "source": "portal-bundle",
+            "expected": false,
+            "probability": 0.7452
+          },
+          {
+            "query": "market-q0",
+            "source": "market-0",
+            "expected": true,
+            "probability": 0.4958
+          },
+          {
+            "query": "market-q4",
+            "source": "market-1",
+            "expected": false,
+            "probability": 0.8043
+          },
+          {
+            "query": "market-q5",
+            "source": "market-bundle",
+            "expected": false,
+            "probability": 0.7896
+          }
+        ]
+      },
+      "ranking": {
+        "lexical": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "stars-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "dense": {
+          "count": 25,
+          "hit_at_1": 0.76,
+          "hit_at_3": 0.96,
+          "all_required_at_3": 0.96,
+          "mrr": 0.868,
+          "misses": [
+            {
+              "id": "stars-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q1",
+              "first_rank": 5,
+              "all_rank": 5,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "filter-3"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            },
+            {
+              "id": "portal-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "portal-3"
+            }
+          ]
+        },
+        "learned": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            }
+          ]
+        },
+        "blend_0.0": {
+          "count": 25,
+          "hit_at_1": 0.8,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.8933,
+          "misses": [
+            {
+              "id": "stars-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q1",
+              "first_rank": 3,
+              "all_rank": 3,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "blend_0.25": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.9333,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 3,
+              "all_rank": 3,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            }
+          ]
+        },
+        "blend_0.5": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.9333,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 3,
+              "all_rank": 3,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            }
+          ]
+        },
+        "blend_1.0": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            }
+          ]
+        }
+      },
+      "dataset_sha256": "62b2301c558d9ca9fb8da02a51fe3cd280043d23dfbbd2d239481ded5ffc7701",
+      "diagnostic_only": true
+    },
+    "reader": {
+      "model": "modulemate-evidence-reader-v2",
+      "split": "test",
+      "documents": [
+        "stars",
+        "music",
+        "filter",
+        "portal",
+        "market"
+      ],
+      "relevance": {
+        "count": 315,
+        "positive_count": 80,
+        "average_precision": 0.9094,
+        "roc_auc": 0.9528,
+        "balanced_accuracy_at_half": 0.8867,
+        "brier": 0.0691,
+        "training_prevalence": 0.248677,
+        "training_rate_baseline_brier": 0.1895,
+        "ece_10_bins": 0.0424,
+        "calibration_bins": [
+          {
+            "count": 183,
+            "predicted": 0.0316,
+            "observed": 0.0219
+          },
+          {
+            "count": 21,
+            "predicted": 0.1274,
+            "observed": 0.0476
+          },
+          {
+            "count": 11,
+            "predicted": 0.2462,
+            "observed": 0.2727
+          },
+          {
+            "count": 7,
+            "predicted": 0.3635,
+            "observed": 0.1429
+          },
+          {
+            "count": 7,
+            "predicted": 0.4277,
+            "observed": 0.4286
+          },
+          {
+            "count": 11,
+            "predicted": 0.5608,
+            "observed": 0.3636
+          },
+          {
+            "count": 6,
+            "predicted": 0.6622,
+            "observed": 0.6667
+          },
+          {
+            "count": 7,
+            "predicted": 0.749,
+            "observed": 0.8571
+          },
+          {
+            "count": 11,
+            "predicted": 0.8473,
+            "observed": 0.5455
+          },
+          {
+            "count": 51,
+            "predicted": 0.9762,
+            "observed": 0.9412
+          }
+        ],
+        "selective": [
+          {
+            "threshold": 0.3,
+            "accepted": 100,
+            "coverage": 0.3175,
+            "error": 0.28
+          },
+          {
+            "threshold": 0.5,
+            "accepted": 86,
+            "coverage": 0.273,
+            "error": 0.2093
+          },
+          {
+            "threshold": 0.7,
+            "accepted": 69,
+            "coverage": 0.219,
+            "error": 0.1304
+          },
+          {
+            "threshold": 0.85,
+            "accepted": 56,
+            "coverage": 0.1778,
+            "error": 0.0893
+          },
+          {
+            "threshold": 0.95,
+            "accepted": 42,
+            "coverage": 0.1333,
+            "error": 0.0
+          }
+        ]
+      },
+      "answerability": {
+        "count": 315,
+        "positive_count": 45,
+        "average_precision": 0.91,
+        "roc_auc": 0.9818,
+        "balanced_accuracy_at_half": 0.9204,
+        "brier": 0.042,
+        "training_prevalence": 0.140212,
+        "training_rate_baseline_brier": 0.1225,
+        "ece_10_bins": 0.0318,
+        "calibration_bins": [
+          {
+            "count": 241,
+            "predicted": 0.0056,
+            "observed": 0.0041
+          },
+          {
+            "count": 8,
+            "predicted": 0.1497,
+            "observed": 0.25
+          },
+          {
+            "count": 5,
+            "predicted": 0.2322,
+            "observed": 0.0
+          },
+          {
+            "count": 4,
+            "predicted": 0.369,
+            "observed": 0.25
+          },
+          {
+            "count": 4,
+            "predicted": 0.4848,
+            "observed": 0.25
+          },
+          {
+            "count": 3,
+            "predicted": 0.5436,
+            "observed": 0.3333
+          },
+          {
+            "count": 8,
+            "predicted": 0.6613,
+            "observed": 0.5
+          },
+          {
+            "count": 3,
+            "predicted": 0.7457,
+            "observed": 0.6667
+          },
+          {
+            "count": 8,
+            "predicted": 0.858,
+            "observed": 0.625
+          },
+          {
+            "count": 31,
+            "predicted": 0.976,
+            "observed": 0.9032
+          }
+        ],
+        "selective": [
+          {
+            "threshold": 0.3,
+            "accepted": 61,
+            "coverage": 0.1937,
+            "error": 0.3115
+          },
+          {
+            "threshold": 0.5,
+            "accepted": 53,
+            "coverage": 0.1683,
+            "error": 0.2453
+          },
+          {
+            "threshold": 0.7,
+            "accepted": 42,
+            "coverage": 0.1333,
+            "error": 0.1667
+          },
+          {
+            "threshold": 0.85,
+            "accepted": 36,
+            "coverage": 0.1143,
+            "error": 0.1111
+          },
+          {
+            "threshold": 0.95,
+            "accepted": 25,
+            "coverage": 0.0794,
+            "error": 0.04
+          }
+        ],
+        "errors_at_half": [
+          {
+            "query": "stars-q5",
+            "source": "stars-bundle",
+            "expected": false,
+            "probability": 0.8394
+          },
+          {
+            "query": "stars-q6",
+            "source": "stars-bundle",
+            "expected": false,
+            "probability": 0.8866
+          },
+          {
+            "query": "music-q1",
+            "source": "music-1",
+            "expected": true,
+            "probability": 0.159
+          },
+          {
+            "query": "music-q3",
+            "source": "music-0",
+            "expected": false,
+            "probability": 0.8093
+          },
+          {
+            "query": "music-q3",
+            "source": "music-2",
+            "expected": true,
+            "probability": 0.1382
+          },
+          {
+            "query": "music-q4",
+            "source": "music-1",
+            "expected": false,
+            "probability": 0.6747
+          },
+          {
+            "query": "filter-q3",
+            "source": "filter-3",
+            "expected": false,
+            "probability": 0.675
+          },
+          {
+            "query": "filter-q4",
+            "source": "filter-bundle",
+            "expected": true,
+            "probability": 0.028
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-1",
+            "expected": false,
+            "probability": 0.6425
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-3",
+            "expected": false,
+            "probability": 0.523
+          },
+          {
+            "query": "filter-q5",
+            "source": "filter-bundle",
+            "expected": false,
+            "probability": 0.95
+          },
+          {
+            "query": "portal-q2",
+            "source": "portal-2",
+            "expected": true,
+            "probability": 0.4947
+          },
+          {
+            "query": "portal-q4",
+            "source": "portal-bundle",
+            "expected": true,
+            "probability": 0.3611
+          },
+          {
+            "query": "portal-q5",
+            "source": "portal-0",
+            "expected": false,
+            "probability": 0.7549
+          },
+          {
+            "query": "portal-q5",
+            "source": "portal-bundle",
+            "expected": false,
+            "probability": 0.5595
+          },
+          {
+            "query": "market-q1",
+            "source": "market-0",
+            "expected": false,
+            "probability": 0.6371
+          },
+          {
+            "query": "market-q4",
+            "source": "market-0",
+            "expected": false,
+            "probability": 0.9019
+          },
+          {
+            "query": "market-q4",
+            "source": "market-1",
+            "expected": false,
+            "probability": 0.9605
+          }
+        ]
+      },
+      "ranking": {
+        "lexical": {
+          "count": 25,
+          "hit_at_1": 0.88,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.94,
+          "misses": [
+            {
+              "id": "stars-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "dense": {
+          "count": 25,
+          "hit_at_1": 0.76,
+          "hit_at_3": 0.96,
+          "all_required_at_3": 0.96,
+          "mrr": 0.868,
+          "misses": [
+            {
+              "id": "stars-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q1",
+              "first_rank": 5,
+              "all_rank": 5,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "filter-3"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            },
+            {
+              "id": "portal-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "portal-3"
+            }
+          ]
+        },
+        "learned": {
+          "count": 25,
+          "hit_at_1": 0.92,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.96,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            }
+          ]
+        },
+        "blend_0.0": {
+          "count": 25,
+          "hit_at_1": 0.8,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.8933,
+          "misses": [
+            {
+              "id": "stars-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "stars-0"
+            },
+            {
+              "id": "music-q1",
+              "first_rank": 3,
+              "all_rank": 3,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "filter-q4",
+              "first_rank": 2,
+              "all_rank": 3,
+              "first": "filter-1"
+            },
+            {
+              "id": "portal-q2",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "portal-0"
+            }
+          ]
+        },
+        "blend_0.25": {
+          "count": 25,
+          "hit_at_1": 0.92,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.9533,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 3,
+              "all_rank": 3,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            }
+          ]
+        },
+        "blend_0.5": {
+          "count": 25,
+          "hit_at_1": 0.92,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.9533,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 3,
+              "all_rank": 3,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            }
+          ]
+        },
+        "blend_1.0": {
+          "count": 25,
+          "hit_at_1": 0.92,
+          "hit_at_3": 1.0,
+          "all_required_at_3": 1.0,
+          "mrr": 0.96,
+          "misses": [
+            {
+              "id": "music-q1",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            },
+            {
+              "id": "music-q3",
+              "first_rank": 2,
+              "all_rank": 2,
+              "first": "music-0"
+            }
+          ]
+        }
+      },
+      "dataset_sha256": "62b2301c558d9ca9fb8da02a51fe3cd280043d23dfbbd2d239481ded5ffc7701",
+      "diagnostic_only": true
+    }
+  },
+  "conversation_runs": [
+    {
+      "model": "Qwen3.5 9B · on this Mac",
+      "code_sha256": "778f63e7762c65bafe3eef204d56bdaedb6992c3eed9960701d7208dc4289bd7",
+      "fixture_sha256": "3b4a2371f425ddfdbddef37f3fcfe5cb2d2b626426b39006ad3581183ab748d5",
+      "source_changed_during_run": false,
+      "fixture_changed_during_run": false,
+      "evidence_policy": "baseline",
+      "started_at": "2026-10-17T16:18:14.681782+00:00",
+      "constraint_passes": 5,
+      "turns": 8,
+      "median_seconds": 10.29,
+      "rows": [
+        {
+          "id": "cross-document-equipment/1",
+          "question": "What footwear do I need for the Stride session?",
+          "answer": "The provided materials state that the Stride session includes a river crossing and direct you to the \"Foot protection section of Equipment.md\" for equipment rules, but the text of Equipment.md is not included. Therefore, the specific footwear requirements cannot be determined from the supplied information. [1] [2]",
+          "kind": "insufficient",
+          "seconds": 18.65,
+          "constraints": [
+            "missing:closed",
+            "expected_kind:insufficient"
+          ],
+          "sources": [
+            {
+              "id": 1,
+              "document_id": "bda3bd6899fa4a5d987bb56971bc1ab1",
+              "name": "Orientation.md",
+              "locator": "part 1 · Field session handbook › Stride session",
+              "text": "# Field session handbook\n## Stride session\nThe Stride session includes a river crossing. Read the Foot protection section of Equipment.md for the equipment rules. This orientation gives the purpose of the session rather than a packing list."
+            },
+            {
+              "id": 6,
+              "document_id": "bda3bd6899fa4a5d987bb56971bc1ab1",
+              "name": "Orientation.md",
+              "locator": "part 1 · Field session handbook › Reading the other documents",
+              "text": "# Field session handbook\n## Reading the other documents\nDifferent documents have different purposes. The equipment sheet supplies practical requirements; the orientation explains the recording process. A missing detail on this page does not imply that the corresponding requirement is absent from the equipment sheet. Follow an explicit reference to a relevant section before treating that detail as unknown. The Lantern festival and the shelf-loan notice describe separate activities with separate rules."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "baseline",
+            "retrieval": "hybrid",
+            "context_complete": false,
+            "context_passages": 6,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "cross-document-equipment/2",
+          "question": "Can I use sandals instead?",
+          "answer": "The provided materials explicitly state that sandals are prohibited and require closed shoes; therefore, using sandals is not allowed. [1]",
+          "kind": "insufficient",
+          "seconds": 15.78,
+          "constraints": [
+            "expected_kind:insufficient"
+          ],
+          "sources": [
+            {
+              "id": 7,
+              "document_id": "665028b3749c45deaf74108ce38aeaf9",
+              "name": "Equipment.md",
+              "locator": "part 1 · Equipment › Foot protection",
+              "text": "# Equipment\n## Foot protection\nClosed shoes are compulsory. Sandals are prohibited. The supplied overshoes go over the participant's own closed shoes; they do not replace them."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "baseline",
+            "retrieval": "hybrid",
+            "context_complete": false,
+            "context_passages": 2,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "current-workshop/1",
+          "question": "Give only the current number of Lantern workshop places.",
+          "answer": "[LANtern workshop places: 7] [1]",
+          "kind": "generated",
+          "seconds": 8.6,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 10,
+              "document_id": "bbcab65cf578449aa8d80dfb0fbbe793",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Admission and workshop",
+              "text": "# Lantern festival — current 2026 notice\n## Admission and workshop\nVisitor admission is free. The lantern workshop has seven places and costs five credits per place. Booking a workshop place is separate from entering the festival."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "baseline",
+            "retrieval": "hybrid",
+            "context_complete": false,
+            "context_passages": 4,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "separate-festival-facts/1",
+          "question": "Where and when do Lantern workshop participants meet, and how much is a workshop place?",
+          "answer": "Workshop participants meet at East Pavilion on 9 November 2026 at 16:20, and a place costs five credits. [1] [2]",
+          "kind": "generated",
+          "seconds": 13.02,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 10,
+              "document_id": "bbcab65cf578449aa8d80dfb0fbbe793",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Admission and workshop",
+              "text": "# Lantern festival — current 2026 notice\n## Admission and workshop\nVisitor admission is free. The lantern workshop has seven places and costs five credits per place. Booking a workshop place is separate from entering the festival."
+            },
+            {
+              "id": 11,
+              "document_id": "bbcab65cf578449aa8d80dfb0fbbe793",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Meeting point",
+              "text": "# Lantern festival — current 2026 notice\n## Meeting point\nWorkshop participants meet at East Pavilion at 16:20 on 9 November 2026."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "baseline",
+            "retrieval": "hybrid",
+            "context_complete": false,
+            "context_passages": 7,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "partial-assembly-help/1",
+          "question": "I need the sculpture's weight, but I have no measurements. What can these directions help me do?",
+          "answer": "These directions cannot help you determine the sculpture's weight because they provide no material masses or dimensions, and they do not include a method for calculating weight. The text only covers folding paper strips and clipping them together. To find the weight, you would need the specific type of paper used and the total mass of the strips. [1]",
+          "kind": "generated",
+          "seconds": 9.52,
+          "constraints": [
+            "missing:loop"
+          ],
+          "sources": [
+            {
+              "id": 15,
+              "document_id": "404805016d224376b11341c414476f7b",
+              "name": "Paper sculpture.md",
+              "locator": "part 1 · A loop sculpture › Limits",
+              "text": "# A loop sculpture\n## Limits\nThe directions describe assembly but supply no dimensions, material masses or final weight. No measurement method for weight is specified."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "baseline",
+            "retrieval": "hybrid",
+            "context_complete": true,
+            "context_passages": 2,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "reserved-renewal/1",
+          "question": "Another reader has reserved my novel, but it is not overdue. Can I renew it?",
+          "answer": "No, you cannot renew it because a reservation prevents renewal even if the book is not overdue. [1]",
+          "kind": "generated",
+          "seconds": 9.62,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 16,
+              "document_id": "f7485d55277d4dadbd216c203da0020a",
+              "name": "Shelf loan notice.md",
+              "locator": "part 1 · Shelf loan notice",
+              "text": "# Shelf loan notice\nPrinted novels can be borrowed for 15 days. One renewal is allowed only if nobody else has reserved the book. A reservation prevents renewal even if the book is not overdue. Reference maps remain in the reading room. This notice does not state a fine for late returns."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "baseline",
+            "retrieval": "hybrid",
+            "context_complete": true,
+            "context_passages": 1,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "absent-sponsor/1",
+          "question": "Who sponsors the Lantern festival?",
+          "answer": "The provided materials explicitly state that the notice names no sponsor for the Lantern festival. [1]",
+          "kind": "insufficient",
+          "seconds": 10.95,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 12,
+              "document_id": "bbcab65cf578449aa8d80dfb0fbbe793",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Missing information",
+              "text": "# Lantern festival — current 2026 notice\n## Missing information\nThe notice names no sponsor and provides no weather forecast."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "baseline",
+            "retrieval": "hybrid",
+            "context_complete": false,
+            "context_passages": 4,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "polite-rewrite/1",
+          "question": "Rewrite this politely in one sentence: \"Return the clipboards now. I need to count them.\"",
+          "answer": "Please return the clipboards so that I may count them.",
+          "kind": "generated",
+          "seconds": 6.8,
+          "constraints": [],
+          "sources": [],
+          "metadata": {
+            "basis": "input",
+            "evidence_policy": "baseline",
+            "retrieval": "user supplied text",
+            "context_complete": true,
+            "context_passages": 0,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        }
+      ]
+    },
+    {
+      "model": "Qwen3.5 9B · on this Mac",
+      "code_sha256": "778f63e7762c65bafe3eef204d56bdaedb6992c3eed9960701d7208dc4289bd7",
+      "fixture_sha256": "3b4a2371f425ddfdbddef37f3fcfe5cb2d2b626426b39006ad3581183ab748d5",
+      "source_changed_during_run": false,
+      "fixture_changed_during_run": false,
+      "evidence_policy": "full",
+      "started_at": "2026-10-17T16:24:31.030943+00:00",
+      "constraint_passes": 7,
+      "turns": 8,
+      "median_seconds": 17.34,
+      "rows": [
+        {
+          "id": "cross-document-equipment/1",
+          "question": "What footwear do I need for the Stride session?",
+          "answer": "For the Stride session, you must wear closed shoes; sandals are prohibited. You will also be supplied with overshoes to wear over your own shoes, but these do not replace your closed footwear.\n\n**Source evidence:**\n*   **Orientation.md** states that the session includes a river crossing and directs readers to the \"Foot protection\" section of Equipment.md for equipment rules.\n*   **Equipment.md** specifies that closed shoes are compulsory, sandals are prohibited, and the supplied overshoes go over the participant's own closed shoes. [1]",
+          "kind": "generated",
+          "seconds": 24.61,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 7,
+              "document_id": "7fc322bcb0ec4974828e38ddceca6105",
+              "name": "Equipment.md",
+              "locator": "part 1 · Equipment › Foot protection",
+              "text": "# Equipment\n## Foot protection\nClosed shoes are compulsory. Sandals are prohibited. The supplied overshoes go over the participant's own closed shoes; they do not replace them."
+            }
+          ],
+          "metadata": {
+            "basis": "mixed",
+            "evidence_policy": "full",
+            "retrieval": "full selected documents",
+            "context_complete": true,
+            "context_passages": 16,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "cross-document-equipment/2",
+          "question": "Can I use sandals instead?",
+          "answer": "No, you cannot use sandals; the equipment rules explicitly prohibit them and require closed shoes. [1]",
+          "kind": "generated",
+          "seconds": 24.35,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 7,
+              "document_id": "7fc322bcb0ec4974828e38ddceca6105",
+              "name": "Equipment.md",
+              "locator": "part 1 · Equipment › Foot protection",
+              "text": "# Equipment\n## Foot protection\nClosed shoes are compulsory. Sandals are prohibited. The supplied overshoes go over the participant's own closed shoes; they do not replace them."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "full",
+            "retrieval": "full selected documents",
+            "context_complete": true,
+            "context_passages": 16,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "current-workshop/1",
+          "question": "Give only the current number of Lantern workshop places.",
+          "answer": "The current number of Lantern workshop places is seven. [1]",
+          "kind": "generated",
+          "seconds": 16.43,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 10,
+              "document_id": "bd4161c68c57467baf0dafde4e54d857",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Admission and workshop",
+              "text": "# Lantern festival — current 2026 notice\n## Admission and workshop\nVisitor admission is free. The lantern workshop has seven places and costs five credits per place. Booking a workshop place is separate from entering the festival."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "full",
+            "retrieval": "full selected documents",
+            "context_complete": true,
+            "context_passages": 16,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "separate-festival-facts/1",
+          "question": "Where and when do Lantern workshop participants meet, and how much is a workshop place?",
+          "answer": "Workshop participants meet at East Pavilion on 9 November 2026 at 16:20, and a place costs five credits. [1] [2]",
+          "kind": "generated",
+          "seconds": 19.51,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 10,
+              "document_id": "bd4161c68c57467baf0dafde4e54d857",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Admission and workshop",
+              "text": "# Lantern festival — current 2026 notice\n## Admission and workshop\nVisitor admission is free. The lantern workshop has seven places and costs five credits per place. Booking a workshop place is separate from entering the festival."
+            },
+            {
+              "id": 11,
+              "document_id": "bd4161c68c57467baf0dafde4e54d857",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Meeting point",
+              "text": "# Lantern festival — current 2026 notice\n## Meeting point\nWorkshop participants meet at East Pavilion at 16:20 on 9 November 2026."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "full",
+            "retrieval": "full selected documents",
+            "context_complete": true,
+            "context_passages": 16,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "partial-assembly-help/1",
+          "question": "I need the sculpture's weight, but I have no measurements. What can these directions help me do?",
+          "answer": "The provided directions only describe how to assemble the paper loops using clips and limits; they do not contain any measurements, material masses, or instructions for calculating the sculpture's weight. Consequently, these texts cannot help you determine the final weight of the sculpture. [1]",
+          "kind": "insufficient",
+          "seconds": 9.21,
+          "constraints": [
+            "expected_kind:insufficient"
+          ],
+          "sources": [
+            {
+              "id": 15,
+              "document_id": "d4fcd11f405849079c612855e9a9cdb3",
+              "name": "Paper sculpture.md",
+              "locator": "part 1 · A loop sculpture › Limits",
+              "text": "# A loop sculpture\n## Limits\nThe directions describe assembly but supply no dimensions, material masses or final weight. No measurement method for weight is specified."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "full",
+            "retrieval": "full selected documents",
+            "context_complete": true,
+            "context_passages": 2,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "reserved-renewal/1",
+          "question": "Another reader has reserved my novel, but it is not overdue. Can I renew it?",
+          "answer": "No, you cannot renew it because a reservation prevents renewal even if the book is not overdue. [1]",
+          "kind": "generated",
+          "seconds": 9.63,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 16,
+              "document_id": "94ecced4ee014b339ee34978f226a09a",
+              "name": "Shelf loan notice.md",
+              "locator": "part 1 · Shelf loan notice",
+              "text": "# Shelf loan notice\nPrinted novels can be borrowed for 15 days. One renewal is allowed only if nobody else has reserved the book. A reservation prevents renewal even if the book is not overdue. Reference maps remain in the reading room. This notice does not state a fine for late returns."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "full",
+            "retrieval": "full selected documents",
+            "context_complete": true,
+            "context_passages": 1,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "absent-sponsor/1",
+          "question": "Who sponsors the Lantern festival?",
+          "answer": "The provided materials do not identify a sponsor for the Lantern festival; the current 2026 notice explicitly states that no sponsor is named. [1]",
+          "kind": "insufficient",
+          "seconds": 18.25,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 12,
+              "document_id": "bd4161c68c57467baf0dafde4e54d857",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Missing information",
+              "text": "# Lantern festival — current 2026 notice\n## Missing information\nThe notice names no sponsor and provides no weather forecast."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "full",
+            "retrieval": "full selected documents",
+            "context_complete": true,
+            "context_passages": 16,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "polite-rewrite/1",
+          "question": "Rewrite this politely in one sentence: \"Return the clipboards now. I need to count them.\"",
+          "answer": "Please return the clipboards so that I may count them.",
+          "kind": "generated",
+          "seconds": 7.2,
+          "constraints": [],
+          "sources": [],
+          "metadata": {
+            "basis": "input",
+            "evidence_policy": "full",
+            "retrieval": "user supplied text",
+            "context_complete": true,
+            "context_passages": 0,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        }
+      ]
+    },
+    {
+      "model": "Qwen3.5 9B · on this Mac",
+      "code_sha256": "778f63e7762c65bafe3eef204d56bdaedb6992c3eed9960701d7208dc4289bd7",
+      "fixture_sha256": "3b4a2371f425ddfdbddef37f3fcfe5cb2d2b626426b39006ad3581183ab748d5",
+      "source_changed_during_run": false,
+      "fixture_changed_during_run": false,
+      "evidence_policy": "adaptive",
+      "started_at": "2026-10-17T16:20:38.604181+00:00",
+      "constraint_passes": 7,
+      "turns": 8,
+      "median_seconds": 11.6,
+      "rows": [
+        {
+          "id": "cross-document-equipment/1",
+          "question": "What footwear do I need for the Stride session?",
+          "answer": "For the Stride session, you must wear closed shoes; sandals are prohibited. You will also be supplied with overshoes to wear over your own closed shoes, which do not replace them. The orientation notes that a specific packing list is not provided in the handbook itself.\n\n*   **Source Evidence:**\n    *   *Orientation.md* states: \"The Stride session includes a river crossing. Read the Foot protection section of Equipment.md for the equipment rules.\"\n    *   *Equipment.md* states: \"Closed shoes are compulsory. Sandals are prohibited. The supplied overshoes go over the participant's own closed shoes; they do not replace them.\" [1] [2]",
+          "kind": "generated",
+          "seconds": 22.21,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 1,
+              "document_id": "2b2ba5929ba64114ab2d6226ce1ca92a",
+              "name": "Orientation.md",
+              "locator": "part 1 · Field session handbook › Stride session",
+              "text": "# Field session handbook\n## Stride session\nThe Stride session includes a river crossing. Read the Foot protection section of Equipment.md for the equipment rules. This orientation gives the purpose of the session rather than a packing list."
+            },
+            {
+              "id": 7,
+              "document_id": "28301899e95c4ab5b5c0baca27520585",
+              "name": "Equipment.md",
+              "locator": "part 1 · Equipment › Foot protection",
+              "text": "# Equipment\n## Foot protection\nClosed shoes are compulsory. Sandals are prohibited. The supplied overshoes go over the participant's own closed shoes; they do not replace them."
+            }
+          ],
+          "metadata": {
+            "basis": "mixed",
+            "evidence_policy": "adaptive",
+            "retrieval": "full short selection + linked sections",
+            "context_complete": false,
+            "context_passages": 7,
+            "context_links": [
+              {
+                "from_document": "2b2ba5929ba64114ab2d6226ce1ca92a",
+                "to_document": "28301899e95c4ab5b5c0baca27520585",
+                "name": "Equipment.md"
+              }
+            ],
+            "evidence_assessment": {
+              "model": "modulemate-evidence-reader-v2",
+              "advisory": true,
+              "parts": [
+                {
+                  "question": "What footwear do I need for the Stride session?",
+                  "estimate": 0.9727,
+                  "passage_estimate": 0.2935,
+                  "context_estimate": 0.9727,
+                  "passage_ids": [
+                    1,
+                    7,
+                    3
+                  ],
+                  "relevance": 0.7472,
+                  "candidate_spans": [
+                    {
+                      "margin": 0.35531044006347656,
+                      "text": "packing list",
+                      "start": 227,
+                      "end": 239,
+                      "passage_id": 1,
+                      "estimate": 0.2935
+                    },
+                    {
+                      "margin": 9.005079984664917,
+                      "text": "Closed shoes",
+                      "start": 31,
+                      "end": 43,
+                      "passage_id": 7,
+                      "estimate": 0.1453
+                    }
+                  ]
+                }
+              ],
+              "recovery_attempted": false,
+              "recovery_applied": false
+            },
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "cross-document-equipment/2",
+          "question": "Can I use sandals instead?",
+          "answer": "No, you cannot use sandals; the materials state that sandals are prohibited and closed shoes are compulsory for the Stride session. [1]",
+          "kind": "generated",
+          "seconds": 19.02,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 7,
+              "document_id": "28301899e95c4ab5b5c0baca27520585",
+              "name": "Equipment.md",
+              "locator": "part 1 · Equipment › Foot protection",
+              "text": "# Equipment\n## Foot protection\nClosed shoes are compulsory. Sandals are prohibited. The supplied overshoes go over the participant's own closed shoes; they do not replace them."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "adaptive",
+            "retrieval": "hybrid + learned",
+            "context_complete": false,
+            "context_passages": 5,
+            "context_links": [],
+            "evidence_assessment": {
+              "model": "modulemate-evidence-reader-v2",
+              "advisory": true,
+              "parts": [
+                {
+                  "question": "Can I use sandals instead?",
+                  "estimate": 0.7233,
+                  "passage_estimate": 0.4021,
+                  "context_estimate": 0.7233,
+                  "passage_ids": [
+                    7,
+                    3,
+                    4
+                  ],
+                  "relevance": 0.895,
+                  "candidate_spans": [
+                    {
+                      "margin": 9.349777221679688,
+                      "text": "Sandals are prohibited",
+                      "start": 60,
+                      "end": 82,
+                      "passage_id": 7,
+                      "estimate": 0.4021
+                    }
+                  ]
+                }
+              ],
+              "recovery_attempted": true,
+              "recovery_applied": true,
+              "initial_estimates": [
+                0.4021
+              ]
+            },
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "current-workshop/1",
+          "question": "Give only the current number of Lantern workshop places.",
+          "answer": "[LANtern workshop places: 7] [1]",
+          "kind": "generated",
+          "seconds": 8.77,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 10,
+              "document_id": "4fb34ef5a3754c6e96f157b40b7bdf27",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Admission and workshop",
+              "text": "# Lantern festival — current 2026 notice\n## Admission and workshop\nVisitor admission is free. The lantern workshop has seven places and costs five credits per place. Booking a workshop place is separate from entering the festival."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "adaptive",
+            "retrieval": "full short selection",
+            "context_complete": false,
+            "context_passages": 4,
+            "context_links": [],
+            "evidence_assessment": {
+              "model": "modulemate-evidence-reader-v2",
+              "advisory": true,
+              "parts": [
+                {
+                  "question": "Give only the current number of Lantern workshop places.",
+                  "estimate": 0.9814,
+                  "passage_estimate": 0.8783,
+                  "context_estimate": 0.9814,
+                  "passage_ids": [
+                    10,
+                    11,
+                    12
+                  ],
+                  "relevance": 0.9558,
+                  "candidate_spans": [
+                    {
+                      "margin": 1.5190367698669434,
+                      "text": "seven",
+                      "start": 119,
+                      "end": 124,
+                      "passage_id": 10,
+                      "estimate": 0.8783
+                    }
+                  ]
+                }
+              ],
+              "recovery_attempted": false,
+              "recovery_applied": false
+            },
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "separate-festival-facts/1",
+          "question": "Where and when do Lantern workshop participants meet, and how much is a workshop place?",
+          "answer": "Workshop participants meet at East Pavilion on 9 November 2026 at 16:20, and a workshop place costs five credits. [1] [2]",
+          "kind": "generated",
+          "seconds": 13.55,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 10,
+              "document_id": "4fb34ef5a3754c6e96f157b40b7bdf27",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Admission and workshop",
+              "text": "# Lantern festival — current 2026 notice\n## Admission and workshop\nVisitor admission is free. The lantern workshop has seven places and costs five credits per place. Booking a workshop place is separate from entering the festival."
+            },
+            {
+              "id": 11,
+              "document_id": "4fb34ef5a3754c6e96f157b40b7bdf27",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Meeting point",
+              "text": "# Lantern festival — current 2026 notice\n## Meeting point\nWorkshop participants meet at East Pavilion at 16:20 on 9 November 2026."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "adaptive",
+            "retrieval": "full short selection",
+            "context_complete": false,
+            "context_passages": 7,
+            "context_links": [],
+            "evidence_assessment": {
+              "model": "modulemate-evidence-reader-v2",
+              "advisory": true,
+              "parts": [
+                {
+                  "question": "Where and when do Lantern workshop participants meet, and how much is a workshop place?",
+                  "estimate": 0.9878,
+                  "passage_estimate": 0.9851,
+                  "context_estimate": 0.9878,
+                  "passage_ids": [
+                    11,
+                    13,
+                    10
+                  ],
+                  "relevance": 0.9826,
+                  "candidate_spans": [
+                    {
+                      "margin": 8.1072678565979,
+                      "text": "East Pavilion",
+                      "start": 88,
+                      "end": 101,
+                      "passage_id": 11,
+                      "estimate": 0.9851
+                    },
+                    {
+                      "margin": 7.580176830291748,
+                      "text": "West Lodge",
+                      "start": 119,
+                      "end": 129,
+                      "passage_id": 13,
+                      "estimate": 0.8727
+                    },
+                    {
+                      "margin": 3.3241419792175293,
+                      "text": "seven",
+                      "start": 119,
+                      "end": 124,
+                      "passage_id": 10,
+                      "estimate": 0.6232
+                    }
+                  ]
+                },
+                {
+                  "question": "when do Lantern workshop participants meet,",
+                  "estimate": 0.9998,
+                  "passage_estimate": 0.9998,
+                  "context_estimate": 0.9996,
+                  "passage_ids": [
+                    11,
+                    13,
+                    10
+                  ],
+                  "relevance": 0.964,
+                  "candidate_spans": [
+                    {
+                      "margin": 12.063564240932465,
+                      "text": "9 November 2026",
+                      "start": 114,
+                      "end": 129,
+                      "passage_id": 11,
+                      "estimate": 0.9998
+                    },
+                    {
+                      "margin": 12.917419195175171,
+                      "text": "West Lodge",
+                      "start": 119,
+                      "end": 129,
+                      "passage_id": 13,
+                      "estimate": 0.9749
+                    }
+                  ]
+                },
+                {
+                  "question": "how much is a workshop place",
+                  "estimate": 0.9657,
+                  "passage_estimate": 0.578,
+                  "context_estimate": 0.9657,
+                  "passage_ids": [
+                    10,
+                    13,
+                    11
+                  ],
+                  "relevance": 0.9132,
+                  "candidate_spans": [
+                    {
+                      "margin": 10.938558340072632,
+                      "text": "The lantern workshop has seven places and costs five credits per place",
+                      "start": 94,
+                      "end": 164,
+                      "passage_id": 10,
+                      "estimate": 0.578
+                    },
+                    {
+                      "margin": 10.613276422023773,
+                      "text": "This obsolete notice offered fourteen workshop places",
+                      "start": 42,
+                      "end": 95,
+                      "passage_id": 13,
+                      "estimate": 0.3354
+                    },
+                    {
+                      "margin": 12.441766262054443,
+                      "text": "participants meet at East Pavilion at 16:20 on 9 November 2026.",
+                      "start": 67,
+                      "end": 130,
+                      "passage_id": 11,
+                      "estimate": 0.0607
+                    }
+                  ]
+                }
+              ],
+              "recovery_attempted": false,
+              "recovery_applied": false
+            },
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "partial-assembly-help/1",
+          "question": "I need the sculpture's weight, but I have no measurements. What can these directions help me do?",
+          "answer": "The provided directions only describe how to assemble the paper loops using clips and limits; they do not contain any measurements, material masses, or instructions for calculating the sculpture's weight. Consequently, these texts cannot help you determine the final weight of the sculpture. [1]",
+          "kind": "insufficient",
+          "seconds": 9.2,
+          "constraints": [
+            "expected_kind:insufficient"
+          ],
+          "sources": [
+            {
+              "id": 15,
+              "document_id": "76a27490e4a14a0bbcdc8b2cc9eb086c",
+              "name": "Paper sculpture.md",
+              "locator": "part 1 · A loop sculpture › Limits",
+              "text": "# A loop sculpture\n## Limits\nThe directions describe assembly but supply no dimensions, material masses or final weight. No measurement method for weight is specified."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "adaptive",
+            "retrieval": "full short selection",
+            "context_complete": true,
+            "context_passages": 2,
+            "context_links": [],
+            "evidence_assessment": {
+              "model": "modulemate-evidence-reader-v2",
+              "advisory": true,
+              "parts": [
+                {
+                  "question": "I need the sculpture's weight, but I have no measurements. What can these directions help me do?",
+                  "estimate": 0.9741,
+                  "passage_estimate": 0.9741,
+                  "context_estimate": 0.5126,
+                  "passage_ids": [
+                    15,
+                    14
+                  ],
+                  "relevance": 0.9874,
+                  "candidate_spans": [
+                    {
+                      "margin": 1.171267032623291,
+                      "text": "final weight",
+                      "start": 107,
+                      "end": 119,
+                      "passage_id": 15,
+                      "estimate": 0.9741
+                    }
+                  ]
+                }
+              ],
+              "recovery_attempted": false,
+              "recovery_applied": false
+            },
+            "repaired": false,
+            "audited": false
+          }
+        },
+        {
+          "id": "reserved-renewal/1",
+          "question": "Another reader has reserved my novel, but it is not overdue. Can I renew it?",
+          "answer": "No, you cannot renew it because a reservation prevents renewal even if the book is not overdue. [1]",
+          "kind": "generated",
+          "seconds": 9.66,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 16,
+              "document_id": "b61abe4c97424110b7122bba12456f42",
+              "name": "Shelf loan notice.md",
+              "locator": "part 1 · Shelf loan notice",
+              "text": "# Shelf loan notice\nPrinted novels can be borrowed for 15 days. One renewal is allowed only if nobody else has reserved the book. A reservation prevents renewal even if the book is not overdue. Reference maps remain in the reading room. This notice does not state a fine for late returns."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "adaptive",
+            "retrieval": "full short selection",
+            "context_complete": true,
+            "context_passages": 1,
+            "context_links": [],
+            "evidence_assessment": {
+              "model": "modulemate-evidence-reader-v2",
+              "advisory": true,
+              "parts": [
+                {
+                  "question": "Another reader has reserved my novel, but it is not overdue. Can I renew it?",
+                  "estimate": 0.9939,
+                  "passage_estimate": 0.9939,
+                  "context_estimate": 0.0,
+                  "passage_ids": [
+                    16
+                  ],
+                  "relevance": 0.9993,
+                  "candidate_spans": [
+                    {
+                      "margin": 2.9326601028442383,
+                      "text": "A reservation prevents renewal",
+                      "start": 130,
+                      "end": 160,
+                      "passage_id": 16,
+                      "estimate": 0.9939
+                    }
+                  ]
+                }
+              ],
+              "recovery_attempted": false,
+              "recovery_applied": false
+            },
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "absent-sponsor/1",
+          "question": "Who sponsors the Lantern festival?",
+          "answer": "The provided materials state that the 2026 Lantern festival notice names no sponsor. [1]",
+          "kind": "insufficient",
+          "seconds": 13.54,
+          "constraints": [],
+          "sources": [
+            {
+              "id": 12,
+              "document_id": "4fb34ef5a3754c6e96f157b40b7bdf27",
+              "name": "Lantern festival current.md",
+              "locator": "part 1 · Lantern festival — current 2026 notice › Missing information",
+              "text": "# Lantern festival — current 2026 notice\n## Missing information\nThe notice names no sponsor and provides no weather forecast."
+            }
+          ],
+          "metadata": {
+            "basis": "materials",
+            "evidence_policy": "adaptive",
+            "retrieval": "hybrid + learned",
+            "context_complete": false,
+            "context_passages": 7,
+            "context_links": [],
+            "evidence_assessment": {
+              "model": "modulemate-evidence-reader-v2",
+              "advisory": true,
+              "parts": [
+                {
+                  "question": "Who sponsors the Lantern festival?",
+                  "estimate": 0.6203,
+                  "passage_estimate": 0.2504,
+                  "context_estimate": 0.6203,
+                  "passage_ids": [
+                    12,
+                    9,
+                    6
+                  ],
+                  "relevance": 0.775,
+                  "candidate_spans": []
+                }
+              ],
+              "recovery_attempted": true,
+              "recovery_applied": true,
+              "initial_estimates": [
+                0.2504
+              ]
+            },
+            "repaired": false,
+            "audited": true
+          }
+        },
+        {
+          "id": "polite-rewrite/1",
+          "question": "Rewrite this politely in one sentence: \"Return the clipboards now. I need to count them.\"",
+          "answer": "Please return the clipboards so that I may count them.",
+          "kind": "generated",
+          "seconds": 6.84,
+          "constraints": [],
+          "sources": [],
+          "metadata": {
+            "basis": "input",
+            "evidence_policy": "adaptive",
+            "retrieval": "user supplied text",
+            "context_complete": true,
+            "context_passages": 0,
+            "context_links": [],
+            "evidence_assessment": {},
+            "repaired": false,
+            "audited": false
+          }
+        }
+      ]
+    }
+  ],
+  "subsequent_changes": []
+}

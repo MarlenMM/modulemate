@@ -25,6 +25,7 @@ jobs:
       - run: uv run python scripts/evaluate.py
       - run: uv run python scripts/evaluate_intelligence.py
       - run: uv run python scripts/evaluate_answers.py
+      - run: uv run python scripts/evaluate_evidence.py --split test
       - run: uv run pip-audit --progress-spinner off
 
   local-models:

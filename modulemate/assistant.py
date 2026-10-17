@@ -8,9 +8,10 @@ import time
 from dataclasses import dataclass, field, replace
 from typing import Protocol
 
+from modulemate.adaptive import adaptive_context
 from modulemate.calculations import direct_calculation
-from modulemate.context import build_context, teaching_request
-from modulemate.conversation import generate, remap_citations
+from modulemate.context import Context, teaching_request
+from modulemate.conversation import generate, remap_citations, supplied_text, transformation_request
 from modulemate.db import UserError, checked_text
 from modulemate.dialogue import compose_local, plan_turn, social_reply
 from modulemate.evidence import source_excerpts
@@ -20,6 +21,7 @@ from modulemate.retrieval import retrieve, scoped_passages
 from modulemate.schemas import CARD_SCHEMA, SUPPORT_SCHEMA
 from modulemate.search import Passage, _scope, overview
 from modulemate.settings import Settings
+from modulemate.support import remap_support
 
 MODES = {
     "Auto": "Choose the most useful response style for the question.",
@@ -279,10 +281,13 @@ def answer_question(
     backend=None,
     engine=None,
     on_progress=None,
+    evidence_policy="adaptive",
 ):
     question = checked_text(question, "Question", 4000)
     if mode not in MODES:
         raise UserError("Choose a supported study mode.")
+    if evidence_policy not in {"adaptive", "baseline", "full"}:
+        raise UserError("Choose a supported evidence policy.")
     # Even social/clarification responses must validate course/document scope.
     with store.transaction() as (con, user):
         _scope(con, store, user, course_id, document_ids)
@@ -296,6 +301,13 @@ def answer_question(
             or (m["sources"] and all(p["document_id"] in allowed for p in m["sources"]))
         ]
     plan = plan_turn(question, mode, history)
+    if supplied_text(question) and transformation_request(question, plan, history)[1]:
+        # Fresh quoted text is a new task, even when it contains words such as
+        # 'this' or 'compare'. It must not inherit a previous comparison's subject.
+        plan.query = plan.resolved_question = question
+        plan.topic = "provided text"
+        plan.subjects = []
+        plan.used_context = False
     intent = classify(question)
     plan.intent = intent.label if intent.confidence >= 0.45 else "conceptual"
     metadata = {
@@ -323,9 +335,41 @@ def answer_question(
     if use_ai and backend and not reply:
         if on_progress:
             on_progress("Reading the relevant material…")
-        context = build_context(
-            store, course_id, question, plan, history, document_ids, engine=engine
+        _, transforming = transformation_request(question, plan, history)
+        needs_library = bool(
+            re.search(
+                r"\b(?:materials|documents?|notes|handout|guide|according|based on)\b",
+                question,
+                re.I,
+            )
         )
+        if transforming and not needs_library:
+            session = next(
+                (
+                    m["metadata"]["lesson_session"]
+                    for m in reversed(history)
+                    if "lesson_session" in m.get("metadata", {})
+                ),
+                {},
+            )
+            context = Context(
+                complete=True,
+                method="user supplied text",
+                policy=evidence_policy,
+                lesson_session=session,
+            )
+        else:
+            context = adaptive_context(
+                store,
+                course_id,
+                question,
+                plan,
+                history,
+                document_ids,
+                engine=engine,
+                policy=evidence_policy,
+                on_progress=on_progress,
+            )
         if context.clarification:
             result = Answer(context.clarification, kind="clarification")
             metadata.update(
@@ -360,6 +404,7 @@ def answer_question(
             cited = [context.passages[i - 1] for i in generated.cited_ids]
             remap = {old: new for new, old in enumerate(generated.cited_ids, 1)}
             text = remap_citations(generated.text, remap)
+            generated.support_check = remap_support(generated.support_check, remap)
             notice = f"{getattr(backend, 'label', 'Conversational model')} · "
             notice += {
                 "materials": "Based on your materials",
@@ -398,6 +443,10 @@ def answer_question(
                     "context_complete": context.complete,
                     "context_passages": len(context.passages),
                     "context_characters": context.characters,
+                    "context_links": context.links,
+                    "evidence_policy": evidence_policy,
+                    "evidence_assessment": context.evidence,
+                    "support_check": generated.support_check,
                     "lesson": context.lesson,
                     "lesson_session": context.lesson_session,
                     "resolved_mode": requested_mode,

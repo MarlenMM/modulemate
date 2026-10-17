@@ -95,8 +95,9 @@ def constraints(turn, answer):
 
 def code_fingerprint():
     fingerprint = hashlib.sha256()
-    for path in sorted((ROOT / "modulemate").glob("*.py")):
-        fingerprint.update(path.name.encode() + b"\0" + path.read_bytes())
+    for path in sorted((ROOT / "modulemate").rglob("*")):
+        if path.suffix in {".py", ".json"} and "__pycache__" not in path.parts:
+            fingerprint.update(str(path.relative_to(ROOT)).encode() + b"\0" + path.read_bytes())
     return fingerprint.hexdigest()
 
 
@@ -108,8 +109,9 @@ def main():
         help="Explicitly send ONLY the original fixture to the configured provider.",
     )
     parser.add_argument("--ids", help="Comma separated scenario IDs; default all")
+    parser.add_argument("--policy", choices=("adaptive", "baseline", "full"), default="adaptive")
     parser.add_argument(
-        "--suite", choices=("general", "probe", "core", "transfer"), default="general"
+        "--suite", choices=("general", "probe", "core", "transfer", "evidence"), default="general"
     )
     parser.add_argument(
         "--progress", action="store_true", help="Print model stages while a turn is running"
@@ -132,13 +134,16 @@ def main():
             "probe": "general_probe.json",
             "core": "conversation_challenge.json",
             "transfer": "conversation_transfer.json",
+            "evidence": "evidence_transfer.json",
         }[args.suite]
     )
     backend = AIBackend(load_settings()) if args.provider else local_backend()
     if backend is None:
         parser.error("Prepare a local model first or explicitly select --provider")
     backend = DiagnosticBackend(backend)
-    fixture = json.loads(fixture_path.read_text())
+    fixture_bytes = fixture_path.read_bytes()
+    fixture_sha256 = hashlib.sha256(fixture_bytes).hexdigest()
+    fixture = json.loads(fixture_bytes)
     ids = set(args.ids.split(",")) if args.ids else None
     rows = []
     with tempfile.TemporaryDirectory() as tmp:
@@ -177,6 +182,7 @@ def main():
                     )
                     if args.progress
                     else None,
+                    evidence_policy=args.policy,
                 )
                 row = {
                     "id": f"{scenario['id']}/{i}",
@@ -204,8 +210,13 @@ def main():
                             "source_changed_during_run": code_fingerprint() != fingerprint,
                             "started_at": started_at,
                             "updated_at": datetime.now(UTC).isoformat(),
-                            "fixture_sha256": hashlib.sha256(fixture_path.read_bytes()).hexdigest(),
+                            "fixture_sha256": fixture_sha256,
+                            "fixture_changed_during_run": hashlib.sha256(
+                                fixture_path.read_bytes()
+                            ).hexdigest()
+                            != fixture_sha256,
                             "diagnostic_only": True,
+                            "evidence_policy": args.policy,
                             "rows": rows,
                         },
                         indent=2,

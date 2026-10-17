@@ -35,6 +35,10 @@ def test_complete_local_study_journey(tmp_path, monkeypatch):
     app.chat_input[0].set_value("What is retrieval practice?").run()
     assert not app.exception
     assert any("Retrieval practice means" in t.value for t in app.markdown)
+    widget(app.selectbox, "Your assessment").set_value("unsupported")
+    widget(app.text_area, "Correction or note (optional)").set_value("Please check the qualifier.")
+    click(app, "Save answer feedback")
+    assert any(d.label == "Export answer review cases (JSON)" for d in app.get("download_button"))
     click(app, "Quiz me on that")
     assert any("in your own words" in t.value for t in app.markdown)
     page(app, "Cards")

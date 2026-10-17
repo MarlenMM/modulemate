@@ -1,0 +1,140 @@
+{
+  "description": "Original English transfer documents authored after the first evidence-model calibration. Not fitted by the evidence models. Used to diagnose whole-document, cross-document and incomplete-evidence behavior; once inspected it is a development diagnostic, not a blinded accuracy benchmark.",
+  "documents": [
+    {
+      "name": "Orientation.md",
+      "text": "# Field session handbook\n## Stride session\nThe Stride session includes a river crossing. Read the Foot protection section of Equipment.md for the equipment rules. This orientation gives the purpose of the session rather than a packing list.\n## Recording observations\nTeams write the observation time and the stop name before recording what they see. Separate direct observations from interpretations. If a detail was not observed, leave that field blank and explain the gap rather than copying another team's entry. The organiser reviews legibility before the sheets are archived. This is a procedure for documenting the session, not a statement about the natural history of the site.\n## Working in groups\nEach group selects a recorder and a route reader. Swap these roles at the halfway stop so that everyone has an opportunity to practise both activities. A group should stay together between the marked stops. Tell the session leader before leaving the group. The orientation does not identify a particular person as leader; names are announced at the meeting point.\n## Looking after records\nUse the printed stop identifiers consistently so that sheets from different teams can be compared. When correcting a copied identifier, keep the old entry readable and add the correction beside it. Do not rewrite another team's observations. The records should describe the trip that actually occurred rather than a planned route that was not followed.\n## End of session\nAt the final stop, check that every sheet has the date and a group identifier. Return borrowed clipboards to the collection box. Keep personal notes separate from the sheets being returned. The organiser will collect questions about observations for a later discussion, but this orientation does not schedule that discussion or promise a publication date.\n## Reading the other documents\nDifferent documents have different purposes. The equipment sheet supplies practical requirements; the orientation explains the recording process. A missing detail on this page does not imply that the corresponding requirement is absent from the equipment sheet. Follow an explicit reference to a relevant section before treating that detail as unknown. The Lantern festival and the shelf-loan notice describe separate activities with separate rules.\n"
+    },
+    {
+      "name": "Equipment.md",
+      "text": "# Equipment\n## Foot protection\nClosed shoes are compulsory. Sandals are prohibited. The supplied overshoes go over the participant's own closed shoes; they do not replace them.\n## Shared kit\nThe leader supplies clipboards. A personal camera is optional. Return borrowed kit at the final collection box.\n"
+    },
+    {
+      "name": "Lantern festival current.md",
+      "text": "# Lantern festival — current 2026 notice\nThis guide replaces the archived notice.\n## Admission and workshop\nVisitor admission is free. The lantern workshop has seven places and costs five credits per place. Booking a workshop place is separate from entering the festival.\n## Meeting point\nWorkshop participants meet at East Pavilion at 16:20 on 9 November 2026.\n## Missing information\nThe notice names no sponsor and provides no weather forecast.\n"
+    },
+    {
+      "name": "Lantern festival archived.md",
+      "text": "# Lantern festival — archived 2025 notice\nThis obsolete notice offered fourteen workshop places. Its meeting point was West Lodge. The current notice replaces these instructions.\n"
+    },
+    {
+      "name": "Paper sculpture.md",
+      "text": "# A loop sculpture\n## Assembly\nFold each of six paper strips into a loop and join neighbouring loops using clips. Arrange the connected loops on a flat surface.\n## Limits\nThe directions describe assembly but supply no dimensions, material masses or final weight. No measurement method for weight is specified.\n"
+    },
+    {
+      "name": "Shelf loan notice.md",
+      "text": "# Shelf loan notice\nPrinted novels can be borrowed for 15 days. One renewal is allowed only if nobody else has reserved the book. A reservation prevents renewal even if the book is not overdue. Reference maps remain in the reading room. This notice does not state a fine for late returns.\n"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "cross-document-equipment",
+      "turns": [
+        {
+          "question": "What footwear do I need for the Stride session?",
+          "required": [
+            "closed"
+          ],
+          "forbidden": [
+            "footwear is not stated"
+          ],
+          "expected_kind": "generated"
+        },
+        {
+          "question": "Can I use sandals instead?",
+          "required": [],
+          "forbidden": [
+            "sandals are allowed"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "current-workshop",
+      "turns": [
+        {
+          "question": "Give only the current number of Lantern workshop places.",
+          "required": [],
+          "forbidden": [
+            "fourteen",
+            "14"
+          ],
+          "max_words": 45,
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "separate-festival-facts",
+      "turns": [
+        {
+          "question": "Where and when do Lantern workshop participants meet, and how much is a workshop place?",
+          "required": [
+            "East Pavilion",
+            "16:20"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "partial-assembly-help",
+      "documents": [
+        "Paper sculpture.md"
+      ],
+      "turns": [
+        {
+          "question": "I need the sculpture's weight, but I have no measurements. What can these directions help me do?",
+          "required": [
+            "loop"
+          ],
+          "forbidden": [
+            "weighs 6",
+            "six grams"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "reserved-renewal",
+      "documents": [
+        "Shelf loan notice.md"
+      ],
+      "turns": [
+        {
+          "question": "Another reader has reserved my novel, but it is not overdue. Can I renew it?",
+          "required": [],
+          "forbidden": [
+            "you can renew"
+          ],
+          "expected_kind": "generated"
+        }
+      ]
+    },
+    {
+      "id": "absent-sponsor",
+      "turns": [
+        {
+          "question": "Who sponsors the Lantern festival?",
+          "required": [],
+          "expected_kind": "insufficient"
+        }
+      ]
+    },
+    {
+      "id": "polite-rewrite",
+      "turns": [
+        {
+          "question": "Rewrite this politely in one sentence: \"Return the clipboards now. I need to count them.\"",
+          "required": [
+            "clipboard"
+          ],
+          "max_words": 45,
+          "expected_kind": "generated"
+        }
+      ]
+    }
+  ]
+}

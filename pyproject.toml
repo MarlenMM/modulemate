@@ -1,6 +1,6 @@
 [project]
 name = "modulemate"
-version = "2.2.0"
+version = "2.3.0"
 description = "A private study workspace for your own course materials"
 requires-python = ">=3.12,<3.14"
 dependencies = [

@@ -5,11 +5,12 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from modulemate.dialogue import stems
-from modulemate.retrieval import retrieve, scoped_passages
+from modulemate.retrieval import RetrievalIndex, retrieve, scoped_passages
 from modulemate.search import Passage, overview, tokens
 
 
@@ -26,6 +27,9 @@ class Context:
     awaiting_document: bool = False
     lesson: dict = field(default_factory=dict)
     lesson_session: dict = field(default_factory=dict)
+    evidence: dict = field(default_factory=dict)
+    policy: str = "baseline"
+    links: list[dict] = field(default_factory=list)
 
 
 def estimate_tokens(text):
@@ -89,6 +93,52 @@ def topic_heading(passage):
     if " · " in passage.locator:
         return passage.locator.split(" · ", 1)[-1].strip()
     return next((s.strip("# \t") for s in passage.text.splitlines() if s.strip()), "")[:90]
+
+
+def referenced_sections(candidates, groups, store, course_id, question, engine=None):
+    """Follow at most two explicit filenames already inside the allowed scope.
+
+    This is an evidence graph over uploaded documents, never filesystem access,
+    a URL fetch or an instruction executor. It helps when a relevant page points
+    to a second file that a keyword filter or an overconfident scorer overlooked.
+    """
+    present = {p.document_id for p in candidates}
+    names = Counter(group[0].name.casefold() for group in groups.values())
+    links, passages = [], []
+    for source in candidates[:8]:
+        for document_id, group in groups.items():
+            if document_id in present:
+                continue
+            name = group[0].name
+            if names[name.casefold()] != 1:
+                continue  # A filename alone cannot disambiguate two uploads.
+            mention = re.search(
+                r"(?<![\w.-])" + re.escape(name) + r"(?![\w-]|\.[\w-])", source.text, re.I
+            )
+            if mention is None or not re.search(
+                r"\b(?:see|read|refer|consult|section|appendix)\b",
+                source.text[max(0, mention.start() - 180) : mention.start()],
+                re.I,
+            ):
+                continue
+            selected = [
+                p
+                for p in group
+                if len(topic_heading(p)) >= 5
+                and topic_heading(p).casefold() in source.text.casefold()
+            ]
+            if not selected:
+                selected = retrieve(
+                    store, course_id, question, [document_id], engine=engine, limit=3
+                ).passages
+            passages.extend(selected[:4])
+            present.add(document_id)
+            links.append(
+                {"from_document": source.document_id, "to_document": document_id, "name": name}
+            )
+            if len(links) >= 2:
+                return passages, links
+    return passages, links
 
 
 def instruction_packet(passage):
@@ -168,7 +218,7 @@ def queries_for(question, plan, history, extra_queries=()):
     return list(dict.fromkeys(q.strip() for q in queries if q.strip()))[:6]
 
 
-def focused_documents(groups, question, plan):
+def focused_documents(groups, question, plan, *, allow_topic_filter=True):
     """Use distinctive query terms to keep unrelated documents out of context.
 
     This is a document-level precision step, not a hard-coded subject router.
@@ -191,8 +241,14 @@ def focused_documents(groups, question, plan):
                 re.I,
             )
         }
-    if len(groups) < 2 or re.search(
-        r"\b(?:all|every|which|across)\b.*\b(?:files?|documents?|notes|materials)\b", question, re.I
+    if (
+        not allow_topic_filter
+        or len(groups) < 2
+        or re.search(
+            r"\b(?:all|every|which|across)\b.*\b(?:files?|documents?|notes|materials)\b",
+            question,
+            re.I,
+        )
     ):
         return set(groups)
     generic = stems(
@@ -221,6 +277,8 @@ def build_context(
     engine=None,
     budget=30000,
     extra_queries=(),
+    policy="baseline",
+    recover=False,
 ):
     all_passages = scoped_passages(store, course_id, document_ids)
     # An explicit filename is stronger than similarity. This also lets a learner
@@ -282,17 +340,22 @@ def build_context(
                 + ", ".join(names[:12])
                 + ".",
             )
-    result = Context(total_passages=len(all_passages), lesson_session=previous_lesson)
+    result = Context(
+        total_passages=len(all_passages), lesson_session=previous_lesson, policy=policy
+    )
     groups = {}
     for passage in all_passages:
         groups.setdefault(passage.document_id, []).append(passage)
     result.catalog = document_catalog(groups)
+    version_scope = focused_documents(groups, question, plan, allow_topic_filter=False)
+    reference_groups = {key: group for key, group in groups.items() if key in version_scope}
     if not all_passages:
         return result
     resumed_selection = bool(
         named and history and history[-1].get("metadata", {}).get("awaiting_document")
     )
     broad = broad_request(question, plan.mode) or plan.overview or continuation or resumed_selection
+    full_selection = policy == "full" and not broad
     lesson = (
         ((teaching_request(question) or plan.mode == "Teach") and broad)
         or continuation
@@ -311,20 +374,38 @@ def build_context(
         return result
     if lesson:
         budget = min(budget, 8000)
-    if not broad:
+    if not broad and not full_selection:
         budget = min(budget, 8500)
         if len(tokens(plan.query)) <= 3:
             budget = min(budget, 3500)
-        focus = focused_documents(groups, question, plan)
+        short_library = policy == "adaptive" and sum(len(p.text) for p in all_passages) <= min(
+            budget, 3500
+        )
+        focus = focused_documents(
+            groups, question, plan, allow_topic_filter=not recover and not short_library
+        )
         if focus != set(groups):
             all_passages = [p for p in all_passages if p.document_id in focus]
             document_ids = sorted(focus)
             groups = {doc: passages for doc, passages in groups.items() if doc in focus}
             result.catalog = document_catalog(groups)
     ranked = []
-    for query in queries_for(question, plan, history, extra_queries):
+    queries = [] if full_selection else queries_for(question, plan, history, extra_queries)
+    index = (
+        RetrievalIndex(store, course_id, document_ids, engine, queries)
+        if engine and queries
+        else None
+    )
+    for query in queries:
         found = retrieve(
-            store, course_id, query, document_ids, engine=engine, limit=10 if broad else 6
+            store,
+            course_id,
+            query,
+            document_ids,
+            engine=engine,
+            limit=12 if recover else 10 if broad else 6,
+            strategy="learned" if policy == "adaptive" else "hybrid",
+            _index=index,
         )
         result.method = found.method
         if found.notice:
@@ -340,6 +421,9 @@ def build_context(
         candidates = all_passages[offset:]
     elif plan.context_ids:
         candidates = [p for p in all_passages if p.id in plan.context_ids]
+    elif full_selection:
+        candidates = all_passages
+        result.method = "full selected documents"
     elif broad:
         # Full short lectures stay in source order. For a long library, sample
         # across documents/locations and explicitly disclose incomplete coverage.
@@ -364,7 +448,21 @@ def build_context(
         # Small selected libraries are cheaper and more reliable to read whole
         # than to discard potentially crucial context with a relevance threshold.
         if sum(len(p.text) for p in all_passages) <= min(budget, 3500):
-            candidates.extend(all_passages)
+            candidates = list(all_passages) if policy == "adaptive" else candidates + all_passages
+            if policy == "adaptive":
+                result.method = "full short selection"
+    if policy == "adaptive" and not broad:
+        linked, result.links = referenced_sections(
+            candidates, reference_groups, store, course_id, question, engine
+        )
+        if linked:
+            candidates = candidates[:4] + linked + candidates[4:]
+            for p in linked:
+                if p.document_id not in groups:
+                    groups[p.document_id] = reference_groups[p.document_id]
+                    all_passages.extend(reference_groups[p.document_id])
+            result.catalog = document_catalog(groups)
+            result.method += " + linked sections"
     seen = set()
     estimated_tokens = 0
     token_budget = min(8500, max(1800, 10500 - estimate_tokens(question)))
@@ -403,9 +501,10 @@ def build_context(
         result.characters += cost
         estimated_tokens += token_cost
         seen.add(passage.id)
-    result.complete = len(seen) == len(all_passages)
+    result.complete = len(seen) == result.total_passages
     if not broad:
         used_documents = {p.document_id for p in result.passages}
+        result.links = [link for link in result.links if link["to_document"] in used_documents]
         result.catalog = [
             item
             for item in result.catalog

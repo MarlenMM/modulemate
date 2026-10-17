@@ -16,6 +16,7 @@ from modulemate.evidence import bind_evidence, source_excerpts
 from modulemate.generation import GenerationError
 from modulemate.prompts import AUDIT_SYSTEM, METADATA_SYSTEM, SYSTEM, TEXT_SYSTEM
 from modulemate.schemas import ANSWER_SCHEMA, AUDIT_SCHEMA, LESSON_SCHEMA, METADATA_SCHEMA
+from modulemate.support import check_claims, get_support_model
 
 
 @dataclass
@@ -31,6 +32,7 @@ class Generated:
     subjects: list[str] = field(default_factory=list)
     intent: str = ""
     history_omitted: int = 0
+    support_check: dict = field(default_factory=dict)
 
 
 def bounded_history(history, budget=2600):
@@ -108,7 +110,9 @@ def without_source_footer(text, question):
             if (
                 offset
                 and text[:offset].strip()
-                and re.match(r"(?:sources?|references|source text)\s*(?::|$)", heading, re.I)
+                and re.match(
+                    r"(?:sources?|references|source text|evidence)\s*(?::|$)", heading, re.I
+                )
             ):
                 return text[:offset].rstrip()
         offset += len(line)
@@ -516,8 +520,7 @@ def check_requested_format(text, question, mode=None):
         )
 
 
-def generate(backend, question, mode, context, history, on_progress=None, *, plan=None):
-    current_request = plan.resolved_question if plan and plan.resolved_question else question
+def transformation_request(question, plan=None, history=()):
     input_allowed = supplied_text(question) or bool(
         plan
         and plan.used_context
@@ -531,6 +534,12 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
             re.I,
         )
     )
+    return input_allowed, input_transform
+
+
+def generate(backend, question, mode, context, history, on_progress=None, *, plan=None):
+    current_request = plan.resolved_question if plan and plan.resolved_question else question
+    input_allowed, input_transform = transformation_request(question, plan, history)
     if not context.passages and not input_allowed:
         text = (
             "I couldn't find information answering that in the selected materials. Select the relevant document or add the missing text, and I can help work through it."
@@ -587,10 +596,13 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
         "_max_tokens": 1700 if mode == "Teach" else (1500 if detailed else 1100),
         "_response_schema": LESSON_SCHEMA if context.lesson else ANSWER_SCHEMA,
         "answer_language": "English",
-        "recent_conversation": bounded_history(history),
+        "recent_conversation": []
+        if input_transform and supplied_text(question)
+        else bounded_history(history),
         "context_complete": context.complete,
         "total_passages": context.total_passages,
         "document_catalog": context.catalog,
+        "requested_parts": [p["question"] for p in context.evidence.get("parts", [])[1:]],
         "lesson_progress": context.lesson,
         "passages": [
             {"source_id": i, "document": p.name, "location": p.locator, "text": p.text}
@@ -736,6 +748,23 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
                 raise ValueError(
                     "grounding_required: the learner did not supply text for this answer; use real material or report the gap"
                 )
+            if (
+                answer.kind == "generated"
+                and answer.cited_ids
+                and not input_transform
+                and mode != "Socratic tutor"
+            ):
+                support_model = get_support_model()
+                if support_model:
+                    if on_progress:
+                        on_progress("Checking statements against their sources…")
+                    answer.support_check = check_claims(
+                        answer.text, context.passages, answer.cited_ids, model=support_model
+                    )
+                else:
+                    answer.support_check = {"available": False, "claims": [], "flags": []}
+                # Independent NLI flags remain visible diagnostics until their
+                # repair policy has been validated on real conversations.
             # A critic must not invent a fact to overturn missing evidence.
             # Refusals stay refusals throughout the pipeline.
             if (

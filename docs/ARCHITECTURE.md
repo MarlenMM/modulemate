@@ -1,4 +1,4 @@
-# ModuleMate 2.2 architecture
+# ModuleMate 2.3 architecture
 
 `app.py` is the Streamlit interface. There is one local workspace; `db.py` provides
 transactional course/document scoping and cascades. Schema 3 migrates previous
@@ -14,6 +14,19 @@ Documents expose text previews so extraction failures can be inspected.
 `retrieval.py` adds normalized local embeddings, persistent digest-checked vectors,
 rank fusion and optional reranking. It validates scope before inference and source
 identity again before storing/returning results. Missing models retain word matching.
+`RetrievalIndex` keeps scoped source vectors and batched query embeddings only for
+one request. It checks store, course, document scope and model identity at reuse;
+final source identity checks still run. Identifier-specific queries do not cause
+unrelated documents to be embedded eagerly.
+
+`learning.py` loads three original supervised heads from bounded, schema-checked
+JSON numerical artifacts. Lexical, embedding and reader variants share explicit
+feature order/version and record fit/calibration source identities. No fitting
+or downloads occur on a user request. `adaptive.py` assesses individual passages
+and combined context for the whole request and explicit subquestions. Reader
+spans must match source offsets. An uncertain estimate can buy one deeper scoped
+search; a replacement must improve a part without substantially reducing another.
+These are advisory estimates, not probabilities of final answer correctness.
 
 `context.py` assembles evidence for the actual question, comparison sides and
 subquestions. It adds adjacent passages from the same document, resolves named
@@ -32,6 +45,11 @@ both sides of comparisons and collection-wide requests. History has a bounded
 token budget and retains the final check question when a long answer is shortened.
 The interface and answer instructions are English only; there is no query
 translation stage or language selector.
+Short allowed libraries bypass keyword narrowing. Explicit uploaded-file
+references can add relevant linked sections from the already allowed document
+set, with at most two targets and one hop. Duplicate filenames are not guessed.
+No paths, links or source commands are executed. Soft document filtering no
+longer incorrectly establishes complete-library coverage.
 
 `conversation.py` instructs a generative tutor to answer the latest request, using
 recent turns for context rather than treating previous answers as evidence. Course
@@ -125,3 +143,20 @@ substring into the back, strips leading heading boilerplate from candidates and
 deduplicates identical backs. It validates each selected ID and its original source
 again before checking the question's support. Legacy provider responses with an
 explicit back still require an exact source match. Cards remain drafts for review.
+
+`support.py` is an explicitly enabled independent NLI experiment, disabled by
+default after false-positive trials. It checks bounded source/claim pairs with
+pinned offline safetensors, preserves claim text during token truncation, and can
+consider multiple cited sources. Its metadata is diagnostic; it never silently
+rejects or rewrites an answer. Disabled checks do not display an inference status.
+
+Pure transformations of newly quoted text omit library retrieval and unrelated
+history. A follow-up transformation retains the relevant input conversation;
+document-dependent requests retain retrieval. Fresh quoted tasks reset stale
+comparison subjects, while saved lesson continuation is preserved separately.
+
+Answer ratings are stored inside the existing message metadata with course/message
+scope validation, so no new database migration is needed. `feedback.py` prioritizes
+local human-review cases using explicit feedback and estimated uncertainty.
+Export requires a deliberate download; user feedback is not a verified gold label
+and is never fitted or uploaded automatically.

@@ -1,7 +1,7 @@
 # HIT Summer School origin and current implementation
 
 ModuleMate began as the Smart Chatbot project for HIT Summer School 2026's
-Artificial Intelligence and Machine Learning course. Version 2.2 is subsequent
+Artificial Intelligence and Machine Learning course. Version 2.3 is subsequent
 portfolio development, not an unchanged July submission.
 
 ## Requirements checked against the source
@@ -39,6 +39,12 @@ below came from the student's proposed design, not additional instructor rules.
 ## What was trained and what was integrated
 
 The small intent classifier is trained on 120 original synthetic utterances.
+Version 2.3 additionally trains relevance, answerability and pairwise-ranking
+logistic heads on an original 22-document, 154-question evidence dataset. There
+are lexical, embedding and embedding-plus-reader ablations, separate document
+groups for fitting/calibration/testing, and inspectable numerical weight files.
+The learned evidence controller can request more context; it does not decide
+truth or force an answer/refusal. See the [model/data card](EVIDENCE_MODEL_CARD.md).
 The encoder, reranker, extractive reader and instruction models use named pretrained
 weights with pinned revisions. No LLM or embedding model is fine-tuned on personal
 student data. Bounded numeric tools compute statistics/arithmetic directly; they
@@ -50,3 +56,18 @@ Documentation describes both the original course identity and the engineering
 changes since the submission. A project report can explain the retrieval/generation
 tradeoff, experiments, observed failures and limitations using the current source;
 new measurements must not be confused with historical submission results.
+
+## The applied AI contribution
+
+The project investigates evidence selection and answerability around a compact
+pretrained conversational model. Its own work includes dataset/label design,
+supervised fitting and calibration, grouped experiments, adaptive evidence
+recovery, a bounded graph of references between uploaded documents, and a local
+human-review queue. Storage, UI and citation binding are engineering components;
+they are not described as newly trained AI. The pretrained generator provides
+the broad conversational capability.
+
+This is an applied AI/ML project with original implementation and experiments,
+not a claim of research novelty or a new foundation model. Negative results,
+including noisy independent NLI checks and confident answerability errors, remain
+part of the evidence rather than being hidden behind a single success score.

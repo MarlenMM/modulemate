@@ -40,6 +40,76 @@ def response(text, basis="general", citations=None, status="answered"):
 APPROVED = '{"approved":true,"issues":[]}'
 
 
+def test_explicit_input_transformation_omits_library_and_irrelevant_history(
+    store, populated, monkeypatch
+):
+    from modulemate import assistant
+
+    course, _ = populated
+    store.add_message(course, "Earlier material question", "PRIVATE_LIBRARY_FACT", [], "Explain")
+
+    def unexpected(*args, **kwargs):
+        raise AssertionError("An input-only rewrite should not retrieve material")
+
+    monkeypatch.setattr(assistant, "adaptive_context", unexpected)
+    backend = Scripted(response("Please return the clipboards so I can count them.", "input"))
+    result = answer_question(
+        store,
+        course,
+        'Rewrite this politely: "Return the clipboards. I need to count them."',
+        use_ai=True,
+        backend=backend,
+    )
+    assert result.kind == "generated" and result.metadata["basis"] == "input"
+    assert not backend.calls[0]["passages"] and not backend.calls[0]["recent_conversation"]
+    assert "PRIVATE_LIBRARY_FACT" not in json.dumps(backend.calls)
+
+
+def test_input_transformation_keeps_saved_lesson_cursor(store, course):
+    session = {"document_ids": [], "next_offset": 8, "signature": "saved"}
+    store.add_message(
+        course, "Teach the lesson", "A lesson.", [], "Teach", {"lesson_session": session}
+    )
+    backend = Scripted(response("Please return the clipboards.", "input"))
+    result = answer_question(
+        store, course, 'Rewrite politely: "Return the clipboards."', use_ai=True, backend=backend
+    )
+    assert result.metadata["lesson_session"] == session
+
+
+def test_input_rewrite_cannot_bypass_document_scope_validation(store, populated):
+    from modulemate.db import UserError
+
+    _, doc = populated
+    other = store.create_course("Other")
+    with pytest.raises(UserError):
+        answer_question(
+            store,
+            other,
+            'Rewrite "Return it." politely.',
+            document_ids=[doc],
+            use_ai=True,
+            backend=Scripted(),
+        )
+
+
+def test_fresh_quoted_rewrite_does_not_inherit_previous_comparison(store, course):
+    store.add_message(
+        course,
+        "Compare a bridge and a tunnel",
+        "A comparison.",
+        [],
+        "Compare",
+        {"subjects": ["bridge", "tunnel"], "topic": "bridge and tunnel"},
+    )
+    question = 'Rewrite this politely: "Compare trees and shrubs."'
+    backend = Scripted(response("Please compare trees and shrubs.", "input"))
+    answer_question(store, course, question, use_ai=True, backend=backend)
+    assert backend.calls[0]["final_request"] == question
+    assert not backend.calls[0]["compared_subjects_in_order"]
+    assert not backend.calls[0]["recent_conversation"]
+
+
 def test_missing_material_is_not_replaced_with_pretrained_knowledge(store, course):
     backend = Scripted()
     result = answer_question(store, course, "What is photosynthesis?", use_ai=True, backend=backend)
@@ -808,11 +878,20 @@ def test_auto_quiz_and_learner_feedback_reach_the_generator(store, populated):
 
     passage = next(p for p in scoped_passages(store, course) if "Retrieval practice" in p.text)
     quote = passage.text[: min(len(passage.text), 180)]
+    # Whole short documents retain their source order. Bind the scripted
+    # evidence to its actual context position instead of assuming source 1.
+    from modulemate.context import build_context
+
+    quiz_question = "Quiz me on retrieval practice"
+    context = build_context(
+        store, course, quiz_question, plan_turn(quiz_question, "Auto", []), [], policy="adaptive"
+    )
+    source_id = next(i for i, p in enumerate(context.passages, 1) if p.id == passage.id)
     quiz = Scripted(
         response(
-            "What does retrieval practice mean? [1]",
+            f"What does retrieval practice mean? [{source_id}]",
             "materials",
-            [{"source_id": 1, "quote": quote}],
+            [{"source_id": source_id, "quote": quote}],
         )
     )
     first = answer_question(
@@ -823,9 +902,9 @@ def test_auto_quiz_and_learner_feedback_reach_the_generator(store, populated):
     assert "STOP" in quiz.calls[0]["turn_task"]
     feedback = Scripted(
         response(
-            "That is recalling from memory. What could you try next? [1]",
+            f"That is recalling from memory. What could you try next? [{source_id}]",
             "materials",
-            [{"source_id": 1, "quote": quote}],
+            [{"source_id": source_id, "quote": quote}],
         )
     )
     second = answer_question(

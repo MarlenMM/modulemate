@@ -47,7 +47,40 @@ configured provider in the sidebar and explicitly enable provider requests.
 These send selected text and recent conversation to that provider. Local MLX
 never silently falls back to a hosted API.
 
-## What changed in 2.2
+## Evidence learning in 2.3
+
+Qwen supplies the pretrained language capability. ModuleMate now also trains its
+own passage-ranking, relevance and answerability heads on original labeled data.
+The models combine text features, pretrained embeddings and source-bound reader
+signals. Training, calibration and test documents are separate; inspectable JSON
+weights and reproduction commands are included.
+
+The assistant checks evidence for each requested part and their combined context.
+Uncertain coverage can trigger one deeper search, without letting a small model
+force a refusal. Explicit references to another uploaded file can bring in its
+relevant sections within your selection. Short libraries are read together.
+Request-local caches batch searches; input-only rewrites omit unnecessary library
+retrieval and unrelated history.
+
+Rate an answer to save a local correction. **Conversation options → Export answer
+review cases** prepares a queue ordered by feedback and estimated uncertainty.
+These are cases for human review; feedback never automatically retrains the model.
+
+```sh
+uv run python scripts/train_evidence.py
+uv run python scripts/evaluate_evidence.py --split test
+uv run --extra ml --extra local python scripts/train_evidence.py --reader
+uv run --extra ml --extra local python scripts/evaluate_evidence.py --reader --split test
+uv run --extra ml --extra local python scripts/evaluate_conversations.py --suite evidence --policy adaptive
+```
+
+See the [evidence model/data card](docs/EVIDENCE_MODEL_CARD.md) and
+[2.3 experiments and limitations](docs/VALIDATION_V23.md). Small synthetic results
+do not establish general chatbot accuracy. An independent NLI experiment remains
+disabled by default after falsely flagging valid answers; adding another model
+was not automatically an improvement.
+
+## Conversational foundation from 2.2
 
 - Genuine instruction-model conversations replace sentence selection as the main
   prepared local experience. Short topics, examples, code explanations, learner
@@ -97,6 +130,9 @@ actual prose, model calls and timing. Its automated phrase/length constraints ar
 Historical 2.1 retrieval and extraction scores do not measure this new generator.
 
 - [Rebuild plan and cycle log](docs/INTELLIGENCE_REBUILD.md)
+- [ML development plan and cycles](docs/ML_DEVELOPMENT.md)
+- [Evidence model and original dataset](docs/EVIDENCE_MODEL_CARD.md)
+- [2.3 validation](docs/VALIDATION_V23.md)
 - [2.2 validation and observed limits](docs/VALIDATION_V22.md)
 - [HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md)
 - [Architecture](docs/ARCHITECTURE.md)

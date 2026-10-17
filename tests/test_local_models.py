@@ -78,3 +78,76 @@ def test_models_load_and_infer_with_network_connections_denied(engine, monkeypat
     assert models.encode(["An offline inference check."]).shape == (1, 384)
     assert len(models.rerank("offline check", ["An offline inference check."])) == 1
     assert models.extract("What is being checked?", ["Offline inference is being checked."])
+
+
+def test_learned_context_assessment_uses_real_reader_and_bound_spans(engine):
+    from modulemate.adaptive import assess_evidence
+    from modulemate.search import Passage
+
+    passages = [
+        Passage(
+            1,
+            "a",
+            "Orientation.md",
+            "part 1 › Session",
+            "The Kestrel session follows the Foot protection rules.",
+        ),
+        Passage(
+            2,
+            "b",
+            "Equipment.md",
+            "part 1 › Foot protection",
+            "Closed shoes are compulsory. Sandals are prohibited.",
+        ),
+    ]
+    report = assess_evidence(
+        "What footwear do I need for the Kestrel session?", passages, engine=engine
+    )
+    assert report["model"] == "modulemate-evidence-reader-v2"
+    assert report["advisory"] and report["parts"]
+    for part in report["parts"]:
+        assert 0 <= part["estimate"] <= 1
+        for candidate in part["candidate_spans"]:
+            p = next(p for p in passages if p.id == candidate["passage_id"])
+            assert p.text[candidate["start"] : candidate["end"]] == candidate["text"]
+
+
+def test_batched_request_index_matches_individual_real_retrieval(store, course, engine):
+    from modulemate.retrieval import RetrievalIndex
+
+    load_fixture(store, course)
+    queries = [
+        "How can revision be spread out over time?",
+        "Which container gives back the newest item first?",
+    ]
+    index = RetrievalIndex(store, course, None, engine, queries)
+    for query in queries:
+        normal = retrieve(store, course, query, engine=engine)
+        batched = retrieve(store, course, query, engine=engine, _index=index)
+        assert [p.id for p in normal.passages[:3]] == [p.id for p in batched.passages[:3]]
+
+
+def test_optional_support_model_is_offline_and_label_order_is_correct(engine, monkeypatch):
+    import socket
+
+    from modulemate.local_models import model_dir
+    from modulemate.support import SupportModel, support_status
+
+    monkeypatch.setenv("MODULEMATE_SUPPORT", "auto")
+    if support_status() != "ready":
+        pytest.skip("The optional support model has not been prepared")
+
+    def deny(*args, **kwargs):
+        raise AssertionError("Unexpected network connection")
+
+    monkeypatch.setattr(socket.socket, "connect", deny)
+    monkeypatch.setattr(socket, "create_connection", deny)
+    model = SupportModel(model_dir())
+    rows = model.predict(
+        [
+            ("A red cup is on the desk.", "There is a cup on the desk."),
+            ("The workshop has ten places.", "The workshop has twenty places."),
+        ]
+    )
+    assert max(rows[0], key=rows[0].get) == "entailment"
+    assert max(rows[1], key=rows[1].get) == "contradiction"

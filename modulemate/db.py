@@ -404,6 +404,30 @@ class Store:
             self._course(con, workspace, course_id)
             con.execute("DELETE FROM messages WHERE course_id=?", (course_id,))
 
+    def save_answer_feedback(self, course_id, message_id, rating, comment=""):
+        """Local review labels; they are never automatically treated as training truth."""
+        if rating not in {"helpful", "incorrect", "unsupported", "unclear"}:
+            raise UserError("Choose a supported answer rating.")
+        if not isinstance(comment, str) or len(comment) > 2000 or "\x00" in comment:
+            raise UserError("Keep the feedback note within 2,000 characters.")
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
+            row = con.execute(
+                "SELECT metadata FROM messages WHERE id=? AND course_id=?", (message_id, course_id)
+            ).fetchone()
+            if row is None:
+                raise UserError("Answer not found in this course.")
+            metadata = json.loads(row["metadata"])
+            metadata["feedback"] = {
+                "rating": rating,
+                "comment": comment.strip(),
+                "updated_at": now_iso(),
+            }
+            con.execute(
+                "UPDATE messages SET metadata=? WHERE id=? AND course_id=?",
+                (json.dumps(metadata), message_id, course_id),
+            )
+
     def add_card(self, course_id, front, back, document_id=None, locator="", *, today=None):
         front = checked_text(front, "Card question", 1000)
         back = checked_text(back, "Card answer", 4000)

@@ -1,0 +1,402 @@
+{
+  "schema": 1,
+  "description": "Original paraphrased support, contradiction and unsupported claims. Source IDs reference evidence_learning.json; document-group splits are inherited. No fitting of the pretrained NLI weights. Small diagnostic only.",
+  "claims": [
+    {
+      "id": "claim-0",
+      "source_id": "forge-0",
+      "claim": "The Forge session begins at 9:40 in the morning.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-1",
+      "source_id": "forge-1",
+      "claim": "Watching Forge reserves a paid workshop seat.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-2",
+      "source_id": "forge-3",
+      "claim": "A refund request must be sent before 1 March.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-3",
+      "source_id": "tide-0",
+      "claim": "A limpet uses its radula to scrape algae.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-4",
+      "source_id": "tide-1",
+      "claim": "The team measured the animals' mass by counting them.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-5",
+      "source_id": "tide-2",
+      "claim": "Sampling at low tide always gives the highest count.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-6",
+      "source_id": "cache-0",
+      "claim": "A repeated key lookup can reuse a stored result.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-7",
+      "source_id": "cache-2",
+      "claim": "A full cache evicts the most recently accessed entry.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-8",
+      "source_id": "cache-3",
+      "claim": "The cache saves its entries in an SQLite database.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-9",
+      "source_id": "loans-1",
+      "claim": "A reserved Maple book cannot be renewed.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-10",
+      "source_id": "loans-0",
+      "claim": "Reference atlases can be taken out on an eighteen-day loan.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-11",
+      "source_id": "loans-3",
+      "claim": "A late book costs two credits per day.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-12",
+      "source_id": "ash-0",
+      "claim": "The dark clay was deposited before the pale ash.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-13",
+      "source_id": "ash-2",
+      "claim": "Colour alone proves that two ash samples match.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-14",
+      "source_id": "ash-1",
+      "claim": "The glass fragments cooled within three minutes.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-15",
+      "source_id": "tram-0",
+      "claim": "The journey reaches the orchard at 10:35.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-16",
+      "source_id": "tram-2",
+      "claim": "A purchased shuttle ticket guarantees a bicycle place.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-17",
+      "source_id": "tram-3",
+      "claim": "The driver is named Ivo.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-18",
+      "source_id": "battery-1",
+      "claim": "A steady amber light means pairing is under way.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-19",
+      "source_id": "battery-2",
+      "claim": "External power may stay connected while opening the battery compartment.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-20",
+      "source_id": "battery-0",
+      "claim": "The two AA cells will last six months.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-21",
+      "source_id": "bridge-0",
+      "claim": "The wooden footbridge was completed before the stone bridge opened.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-22",
+      "source_id": "bridge-1",
+      "claim": "The drawing records a completed bridge in 1838.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-23",
+      "source_id": "bridge-0",
+      "claim": "The stone replacement cost fifty thousand credits.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-24",
+      "source_id": "repair-1",
+      "claim": "A booked inspection does not promise a successful repair.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-25",
+      "source_id": "repair-0",
+      "claim": "The repair bench accepts microwave ovens.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-26",
+      "source_id": "repair-2",
+      "claim": "Replacement parts carry a six-month warranty.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-27",
+      "source_id": "recipe-2",
+      "claim": "The pear is added immediately before serving.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-28",
+      "source_id": "recipe-1",
+      "claim": "The oats must be cooked before refrigeration.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-29",
+      "source_id": "recipe-0",
+      "claim": "One prepared jar contains 300 calories.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-30",
+      "source_id": "radio-0",
+      "claim": "Amplitude varies while the carrier frequency remains constant.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-31",
+      "source_id": "radio-1",
+      "claim": "Greater amplitude alone establishes a farther transmitter.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-32",
+      "source_id": "radio-2",
+      "claim": "The pulse travels at three hundred metres per second.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-33",
+      "source_id": "story-1",
+      "claim": "Oren put the envelope in the outgoing post tray.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-34",
+      "source_id": "story-0",
+      "claim": "Mira opened the envelope and read it at the desk.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-35",
+      "source_id": "story-3",
+      "claim": "The sender hid the letter to avoid paying postage.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-36",
+      "source_id": "weaving-0",
+      "claim": "Wool forms the sample's crosswise weft.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-37",
+      "source_id": "weaving-2",
+      "claim": "The weaver may carry on without repairing a broken warp thread.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-38",
+      "source_id": "weaving-1",
+      "claim": "The shuttle is made of polished maple.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-39",
+      "source_id": "cleanup-2",
+      "claim": "A fifteen-year-old volunteer needs to work beside a registered guardian.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-40",
+      "source_id": "cleanup-1",
+      "claim": "Volunteers should pick up sharp objects themselves.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-41",
+      "source_id": "cleanup-0",
+      "claim": "A local bank sponsors the Cove cleanup.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-42",
+      "source_id": "poem-1",
+      "claim": "Repeating an image connects the poem's opening and ending.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-43",
+      "source_id": "poem-2",
+      "claim": "The notes identify the poem's speaker as its author.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-44",
+      "source_id": "poem-0",
+      "claim": "Sela Venn was born in a coastal town.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-45",
+      "source_id": "nursery-0",
+      "claim": "Mint cuttings should be rooted under indirect light.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-46",
+      "source_id": "nursery-1",
+      "claim": "The compost should be kept waterlogged.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-47",
+      "source_id": "nursery-2",
+      "claim": "The first roots appear precisely four days after planting.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-48",
+      "source_id": "delivery-0",
+      "claim": "Live carrier integration is optional for the parcel prototype.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-49",
+      "source_id": "delivery-1",
+      "claim": "The scan timestamp promises the parcel will be delivered at that time.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-50",
+      "source_id": "delivery-2",
+      "claim": "The parcel demonstration is held in Room Six.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-51",
+      "source_id": "stars-1",
+      "claim": "The low-power eyepiece is used before increasing magnification.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-52",
+      "source_id": "stars-2",
+      "claim": "An eleven-year-old can attend without an adult.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-53",
+      "source_id": "stars-0",
+      "claim": "The sky will be cloudless for the observation.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-54",
+      "source_id": "music-2",
+      "claim": "Players receive printed scores and need not print their own.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-55",
+      "source_id": "music-1",
+      "claim": "The leader separates parts before the unison phrase.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-56",
+      "source_id": "music-0",
+      "claim": "The Reed ensemble's first concert is in the town hall.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-57",
+      "source_id": "filter-0",
+      "claim": "The filter captures some suspended solid material.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-58",
+      "source_id": "filter-1",
+      "claim": "Water that looks clear after filtering is certainly safe to drink.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-59",
+      "source_id": "filter-2",
+      "claim": "The collected water contains no bacteria.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-60",
+      "source_id": "portal-2",
+      "claim": "Finishing a request allows another pending request.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-61",
+      "source_id": "portal-0",
+      "claim": "A requested scan is released without staff review.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-62",
+      "source_id": "portal-1",
+      "claim": "A requested printed copy is free of charge.",
+      "label": "neutral"
+    },
+    {
+      "id": "claim-63",
+      "source_id": "market-1",
+      "claim": "Market visitors can enter without paying an admission fee.",
+      "label": "entailment"
+    },
+    {
+      "id": "claim-64",
+      "source_id": "market-2",
+      "claim": "Every stallholder must always bring a canopy.",
+      "label": "contradiction"
+    },
+    {
+      "id": "claim-65",
+      "source_id": "market-0",
+      "claim": "The Frost market closes at six in the evening.",
+      "label": "neutral"
+    }
+  ]
+}

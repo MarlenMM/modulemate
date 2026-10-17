@@ -12,6 +12,7 @@ import streamlit as st
 
 from modulemate.assistant import MODES, AIBackend, answer_question, generate_cards
 from modulemate.db import Database, Store, UserError
+from modulemate.feedback import review_queue
 from modulemate.generation import GenerationError, chat_model_name, chat_status, local_backend
 from modulemate.ingest import SUPPORTED, parse_upload
 from modulemate.local_models import ModelUnavailable, get_local_models, model_status
@@ -59,6 +60,30 @@ def source_panel(sources, key):
             st.text(f"[{i}] {passage['name']} · {passage['locator']}")
             st.text(passage["text"])
             st.divider()
+
+
+def answer_feedback(store, course_id, message):
+    labels = {
+        "helpful": "Helpful",
+        "incorrect": "Incorrect answer",
+        "unsupported": "Not supported by the sources",
+        "unclear": "Unclear or incomplete",
+    }
+    previous = message.get("metadata", {}).get("feedback", {})
+    with st.expander("Rate this answer"), st.form(f"feedback_{message['id']}"):
+        rating = st.selectbox(
+            "Your assessment",
+            list(labels),
+            index=list(labels).index(previous["rating"]) if previous.get("rating") in labels else 0,
+            format_func=labels.get,
+        )
+        note = st.text_area(
+            "Correction or note (optional)", value=previous.get("comment", ""), max_chars=2000
+        )
+        st.caption("Saved locally for review. Feedback does not automatically retrain the model.")
+        if st.form_submit_button("Save answer feedback"):
+            store.save_answer_feedback(course_id, message["id"], rating, note)
+            flash("Answer feedback saved.")
 
 
 def select_documents(documents, key):
@@ -253,6 +278,22 @@ def assistant(store, course_id, settings, backend):
             st.download_button(
                 "Export displayed conversation", transcript, "conversation.txt", "text/plain"
             )
+            st.download_button(
+                "Export answer review cases (JSON)",
+                json.dumps(
+                    {
+                        "schema": 1,
+                        "private_user_content": True,
+                        "cases": review_queue(store.messages(course_id, 200)),
+                    },
+                    indent=2,
+                ),
+                "answer-review.json",
+                "application/json",
+            )
+            st.caption(
+                "Review cases include your questions, answers and source excerpts, ordered by feedback and estimated uncertainty."
+            )
             if st.button("Clear this course's conversation"):
                 store.clear_messages(course_id)
                 flash("Conversation cleared.")
@@ -267,6 +308,7 @@ def assistant(store, course_id, settings, backend):
             render_answer(message["answer"])
             st.caption(message.get("metadata", {}).get("notice") or message["mode"])
             source_panel(message["sources"], message["id"])
+            answer_feedback(store, course_id, message)
     if messages:
         if messages[-1].get("metadata", {}).get("kind") == "error" and st.button(
             "Retry this question"
