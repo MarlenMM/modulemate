@@ -1,0 +1,87 @@
+{
+  "scope": "Original fictional multi-subject development diagnostic for useful partial help; not training data or a general accuracy estimate.",
+  "license": "CC0-1.0",
+  "documents": [
+    {
+      "name": "Paper sculpture.md",
+      "text": "# A loop sculpture\n## Assembly\nFold each of six paper strips into a loop and join neighbouring loops using clips. Arrange the connected loops on a flat surface.\n## Limits\nThe directions describe assembly but supply no dimensions, material masses or final weight. No measurement method for weight is specified.\n"
+    },
+    {
+      "name": "Sensor workflow.md",
+      "text": "# Sensor record workflow\n## Preparing the records\nImport the CSV file. Exclude rows whose voltage field is empty, and plot the remaining voltage readings against their timestamps. Keep the original CSV unchanged.\n## Calibration gap\nThe notes contain no calibration equation or conversion factors from voltage to temperature. They do not provide a temperature series.\n"
+    },
+    {
+      "name": "Community memo brief.md",
+      "text": "# Community memo brief\n## Draft structure\nStart with a title naming the issue. Write one paragraph describing the issue, then a section collecting available evidence. Finish with a proposed action and a list of unresolved questions.\n## Unspecified resources\nThe brief does not specify a project budget, funding source or application deadline.\n"
+    },
+    {
+      "name": "Fictional biscuit card.md",
+      "text": "# Cloud biscuits\n## Preparation\nMix 100 grams of flour with 60 grams of water. Shape six biscuits and bake at 200 degrees Celsius for 12 minutes.\n## Missing analysis\nThis fictional card supplies no nutritional analysis or calorie values. It contains no method for computing them.\n"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "sculpture-useful-part",
+      "documents": ["Paper sculpture.md"],
+      "turns": [{
+        "question": "I need the sculpture's weight, but I have no measurements. What can these directions help me do?",
+        "required_any": [["loop"], ["clip"], ["weight", "mass"]],
+        "expected_kind": "generated",
+        "max_words": 100
+      }]
+    },
+    {
+      "id": "sensor-useful-part",
+      "documents": ["Sensor workflow.md"],
+      "turns": [{
+        "question": "I need temperatures, but the calibration is missing. How can I still make useful progress with this workflow?",
+        "required_any": [["import", "load"], ["plot"], ["calibration", "conversion"]],
+        "forbidden": ["fit a linear", "use ohm"],
+        "expected_kind": "generated",
+        "max_words": 130
+      }]
+    },
+    {
+      "id": "memo-useful-part",
+      "documents": ["Community memo brief.md"],
+      "turns": [{
+        "question": "The budget is missing, so I cannot complete the funding request. What can I prepare using this brief?",
+        "required_any": [["issue"], ["evidence"], ["propos", "action"], ["budget"]],
+        "expected_kind": "generated",
+        "max_words": 130
+      }]
+    },
+    {
+      "id": "calories-only-gap",
+      "documents": ["Fictional biscuit card.md"],
+      "turns": [{
+        "question": "Give only the number of calories in each biscuit.",
+        "required_any": [["not", "no ", "cannot", "couldn't"]],
+        "forbidden": ["50 calories", "100 calories", "200 calories"],
+        "allowed_kinds": ["insufficient", "generated"],
+        "max_words": 45
+      }]
+    },
+    {
+      "id": "temperature-only-gap",
+      "documents": ["Sensor workflow.md"],
+      "turns": [{
+        "question": "What is the temperature corresponding to a reading of 2 volts?",
+        "required_any": [["calibration", "conversion"], ["not", "no ", "cannot", "couldn't", "missing"]],
+        "forbidden": ["2 degrees", "20 degrees"],
+        "allowed_kinds": ["insufficient", "generated"],
+        "max_words": 70
+      }]
+    },
+    {
+      "id": "biscuit-direct-facts",
+      "documents": ["Fictional biscuit card.md"],
+      "turns": [{
+        "question": "What oven temperature and baking time does the card specify?",
+        "required_any": [["200"], ["12"]],
+        "expected_kind": "generated",
+        "max_words": 50
+      }]
+    }
+  ]
+}

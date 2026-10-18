@@ -1,5 +1,28 @@
 # Original evaluation material
 
+The 2.3 evidence work adds `evidence_learning.json` (original document-grouped
+training/calibration/test annotations), `claim_support.json` (independent NLI
+diagnostics), and `evidence_transfer.json` (new multi-document conversations).
+The [model/data card](../docs/EVIDENCE_MODEL_CARD.md) explains labels, exact splits,
+training and limits. Run `scripts/train_evidence.py` and
+`scripts/evaluate_evidence.py --split test`; use `--reader` with the prepared ML
+extras for the neural-feature variant. `scripts/evaluate_conversations.py --suite
+evidence --policy baseline|full|adaptive` compares evidence policies with the same
+generator. The [2.3 retained observations](observations/evidence-v23.json) preserve
+actual answers and model errors. Constraint checks are not semantic accuracy.
+
+`partial_help.json` adds four original fictional documents and six checks of
+preparatory help, missing results and exact facts. One sculpture example reuses
+the known transfer material; these are development cases, not a new blinded test.
+Run `scripts/evaluate_conversations.py --suite partial`. The retained 2.3 log
+includes regressions and rejected planning experiments as well as final outputs.
+
+The independent support classifier is explicitly prepared with
+`scripts/prepare_support_model.py`; `scripts/evaluate_support.py` and
+`scripts/evaluate_recorded_support.py` reproduce its failures on original material.
+It is disabled by default. No private review export or personal upload is training
+data in this repository.
+
 `general_documents.json` is the primary 2.2 conversation development set. Its nine
 original fictional documents cover events, history, biology, project requirements,
 practical notices, code and fiction. Requests and expected responses are English.

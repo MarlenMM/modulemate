@@ -114,6 +114,26 @@ uv run --extra ml --extra local python scripts/evaluate_conversations.py --polic
 The neural commands require the explicitly prepared local models. Final held-out
 results and release checks are recorded separately in the validation report.
 
+## Component boundaries
+
+```mermaid
+flowchart LR
+    D[Original labeled examples] --> T[Fit and calibrate own ML heads]
+    T --> E[Evidence estimates and ranking]
+    U[User question and allowed materials] --> R[Scoped retrieval and reference links]
+    R --> E
+    P[Pretrained encoder and reader] --> E
+    E --> C[Bounded context and recovery]
+    C --> Q[Pretrained Qwen writes the answer]
+    Q --> B[Source binding and presentation]
+    B --> A[Answer with inspectable sources]
+    A --> H[Local feedback and human-review queue]
+```
+
+Feedback does not feed training automatically. Evidence estimates are not final
+answer correctness probabilities. Possible omitted-citation excerpts are review
+hints; the failed automatic relabeling experiment is not enabled in production.
+
 ## Research references
 
 - [Selective Question Answering under Domain Shift](https://aclanthology.org/2020.acl-main.503/): learned calibration and abstention; our estimates are used for bounded evidence recovery instead of hard refusals.

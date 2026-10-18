@@ -21,7 +21,7 @@ def review_queue(messages, limit=100):
         ) / max(1, len(estimates))
         negative = feedback.get("rating") in {"incorrect", "unsupported", "unclear"}
         failed = metadata.get("kind") == "error"
-        priority = 3 * negative + 2 * failed + entropy
+        priority = 3 * negative + 2 * failed + bool(metadata.get("citation_review")) + entropy
         if feedback.get("rating") == "helpful":
             priority -= 1
         rows.append(
@@ -31,6 +31,7 @@ def review_queue(messages, limit=100):
                 "answer": message["answer"],
                 "sources": message.get("sources", []),
                 "feedback": feedback,
+                "citation_review": metadata.get("citation_review", []),
                 "label_status": "Human review required; user feedback is not verified ground truth",
                 "priority": round(priority, 4),
                 "uncertainty": round(entropy, 4),

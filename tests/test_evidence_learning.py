@@ -276,6 +276,52 @@ def test_short_library_keeps_semantically_linked_document(store, course):
     assert any("Closed shoes" in p.text for p in new.passages)
 
 
+def test_named_topic_does_not_pull_in_an_unrelated_reference_graph(store, course):
+    from modulemate.ingest import parse_upload
+
+    fixture = json.loads((ROOT / "evaluation/evidence_transfer.json").read_text())
+    for doc in fixture["documents"]:
+        store.add_document(course, parse_upload(doc["name"], doc["text"].encode(), isolated=False))
+    question = "I need the sculpture's weight, but I have no measurements. What can these directions help me do?"
+    context = build_context(
+        store, course, question, plan_turn(question, "Explain", []), [], policy="adaptive"
+    )
+    assert {p.name for p in context.passages} == {"Paper sculpture.md"}
+    assert not context.links and not context.complete
+    assert any("clips" in p.text for p in context.passages)
+    assert any("no dimensions" in p.text for p in context.passages)
+    comparison = "Compare the sculpture and the Stride session."
+    both = build_context(
+        store, course, comparison, plan_turn(comparison, "Auto", []), [], policy="adaptive"
+    )
+    assert {"Paper sculpture.md", "Orientation.md"} <= {p.name for p in both.passages}
+
+
+def test_title_focus_still_follows_an_allowed_reference(store, course):
+    from modulemate.ingest import parse_upload
+
+    for name, text in (
+        (
+            "Timber sculpture.md",
+            "# Assembly\nSee Measurements.md, Height, for the sculpture dimensions.",
+        ),
+        ("Measurements.md", "# Height\nThe assembled timber sculpture is 30 centimetres tall."),
+        ("Other notes.md", "# Measurements\nThe pool's depth is two metres."),
+    ):
+        store.add_document(course, parse_upload(name, text.encode(), isolated=False))
+    question = "How tall is the sculpture?"
+    context = build_context(
+        store, course, question, plan_turn(question, "Explain", []), [], policy="adaptive"
+    )
+    assert {p.name for p in context.passages} == {"Timber sculpture.md", "Measurements.md"}
+    assert [link["name"] for link in context.links] == ["Measurements.md"]
+    compound = "How tall is the sculpture?\nWhat is the pool depth?"
+    both = build_context(
+        store, course, compound, plan_turn(compound, "Explain", []), [], policy="adaptive"
+    )
+    assert {"Timber sculpture.md", "Other notes.md"} <= {p.name for p in both.passages}
+
+
 class CountingEncoder:
     key = "counting-encoder"
     dimensions = 3
@@ -447,3 +493,49 @@ def test_malformed_secondary_support_scores_do_not_erase_a_primary_answer():
     p = Passage(1, "d", "d", "s", "The meeting starts at 10:00.")
     report = check_claims("The meeting starts at ten in the morning. [1]", [p], [1], model=model)
     assert not report["available"] and not report["flags"]
+
+
+def test_writer_view_omits_only_duplicated_leading_headings():
+    from modulemate.evidence import source_excerpts, writer_text
+
+    original = "# Loop sculpture\n## Limits\nThe note gives no material masses."
+    p = Passage(1, "d", "Sculpture.md", "part 1 · Loop sculpture › Limits", original)
+    assert writer_text(p) == "The note gives no material masses."
+    assert p.text == original
+    _, bindings = source_excerpts([p])
+    assert bindings[1]["quote"] in original
+    code = Passage(
+        2, "d", "Code.md", "part 1 › Code", "```python\n# Keep this comment\nvalues = [1, 2]\n```"
+    )
+    assert writer_text(code) == code.text
+    unrelated = Passage(3, "d", "Note.txt", "page 1", original)
+    assert writer_text(unrelated) == original
+
+
+def test_citation_hints_find_omitted_details_without_inventing_sources():
+    from modulemate.evidence import citation_coverage_hints, source_excerpts
+
+    ps = [
+        Passage(
+            1,
+            "d",
+            "Sculpture.md",
+            "Assembly",
+            "Fold paper strips into loops and join the loops using clips.",
+        ),
+        Passage(
+            2,
+            "d",
+            "Sculpture.md",
+            "Limits",
+            "The directions give no material masses or measurements.",
+        ),
+    ]
+    _, bindings = source_excerpts(ps)
+    text = "The directions describe paper loops joined using clips, but give no material masses."
+    hints = citation_coverage_hints(text, ps, [2], bindings)
+    assert hints and hints[0]["source_id"] == 1
+    assert {"loop", "clip"} <= set(hints[0]["details"])
+    assert citation_coverage_hints(text, ps, [1, 2], bindings) == []
+    assert citation_coverage_hints("The author is unknown.", ps, [], bindings) == []
+    assert citation_coverage_hints("```text\npaper loops using clips\n```", ps, [2], bindings) == []

@@ -12,7 +12,7 @@ from modulemate.calculations import (
     verified_calculations,
 )
 from modulemate.context import estimate_tokens
-from modulemate.evidence import bind_evidence, source_excerpts
+from modulemate.evidence import bind_evidence, citation_coverage_hints, source_excerpts, writer_text
 from modulemate.generation import GenerationError
 from modulemate.prompts import AUDIT_SYSTEM, METADATA_SYSTEM, SYSTEM, TEXT_SYSTEM
 from modulemate.schemas import ANSWER_SCHEMA, AUDIT_SCHEMA, LESSON_SCHEMA, METADATA_SCHEMA
@@ -33,6 +33,7 @@ class Generated:
     intent: str = ""
     history_omitted: int = 0
     support_check: dict = field(default_factory=dict)
+    citation_review: list[dict] = field(default_factory=list)
 
 
 def bounded_history(history, budget=2600):
@@ -107,11 +108,17 @@ def without_source_footer(text, question):
                 fence = None
         elif fence is None:
             heading = line.strip().lstrip("#").strip().replace("**", "").replace("__", "")
+            heading = re.sub(r"^[-*]\s+", "", heading).strip()
             if (
                 offset
                 and text[:offset].strip()
-                and re.match(
-                    r"(?:sources?|references|source text|evidence)\s*(?::|$)", heading, re.I
+                and (
+                    re.match(
+                        r"(?:sources?|references|source text|source evidence)\s*(?::|$)",
+                        heading,
+                        re.I,
+                    )
+                    or re.fullmatch(r"evidence\s*:?", heading, re.I)
                 )
             ):
                 return text[:offset].rstrip()
@@ -371,14 +378,18 @@ def requires_materials(question):
 
 
 def institutional_permission(question):
-    # Request shape, independent of the subject of a document.
-    return bool(
-        re.search(
-            r"\b(?:can|may|should)\s+(?:I|we)\b|\b(?:allowed|permission|approv\w*|excus\w*)\b",
-            question,
+    # A method question such as 'How can I ...?' is not a request for
+    # authorization. Explicit policy language still needs source-only facts.
+    if re.search(r"\b(?:allowed|permission|approv\w*|excus\w*)\b", question, re.I):
+        return True
+    for modal in re.finditer(r"\b(?:can|may|should)\s+(?:I|we)\b", question, re.I):
+        if not re.search(
+            r"\b(?:how|what|where|when|why|which)(?:\s+[A-Za-z'-]+){0,3}\s*$",
+            question[: modal.start()],
             re.I,
-        )
-    )
+        ):
+            return True
+    return False
 
 
 def narrow_fact_request(question):
@@ -483,6 +494,57 @@ def supplied_text(question):
     return (transform and content) or (explanation and substantial)
 
 
+def normalize_scalar_label(text, question):
+    """Shorten unambiguous scalar presentation without calculating or guessing."""
+    if not re.search(
+        r"\b(?:give|return|show|tell me)\s+only\s+(?:the\s+)?(?:current\s+)?(?:number|count|quantity)\b",
+        question,
+        re.I,
+    ):
+        return text
+    match = re.fullmatch(
+        r"\s*\[[A-Za-z][A-Za-z '\u2019-]{0,90}:\s*(-?\d+(?:\.\d+)?)\]\s*((?:\[\d+\]\s*)*)", text
+    )
+    if match:
+        return (match[1] + " " + match[2].strip()).strip()
+    # Keep conditions, bounds, uncertainty, code and multiple quantities intact.
+    # This formats an existing answer; it cannot decide whether its fact is true.
+    body = re.sub(r"(?:\s*\[\d+\])+\s*$", "", text).strip().strip("*")
+    if len(body.split()) > 28 or re.search(r"[\n`\[\],;:?!]", body):
+        return text
+    if re.search(
+        r"\b(?:not|no|unknown|unstated|missing|cannot|could|may|might|if|unless|when|"
+        r"until|but|except|per|each|about|approximately|around|roughly|estimated|"
+        r"minimum|maximum|least|most|up to|more|less|fewer|over|under|between|"
+        r"times|twice|half|quarter|hundred|thousand|million|billion|trillion)\b",
+        body,
+        re.I,
+    ):
+        return text
+    units = r"(?:one|two|three|four|five|six|seven|eight|nine)"
+    cardinal = (
+        rf"(?:zero|{units}|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|"
+        rf"seventeen|eighteen|nineteen|(?:twenty|thirty|forty|fifty|sixty|seventy|"
+        rf"eighty|ninety)(?:[- ]{units})?)"
+    )
+    scalar = rf"(?<![\w.-])(?:-?\d+(?:\.\d+)?|(?:minus |negative )?{cardinal})(?![\w-]|\.\d)"
+    quantities = list(re.finditer(scalar, body, re.I))
+    if len(quantities) != 1:
+        return text
+    value = quantities[0]
+    prefix, suffix = body[: value.start()], body[value.end() :]
+    predicate = re.fullmatch(
+        r"(?:There\s+(?:is|are)|The\s+[A-Za-z '\u2019-]{1,100}\s+"
+        r"(?:is|are|has|have|offers|provides))\s+(?:a total of\s+)?",
+        prefix,
+        re.I,
+    )
+    if not predicate or not re.fullmatch(r"(?:\s+[A-Za-z]+){0,4}\.?", suffix):
+        return text
+    citations = " ".join(re.findall(r"\[\d+\]", text))
+    return (value[0] + " " + citations).strip()
+
+
 def check_requested_format(text, question, mode=None):
     """Enforce explicit short formats, not a guess at semantic correctness."""
     one = bool(re.search(r"\b(?:one|1)[- ]sentence\b", question, re.I))
@@ -535,6 +597,32 @@ def transformation_request(question, plan=None, history=()):
         )
     )
     return input_allowed, input_transform
+
+
+def focus_request(question):
+    """Separate a declarative prelude from one explicit final English question.
+
+    Both are retained for the writer. Never split multiple questions, quotes or
+    code; the original full request remains the source of retrieval and checks.
+    """
+    if (
+        not question.rstrip().endswith("?")
+        or question.count("?") != 1
+        or re.search(r'["“”`]', question)
+    ):
+        return question, ""
+    boundaries = list(
+        re.finditer(
+            r"(?<=[.!])\s+(?=(?:what|how|which|can|could|would|will|is|are|do|does|"
+            r"did|where|when|why|should|may|must|who|whose)\b)",
+            question,
+            re.I,
+        )
+    )
+    if not boundaries:
+        return question, ""
+    boundary = boundaries[-1]
+    return question[boundary.end() :].strip(), question[: boundary.start()].strip()
 
 
 def generate(backend, question, mode, context, history, on_progress=None, *, plan=None):
@@ -605,7 +693,7 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
         "requested_parts": [p["question"] for p in context.evidence.get("parts", [])[1:]],
         "lesson_progress": context.lesson,
         "passages": [
-            {"source_id": i, "document": p.name, "location": p.locator, "text": p.text}
+            {"source_id": i, "document": p.name, "location": p.locator, "text": writer_text(p)}
             for i, p in enumerate(context.passages, 1)
         ],
         # Context and old assistant prose must not be the last instruction the
@@ -613,6 +701,11 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
         "final_request": current_request,
         "final_response_constraint": "Follow this latest request's length and format. Earlier answers are context, not a template to copy.",
     }
+    if not input_allowed and not input_transform:
+        focused, background = focus_request(current_request)
+        if background:
+            payload["request_background"] = background
+            payload["latest_question"] = payload["final_request"] = focused
     if source_fact_request(question) and not detailed and mode not in {"Teach", "Socratic tutor"}:
         payload["study_mode"] = "Find the requested source facts"
         payload["turn_task"] = (
@@ -620,6 +713,26 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
         )
         payload["response_length"] = (
             "One concise answer sentence, or two if needed for multiple requested facts; at most 45 words. No outside explanation, examples, unasked historical details, advice or conjectured restrictions."
+        )
+    if (
+        not input_allowed
+        and mode == "Explain"
+        and not context.lesson
+        and not narrow_fact_request(question)
+        and not source_fact_request(payload["latest_question"])
+        and re.search(
+            r"\b(?:how|what (?:steps|actions|procedure))\b[^.!?]{0,80}\b(?:can|may|should|do)\s+(?:I|we)\b",
+            payload["latest_question"],
+            re.I,
+        )
+    ):
+        payload["study_mode"] = "Explain"
+        payload["source_only_facts"] = True
+        payload["turn_task"] = (
+            "Give the requested method or useful preparatory steps from the supplied material. Include concrete actions and stated constraints. Separate available steps from missing information. Do not invent results, later workflow stages or prerequisites. A missing final result does not make supported preparation unavailable."
+        )
+        payload["response_length"] = (
+            "Normally 40-100 words, enough for the supported actions and their constraints. Obey an explicit requested length instead. Do not add an unsupported rationale or a follow-up question."
         )
     if re.search(r"\bchecklist\b", question, re.I) and not input_transform:
         payload["turn_task"] = (
@@ -653,6 +766,8 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
                     raw = backend.complete(TEXT_SYSTEM, payload | {"_plain_text": True})
                     text_draft, draft_status = parse_draft(raw)
                     text_draft = without_citations(without_source_footer(text_draft, question))
+                    if not input_transform:
+                        text_draft = normalize_scalar_label(text_draft, question)
                     history_omitted = getattr(backend, "last_stats", {}).get(
                         "history_turns_omitted", 0
                     )
@@ -703,6 +818,22 @@ def generate(backend, question, mode, context, history, on_progress=None, *, pla
             else:
                 raw = backend.complete(SYSTEM, payload)
             answer = parse_response(raw, context.passages, planned_lesson=bool(context.lesson))
+            if not input_transform:
+                answer.text = normalize_scalar_label(answer.text, question)
+            for hint in citation_coverage_hints(
+                answer.text, context.passages, answer.cited_ids, bindings
+            ):
+                p = context.passages[hint["source_id"] - 1]
+                answer.citation_review.append(
+                    {
+                        "document_id": p.document_id,
+                        "document": p.name,
+                        "location": p.locator,
+                        "quote": bindings[hint["evidence_id"]]["quote"],
+                        "matched_terms": hint["details"],
+                        "status": "Possible omitted evidence; human review required",
+                    }
+                )
             if missing_locked and answer.kind != "insufficient":
                 raise ValueError(
                     "missing_response: preserve the missing-information result; correct incidental claims without inventing the absent answer"

@@ -47,8 +47,9 @@ reference to another file, a follow-up, conflicting versions, partial exercise
 help, a reserved book, an unnamed sponsor and rewriting supplied text.
 
 All three retained runs use the same inference-code/model-artifact fingerprint
-`778f63e7762c65bafe3eef204d56bdaedb6992c3eed9960701d7208dc4289bd7`.
-Neither code nor fixture changed during these runs. The full policy provides a
+`778f63e7762c65bafe3eef204d56bdaedb6992c3eed9960701d7208dc4289bd7`,
+retained in commit `87ed0ed`. Neither code nor fixture changed during these runs.
+The full policy provides a
 larger context allowance; these are policy/cost comparisons, not equal-token
 experiments. Medians include first-request loading and are machine/run specific.
 
@@ -107,7 +108,7 @@ private corrections are not automatically shared or fitted.
 
 ## Engineering checks
 
-At the evidence-policy checkpoint, 219 offline tests pass and eight model tests
+After the presentation, request-routing and topic-selection fixes, 243 offline tests pass and eight model tests
 are skipped deliberately. Those eight real-weight checks pass separately,
 including scoped batch retrieval, learned reader/source-span binding and offline
 inference with network connections denied. Lint/formatting, dependency audit and
@@ -117,5 +118,104 @@ Tests cover split leakage/provenance, reproducible numerical artifacts, corrupti
 source deletion and scope changes, model identity changes, query batching, bounded
 recovery, document links, source-number remapping, missing models, feedback storage
 and export, fresh input transformations and preserved lesson continuation.
-Streamlit AppTest exercises the feedback flow. Additional presentation and final
-UI checks are recorded below when completed; this is not a live-browser inspection.
+Streamlit AppTest also exercises the feedback flow. The app verification described
+below uses Streamlit's isolated testing runtime, not a live-browser inspection.
+
+## Presentation follow-up
+
+The retained eight-turn presentation follow-up uses fingerprint
+`b4c0f12d8ef1d51ea5ac5c45b5114e356505f047cc1ab35b02adf06486b4c48a`.
+It keeps 7/8 constraint passes with median 11.57 seconds. The strict quantity
+answer is now `7`, redundant source footers are removed, and the sculpture
+description no longer treats the heading 'Limits' as an assembly item. Leading
+headings are omitted only from the writer's view when already represented in
+the locator; stored sources and their quotes remain intact.
+
+The partial-help answer still labels the missing weight insufficient, while
+giving useful assembly details. It cites the missing-measurements passage but
+omits a separate assembly passage supporting those preliminary details. Stronger
+metadata instructions did not eliminate this omission. An automatic relabeling
+trial added about five seconds without fixing it and was rejected. Bounded
+literal-overlap candidates now appear only in the local human-review queue.
+They can be false positives and never automatically add citations or make extra
+model calls. Source identity is verified; complete semantic citation coverage
+is still a limitation.
+
+A later app check found a second strict-quantity presentation: a correct number
+written in a sentence. The final formatter shortens only an unambiguous single
+quantity in a simple answer to an explicit quantity-only request. It preserves
+bounds, conditions, uncertainty, multiple quantities and code. This cleanup does
+not choose an answer or establish factual correctness. Earlier raw conversation
+records retain their actual code fingerprints; they are not relabeled as final
+code observations.
+
+## Request understanding and partial help
+
+`evaluation/partial_help.json` contains four original fictional documents and
+six requests: useful assembly, sensor preparation and memo drafting, plus two
+missing-result controls and an exact baking instruction. The sculpture is a
+known transfer example. These are inspected development cases, not new blinded
+test data, and no model weights were refitted on them.
+
+| Development stage | Constraint checks |
+|---|---:|
+| Presentation checkpoint | 3/6 |
+| Separate background from the final question | 5/6 |
+| Also distinguish procedures from permission and request concrete supported steps | 6/6 |
+
+The final run uses fingerprint
+`4d17e5e35d9e94bb1c914cd883a3a48811fafb88435c52fc2b95dc951915f798`.
+It gives useful, separately cited assembly steps and memo content, and the sensor
+answer covers importing the CSV, removing empty voltage rows, plotting against
+timestamps, preserving the original file and the missing calibration. It keeps
+unknown calories/temperature unknown and preserves the stated baking facts.
+
+The underlying bug classified `How can I…` as institutional permission, imposing
+a restrictive fact-only response on a method request. Explicit permissions still
+use policy evidence; ordinary method requests can explain supported steps.
+The user's full question is retained for retrieval, checks and history. Focusing
+the current action never discards its background or splits compound questions.
+
+Extra generic instructions and reordering the full request did not improve this
+diagnostic. An extra action-planning call passed 6/6 phrase checks but invented a
+budget prerequisite for drafting unresolved questions; it was rejected. Applying
+procedure instructions too broadly regressed that memo answer and was also
+rejected. A reasoning prototype hit 2,400 tokens before a final answer on two
+cases, taking about 54 seconds each. Its third case was interrupted; it is not
+enabled, and no reasoning traces were retained. These experiments demonstrate
+why a passing phrase check or an additional model stage is not sufficient.
+
+The final routing adds no model calls. These fixes improve the observed cases;
+they do not establish complete understanding or eliminate semantic errors on
+new materials. Raw final answers, source chunks and rejected outputs remain in
+the retained observations.
+
+## All-files app verification and topic selection
+
+The first real three-question app check passed its assertions but inspection of
+the actual third answer found unrelated field-session and footwear advice mixed
+with the sculpture answer. This is retained as a failure, not counted as semantic
+success. The selected context had included documents matching generic body words.
+
+Adaptive selection now prefers a distinctive filename topic for a single-topic
+request. Comparisons/compound questions retain multiple topics, explicit links
+can still bring in another allowed file, and recovery can look more broadly.
+It does not treat a title match as evidence of an answer's correctness.
+
+The repeated app check uses fingerprint
+`e96343df111af91b5c71eb596d37375ade62779d23ca713f933518e0569a1f9e`.
+With all six original files loaded and recent unrelated conversation, it answers
+the footwear rule, returns only `seven` for a quantity request, and gives useful
+sculpture steps plus the missing-weight explanation. The last answer cites both
+sculpture sections and contains no unrelated field-session/footwear content.
+Feedback saving, the review-export control and the absence of a login pass too.
+Every retained source chunk was checked against a fresh fixture parse.
+
+The repeated final-code runs pass 8/8 transfer and 6/6 partial/control checks.
+Their complete answers and source chunks are retained under `final_code_runs`.
+The temperature-only missing-result answer still mentions preparation while
+citing only the calibration gap, so complete semantic citation coverage remains
+a limitation. Earlier results describe their stated checkpoints and are not
+silently attributed to a later version.
+AppTest verifies the real Streamlit/local-model flow. No visual browser inspection
+is claimed, and these original development cases do not establish perfection.

@@ -218,7 +218,7 @@ def queries_for(question, plan, history, extra_queries=()):
     return list(dict.fromkeys(q.strip() for q in queries if q.strip()))[:6]
 
 
-def focused_documents(groups, question, plan, *, allow_topic_filter=True):
+def focused_documents(groups, question, plan, *, allow_topic_filter=True, prefer_titles=False):
     """Use distinctive query terms to keep unrelated documents out of context.
 
     This is a document-level precision step, not a hard-coded subject router.
@@ -242,7 +242,7 @@ def focused_documents(groups, question, plan, *, allow_topic_filter=True):
             )
         }
     if (
-        not allow_topic_filter
+        (not allow_topic_filter and not prefer_titles)
         or len(groups) < 2
         or re.search(
             r"\b(?:all|every|which|across)\b.*\b(?:files?|documents?|notes|materials)\b",
@@ -252,10 +252,34 @@ def focused_documents(groups, question, plan, *, allow_topic_filter=True):
     ):
         return set(groups)
     generic = stems(
-        "need bring give show tell find answer question example simple simpler short sentence definition describe explain useful different same alone independently current previous earlier old new first second version number amount only just actually meant include information following provided selected document file note chapter lecture request help topic concept use mean contain refer please specific exact know based according state detail day year how many much any more most less really should register"
+        "need bring give show tell find answer question example simple simpler short sentence definition describe explain useful different same alone independently current previous earlier old new first second version number amount only just actually meant include information following provided selected document file note chapter lecture request help topic concept use mean contain refer please specific exact know based according state detail day year how many much any more most less really should register guide handbook handout instruction directions material source text summary step method"
     )
     terms = stems(question + " " + plan.query + " " + " ".join(plan.subjects)) - generic
     terms = {t for t in terms if len(t) >= 3 and not t.isdigit()}
+    if (
+        prefer_titles
+        and not plan.subjects
+        and not re.search(
+            r"\b(?:and|also|compare|versus|across)\b|[?;]\s*\S", question.rstrip("? "), re.I
+        )
+    ):
+        # A distinctive topic in an uploaded filename is stronger than a
+        # generic body word such as 'measurements'. Keep all matching titles;
+        # references may still bring in another allowed file afterwards.
+        titled = {
+            doc: terms & stems(Path(passages[0].name).stem) for doc, passages in groups.items()
+        }
+        maximum = max(1, len(groups) // 3)
+        anchors = {
+            term
+            for matches in titled.values()
+            for term in matches
+            if sum(term in other for other in titled.values()) <= maximum
+        }
+        if anchors:
+            return {doc for doc, matches in titled.items() if matches & anchors}
+    if not allow_topic_filter:
+        return set(groups)
     matches = {term: set() for term in terms}
     for document_id, passages in groups.items():
         words = stems(" ".join(p.name + " " + p.locator + " " + p.text for p in passages))
@@ -382,7 +406,11 @@ def build_context(
             budget, 3500
         )
         focus = focused_documents(
-            groups, question, plan, allow_topic_filter=not recover and not short_library
+            groups,
+            question,
+            plan,
+            allow_topic_filter=not recover and not short_library,
+            prefer_titles=policy == "adaptive" and not recover,
         )
         if focus != set(groups):
             all_passages = [p for p in all_passages if p.document_id in focus]

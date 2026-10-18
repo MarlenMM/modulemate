@@ -110,6 +110,200 @@ def test_fresh_quoted_rewrite_does_not_inherit_previous_comparison(store, course
     assert not backend.calls[0]["recent_conversation"]
 
 
+def test_final_request_separates_background_without_dropping_it(store, course):
+    question = "I cannot finish the grant without a budget. What can I prepare from the brief?"
+    source = "Start with an issue description and collect the available evidence."
+    store.add_document(course, parse_upload("Brief.txt", source.encode(), isolated=False))
+    backend = Scripted(
+        response(
+            "You can prepare the issue description and collect evidence. [1]",
+            "materials",
+            [{"source_id": 1, "quote": source}],
+        ),
+        APPROVED,
+    )
+    result = answer_question(store, course, question, use_ai=True, backend=backend)
+    assert result.kind == "generated"
+    payload = backend.calls[0]
+    assert (
+        payload["latest_question"]
+        == payload["final_request"]
+        == "What can I prepare from the brief?"
+    )
+    assert payload["request_background"] == "I cannot finish the grant without a budget."
+    assert payload["original_question"] == question
+    assert store.messages(course)[-1]["question"] == question
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "What is missing? What can I do?",
+        'The text says "I cannot finish." What does it mean?',
+        "Explain `if x: return 1. What next?`",
+        "I cannot finish. Please give me a checklist.",
+    ],
+)
+def test_focusing_preserves_compound_requests_quoted_text_and_code(question):
+    from modulemate.conversation import focus_request
+
+    assert focus_request(question) == (question, "")
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "How can I prepare these records?",
+        "What steps should we follow?",
+        "Where can I find the next step in this workflow?",
+        "I do not have the final values. How should I begin?",
+    ],
+)
+def test_method_questions_do_not_become_permission_requests(question):
+    from modulemate.conversation import institutional_permission, requires_materials
+
+    assert not institutional_permission(question)
+    assert not requires_materials(question)
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "Can I renew a reserved book?",
+        "How can I get permission to renew it?",
+        "Are sandals allowed?",
+        "I have closed shoes. May we wear overshoes?",
+    ],
+)
+def test_actual_permissions_still_require_source_policy(question):
+    from modulemate.conversation import institutional_permission, source_fact_request
+
+    assert institutional_permission(question)
+    assert source_fact_request(question)
+
+
+def test_supported_workflow_question_keeps_explanation_mode(store, course):
+    source = (
+        "Import the file, remove rows with empty voltage fields, and plot voltage against time."
+    )
+    store.add_document(course, parse_upload("Workflow.txt", source.encode(), isolated=False))
+    backend = Scripted(
+        response(
+            "Import the file, remove empty voltage rows, then plot voltage against time. [1]",
+            "materials",
+            [{"source_id": 1, "quote": source}],
+        ),
+        APPROVED,
+    )
+    result = answer_question(
+        store, course, "How can I prepare these records?", use_ai=True, backend=backend
+    )
+    assert result.kind == "generated"
+    assert backend.calls[0]["study_mode"] == "Explain"
+    assert "steps" in backend.calls[0]["turn_task"]
+
+
+def test_nested_unrequested_source_footer_is_omitted_but_requested_quotes_remain():
+    from modulemate.conversation import without_source_footer
+
+    text = (
+        "Closed shoes are compulsory.\n\n* **Source Evidence:**\n  * Equipment.md states the rule."
+    )
+    assert without_source_footer(text, "What must I wear?") == "Closed shoes are compulsory."
+    assert without_source_footer(text, "Give the exact source quote.") == text
+    code = "An explanation.\n```text\nSource evidence:\nliteral data\n```"
+    assert without_source_footer(code, "Explain it") == code
+
+
+def test_strict_quantity_normalization_preserves_arrays_and_citations():
+    from modulemate.conversation import normalize_scalar_label
+
+    q = "Give only the current number of workshop places."
+    assert normalize_scalar_label("[Workshop places: 7]", q) == "7"
+    assert normalize_scalar_label("[Workshop places: 7] [3]", q) == "7 [3]"
+    assert (
+        normalize_scalar_label("[Workshop places: 7]", "Explain the label")
+        == "[Workshop places: 7]"
+    )
+    for text in ("[1, 2, 3]", "values[7]", "`[Workshop places: 7]`", "The count is not stated."):
+        assert normalize_scalar_label(text, q) == text
+
+
+def test_strict_quantity_sentence_keeps_bounds_conditions_and_uncertainty():
+    from modulemate.conversation import normalize_scalar_label
+
+    q = "Give only the current number of workshop places."
+    assert (
+        normalize_scalar_label("The current workshop has seven places available. [1]", q)
+        == "seven [1]"
+    )
+    assert normalize_scalar_label("There are twenty-one places. [1] [2]", q) == "twenty-one [1] [2]"
+    assert normalize_scalar_label("The count is 7. [2]", q) == "7 [2]"
+    for text in (
+        "There are at least seven places. [1]",
+        "The workshop has approximately 7 places. [1]",
+        "There are seven places per group. [1]",
+        "There are seven places if someone cancels. [1]",
+        "The workshop may have seven places. [1]",
+        "There are seven places and two are reserved. [1]",
+        "The limit is one hundred places. [1]",
+        "There are seven fewer places. [1]",
+        "The workshop has 7 to 9 places. [1]",
+        "The count is unknown, though an earlier workshop had 7. [1]",
+    ):
+        assert normalize_scalar_label(text, q) == text
+
+
+def test_labeled_scalar_writer_output_keeps_its_real_source(store, course):
+    source = "# Workshop\n## Capacity\nThe current workshop has 7 places."
+    store.add_document(course, parse_upload("Workshop.md", source.encode(), isolated=False))
+    backend = Scripted(
+        "[Workshop places: 7]",
+        json.dumps({"basis": "materials", "citations": [{"evidence_id": 1}]}),
+    )
+    backend.supports_plain_text = True
+    result = answer_question(
+        store,
+        course,
+        "Give only the current number of workshop places.",
+        use_ai=True,
+        backend=backend,
+    )
+    assert result.text == "7 [1]" and len(result.passages) == 1
+    assert result.passages[0].text == source
+    assert backend.calls[0]["passages"][0]["text"] == "The current workshop has 7 places."
+
+
+@pytest.mark.parametrize("complete_citation", [True, False])
+def test_citation_gaps_are_review_hints_without_relabeling_or_forcing_evidence(
+    store, course, complete_citation
+):
+    source = "# Sculpture\n## Assembly\nFold paper strips into loops and join the loops using clips.\n## Limits\nThe directions give no material masses or measurements."
+    store.add_document(course, parse_upload("Sculpture.md", source.encode(), isolated=False))
+    draft = "The directions describe paper loops joined using clips, but give no material masses."
+    citations = (
+        [{"evidence_id": 1}, {"evidence_id": 2}] if complete_citation else [{"evidence_id": 2}]
+    )
+    backend = Scripted(
+        "[MISSING] " + draft, json.dumps({"basis": "materials", "citations": citations})
+    )
+    backend.supports_plain_text = True
+    result = answer_question(
+        store,
+        course,
+        "What can the directions help me do without measurements?",
+        use_ai=True,
+        backend=backend,
+    )
+    assert result.text.startswith(draft) and not result.metadata["repaired"]
+    assert result.kind == "insufficient"
+    assert bool(result.metadata["citation_review"]) is not complete_citation
+    assert len(result.passages) == (2 if complete_citation else 1)
+    assert len(backend.calls) == 2
+    if not complete_citation:
+        assert "loops" in result.metadata["citation_review"][0]["quote"]
+
+
 def test_missing_material_is_not_replaced_with_pretrained_knowledge(store, course):
     backend = Scripted()
     result = answer_question(store, course, "What is photosynthesis?", use_ai=True, backend=backend)

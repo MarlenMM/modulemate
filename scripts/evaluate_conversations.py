@@ -111,7 +111,9 @@ def main():
     parser.add_argument("--ids", help="Comma separated scenario IDs; default all")
     parser.add_argument("--policy", choices=("adaptive", "baseline", "full"), default="adaptive")
     parser.add_argument(
-        "--suite", choices=("general", "probe", "core", "transfer", "evidence"), default="general"
+        "--suite",
+        choices=("general", "probe", "core", "transfer", "evidence", "partial"),
+        default="general",
     )
     parser.add_argument(
         "--progress", action="store_true", help="Print model stages while a turn is running"
@@ -135,6 +137,7 @@ def main():
             "core": "conversation_challenge.json",
             "transfer": "conversation_transfer.json",
             "evidence": "evidence_transfer.json",
+            "partial": "partial_help.json",
         }[args.suite]
     )
     backend = AIBackend(load_settings()) if args.provider else local_backend()

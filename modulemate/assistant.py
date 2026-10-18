@@ -447,6 +447,7 @@ def answer_question(
                     "evidence_policy": evidence_policy,
                     "evidence_assessment": context.evidence,
                     "support_check": generated.support_check,
+                    "citation_review": generated.citation_review,
                     "lesson": context.lesson,
                     "lesson_session": context.lesson_session,
                     "resolved_mode": requested_mode,

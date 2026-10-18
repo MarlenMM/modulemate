@@ -56,7 +56,7 @@ documents, personal chats, runtime databases and model weights remain untracked.
 This log will record rejected ideas as well as adopted improvements. There is no
 claim that a finite test suite can establish perfect chatbot intelligence.
 
-## Development cycles, 18 October 2026
+## Development cycles, 18–19 October 2026
 
 1. **Baseline and original supervision.** Recorded 174 passing offline tests and
    the existing 46-query neural retrieval results. Authored 22 multi-subject
@@ -97,6 +97,41 @@ claim that a finite test suite can establish perfect chatbot intelligence.
    The checker no longer displays an inference status when disabled. Training
    validation no longer depends on Python assertions. Fixed fixture fingerprinting
    so a changed file cannot be mislabeled as the data originally loaded.
+8. **Presentation and citation coverage.** Real answers exposed a decorative
+   scalar label, nested source footers and a section heading treated as an
+   assembly item. Kept source text intact while omitting duplicated leading
+   headings from the writer/evidence views, normalized strict scalar labels and
+   simple single-quantity sentences while preserving bounds and uncertainty,
+   and preserved both inline-source cleanup and explicit quote/code requests.
+   A rare-term citation-gap relabeling experiment added latency without repairing
+   the actual omission and was rejected. Its bounded candidates now feed only
+   the local human-review queue; they never add citations or trigger model calls.
+9. **Requested action versus background goal.** Added four original documents
+   and six partial-help/control cases. Separate a declarative prelude from one
+   final question while retaining both. This improved constraint checks from
+   3/6 to 5/6 and recovered useful, separately cited assembly/memo information.
+   Extra generic instructions and request reordering did not improve the result.
+   An additional action-planning call passed phrase checks but invented a budget
+   prerequisite, so it was rejected. A bounded reasoning prototype exhausted
+   2,400 tokens without an answer on two cases and was also rejected; its third
+   case was interrupted. No reasoning traces were saved or exposed.
+10. **Procedures versus permission.** Traced the remaining over-refusal to
+    `How can I…` being treated as institutional permission, which imposed a
+    fact-only answer instead of useful procedural help. Retained explicit policy
+    handling while separating ordinary method questions. Procedure requests ask
+    for concrete source-supported actions/constraints, without invented later
+    stages. Broadening that instruction to every `What can I…` request regressed
+    the memo case and was rejected. The final distinction adds no planning-model
+    calls. Reviewed deletion behavior: removing a document clears its course's
+    chat history, including local citation hints and feedback.
+11. **Mixed-topic app output.** The all-files app check passed its automated
+    assertions yet mixed sculpture instructions with unrelated field-trip help.
+    Added subject-independent preference for distinctive filename topics in a
+    single-topic adaptive request. Generic words cannot establish a topic;
+    comparisons, compound questions, explicit reference links and broader
+    recovery retain their scope. Added regressions for the six-file mixture,
+    short linked documents and compound questions separated by a newline.
+    The repeated real app answer uses only the sculpture's two source sections.
 
 The separate validation report records final model results, actual conversation
 outputs, regression checks and limits. The additional transfer fixture is a known

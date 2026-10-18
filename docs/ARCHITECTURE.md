@@ -160,3 +160,28 @@ scope validation, so no new database migration is needed. `feedback.py` prioriti
 local human-review cases using explicit feedback and estimated uncertainty.
 Export requires a deliberate download; user feedback is not a verified gold label
 and is never fitted or uploaded automatically.
+
+The writer and evidence catalog omit only leading headings already represented
+in the locator; stored source text and quote membership remain unchanged. Strict
+quantity requests can drop a decorative label without changing its numeric value.
+Nested unrequested source footers are omitted, while requested quotations and code
+stay intact. Two uncommon answer terms in an uncited excerpt can produce a local
+citation-review hint. The hint is not an entailment verdict, an automatic citation,
+or an extra generation request. A real relabeling trial failed and was not retained.
+
+For a declarative prelude followed by one explicit question, request assembly
+keeps the prelude as background and the question as the current action. Retrieval,
+validation and saved history retain the original text. Compound questions,
+quotations and code are preserved. Ordinary `How can I…` method questions do not
+become institutional permission requests; explicit policy terms still do.
+Procedures retain concrete supported actions and constraints without requiring
+an unavailable final result. These controls do not add model calls or certify
+semantic correctness. Experimental planning/reasoning stages were rejected.
+
+Single-topic adaptive requests prefer distinctive terms in uploaded filenames
+over incidental body words. This also applies to short libraries, so a generic
+word such as 'measurements' cannot pull a field guide into an answer about a
+sculpture. Comparisons and compound requests keep their union. Explicit links
+can still add sections from any allowed file, and broader recovery can search
+beyond the preferred titles. Filename matching is a precision heuristic, not
+proof that every relevant source has been found.

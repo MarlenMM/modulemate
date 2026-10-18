@@ -102,6 +102,10 @@ citations: [{"evidence_id":1}]. Select real supporting excerpts from source_evid
 An evidence_id is different from a source_id. Do not reconstruct or write quote
 text. At most 12 excerpts. Select the excerpts supporting the answer's claims;
 the app attaches their source numbers. Do not select merely related evidence.
+Cover each substantive factual statement in answer_to_label, including useful
+preliminary facts before a missing-information conclusion. A gap excerpt cannot
+replace separate evidence for those facts. Match the written answer's specific
+details rather than selecting only the excerpt closest to latest_question.
 When source_only_facts is true, use materials, not mixed additions.
 followups: at most ONE useful question the user can send next, or [].
 topic: the current subject, resolving references and corrections. subjects: compared
