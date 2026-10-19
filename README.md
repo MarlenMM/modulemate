@@ -47,7 +47,7 @@ configured provider in the sidebar and explicitly enable provider requests.
 These send selected text and recent conversation to that provider. Local MLX
 never silently falls back to a hosted API.
 
-## Evidence learning in 2.3
+## Understanding and evidence
 
 Qwen supplies the pretrained language capability. ModuleMate now also trains its
 own passage-ranking, relevance and answerability heads on original labeled data.
@@ -61,6 +61,24 @@ force a refusal. Explicit references to another uploaded file can bring in its
 relevant sections within your selection. Short libraries are read together.
 Request-local caches batch searches; input-only rewrites omit unnecessary library
 retrieval and unrelated history.
+
+Main ideas, themes, interpretations and connections are supported learning tasks;
+they need not appear as a ready-made sentence in a slide. Broad questions read
+across the material. Long selections include passages from their beginning,
+middle and end. If a document reference is ambiguous, the assistant asks which
+one you mean. Source checks bind citations to real text; they do not require an
+explanation to be a quotation. Short facts and formulas remain citable.
+If an answer reports missing information, one wider look can reconsider additional
+allowed passages even when a small evidence model was confidently wrong.
+Document focus survives navigation between Assistant and Cards, separately for
+each course and tool. Sampled replies show how many available passages were read.
+An explicit source quotation whose wording cannot be verified receives one focused
+correction attempt; an unresolved wording mismatch is marked for inspection rather
+than turning the whole answer into a refusal.
+Fresh material questions use current source text without copying prior assistant
+claims. Follow-ups retain the conversation segment needed to resolve their references.
+Possible stacked PDF equations get a layout notice. The source stays available;
+unclear fraction grouping can be checked without blocking the conceptual explanation.
 
 Rate an answer to save a local correction. **Conversation options → Export answer
 review cases** prepares a queue ordered by feedback and estimated uncertainty.
@@ -108,9 +126,27 @@ was not automatically an improvement.
 
 ## Supported materials
 
-PDF, DOCX, PPTX, TXT, Markdown and IPYNB (15 MB per file). Notebook code is read as
-text and never executed. Image-only scans and diagrams require OCR or a text
-description supplied by you. No university corpus, personal student submission,
+PDF, DOCX, PPTX, TXT, Markdown, IPYNB, PNG, JPEG and WebP (15 MB per file).
+Notebook code and saved text/image outputs are read as static material, never
+executed or recomputed. Saved results may be stale. Local OCR recovers printed text
+from scanned and mixed PDF pages, embedded slide/document pictures and uploaded
+images, including outlined PDF letters that have no native text or image objects.
+Apple Vision is installed on macOS with the normal setup. Linux/Windows
+use an installed [Tesseract engine with English data](https://tesseract-ocr.github.io/tessdoc/Installation.html)
+(Ubuntu: `sudo apt install tesseract-ocr tesseract-ocr-eng`). Native text remains
+usable when OCR is unavailable. No hosted OCR service is called.
+
+Word headers, footers, referenced notes and text boxes are also searchable.
+Presentations retain native chart categories and cached values with their number
+formats, plus SmartArt text labels. Cached values are not recalculated workbook
+results, and text labels do not establish a diagram's visual relationships.
+
+OCR locations and import notices identify recovered and unread content. Inspect
+the text preview, especially numbers, names and formulas. Diagram relationships,
+chart values and handwriting may still need a description. Imports are bounded
+to 500 OCR images and a 35-second recognition budget; remaining locations are
+reported. Original uploads are discarded, so reimport an original file to recover
+images omitted by an older version. No university corpus, personal student submission,
 credentials, runtime database or model weights are bundled in this repository.
 
 ## Quality and project evidence
@@ -133,6 +169,8 @@ Historical 2.1 retrieval and extraction scores do not measure this new generator
 - [ML development plan and cycles](docs/ML_DEVELOPMENT.md)
 - [Evidence model and original dataset](docs/EVIDENCE_MODEL_CARD.md)
 - [2.3 validation](docs/VALIDATION_V23.md)
+- [Current intelligence decisions and cycles](docs/INTELLIGENCE_V24.md)
+- [2.4 validation and real-app checks](docs/VALIDATION_V24.md)
 - [2.2 validation and observed limits](docs/VALIDATION_V22.md)
 - [HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md)
 - [Architecture](docs/ARCHITECTURE.md)

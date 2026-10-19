@@ -1,0 +1,54 @@
+{
+  "license": "CC0-1.0",
+  "description": "Original native-text PDF with a drawn fraction bar. Checks layout uncertainty without rejecting the conceptual explanation. No private content.",
+  "documents": [
+    {
+      "name": "Share score.pdf",
+      "base64": "JVBERi0xLjMKJeLjz9MKMSAwIG9iago8PAovUHJvZHVjZXIgKHB5cGRmKQo+PgplbmRvYmoKMiAwIG9iago8PAovVHlwZSAvUGFnZXMKL0NvdW50IDEKL0tpZHMgWyA0IDAgUiBdCj4+CmVuZG9iagozIDAgb2JqCjw8Ci9UeXBlIC9DYXRhbG9nCi9QYWdlcyAyIDAgUgo+PgplbmRvYmoKNCAwIG9iago8PAovVHlwZSAvUGFnZQovUmVzb3VyY2VzIDw8Ci9Gb250IDw8Ci9GMSA1IDAgUgo+Pgo+PgovTWVkaWFCb3ggWyAwLjAgMC4wIDYwMCA3NjAgXQovUGFyZW50IDIgMCBSCi9Db250ZW50cyA2IDAgUgo+PgplbmRvYmoKNSAwIG9iago8PAovVHlwZSAvRm9udAovU3VidHlwZSAvVHlwZTEKL0Jhc2VGb250IC9IZWx2ZXRpY2EKPj4KZW5kb2JqCjYgMCBvYmoKPDwKL0xlbmd0aCAzNzMKPj4Kc3RyZWFtCkJUIC9GMSAyMCBUZiA2MCA3MDAgVGQgKEZpY3Rpb25hbCBzaGFyZSBzY29yZSkgVGogRVQKQlQgL0YxIDEyIFRmIDYwIDY2NSBUZCAoVGhlIHNoYXJlIHNjb3JlIGNvbWJpbmVzIHR3byByZWFkaW5ncyBpbnRvIG9uZSBzY2FsZWQgaW5kZXguKSBUaiBFVApCVCAvRjEgMTggVGYgNzAgNjAwIFRkIChTID0pIFRqIEVUCkJUIC9GMSAxOCBUZiAxMzAgNjIwIFRkIChyICsgcykgVGogRVQKMTI1IDYxMSBtIDE4MyA2MTEgbCBTCkJUIC9GMSAxOCBUZiAxNTAgNTg4IFRkICgzKSBUaiBFVApCVCAvRjEgMTIgVGYgNjAgNTQ1IFRkIChyIGFuZCBzIGFyZSB0aGUgdHdvIHJlYWRpbmdzLiBObyB1bml0IG9yIG1lYXN1cmVkIG91dGNvbWUgaXMgZ2l2ZW4uKSBUaiBFVAoKZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgNwowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDA1NCAwMDAwMCBuIAowMDAwMDAwMTEzIDAwMDAwIG4gCjAwMDAwMDAxNjIgMDAwMDAgbiAKMDAwMDAwMDI5NCAwMDAwMCBuIAowMDAwMDAwMzY0IDAwMDAwIG4gCnRyYWlsZXIKPDwKL1NpemUgNwovUm9vdCAzIDAgUgovSW5mbyAxIDAgUgo+PgpzdGFydHhyZWYKNzg4CiUlRU9GCg=="
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "stacked-fraction",
+      "documents": [
+        "Share score.pdf"
+      ],
+      "review_criteria": [
+        "The numerator is the whole r + s expression above the fraction bar; the denominator is 3. Do not silently read r + s/3.",
+        "A main-concept explanation remains useful while notation uncertainty is disclosed.",
+        "With readings 8 and 4 the displayed grouping gives 4. No unit is invented."
+      ],
+      "turns": [
+        {
+          "question": "Explain the main concept of this presentation.",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "combin",
+              "together",
+              "both"
+            ],
+            [
+              "scal",
+              "three",
+              "3"
+            ]
+          ],
+          "max_words": 180
+        },
+        {
+          "question": "Use its displayed rule for readings r = 8 and s = 4. Show the grouping.",
+          "expected_kind": "generated",
+          "required": [
+            "4"
+          ],
+          "forbidden": [
+            "r + s/3",
+            "r+s/3"
+          ],
+          "max_words": 180
+        }
+      ]
+    }
+  ]
+}

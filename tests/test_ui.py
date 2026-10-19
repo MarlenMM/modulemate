@@ -90,3 +90,51 @@ def test_new_browser_opens_same_local_workspace_without_login(tmp_path, monkeypa
     assert widget(second.selectbox, "Current course").value
     assert any(r.label == "Workspace" for r in second.radio)
     assert not any(r.label == "Account" for r in second.radio)
+
+
+def test_document_focus_survives_navigation_without_crossing_course_or_tool(tmp_path, monkeypatch):
+    from modulemate.db import Database, Store
+    from modulemate.ingest import parse_upload
+
+    monkeypatch.setenv("MODULEMATE_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("MODULEMATE_CHAT", "off")
+    store = Store(Database(tmp_path / "modulemate.sqlite3"))
+    first, second = store.create_course("First lab"), store.create_course("Second lab")
+    documents = []
+    for course_id, name in ((first, "Cedar"), (first, "Birch"), (second, "Maple")):
+        document, _ = store.add_document(
+            course_id,
+            parse_upload(f"{name}.txt", f"The {name} label reads pH = 7.".encode(), isolated=False),
+        )
+        documents.append(document)
+    app = AppTest.from_file(
+        Path(__file__).resolve().parents[1] / "app.py", default_timeout=30
+    ).run()
+    widget(app.selectbox, "Current course").set_value(first).run()
+    page(app, "Assistant")
+    widget(app.multiselect, "Focus on documents (leave empty for all)").set_value(
+        [documents[0]]
+    ).run()
+    page(app, "Cards")
+    widget(app.radio, "Study tools").set_value("Create cards").run()
+    focus = widget(app.multiselect, "Focus on documents (leave empty for all)")
+    assert focus.value == []
+    focus.set_value([documents[1]]).run()
+    page(app, "Assistant")
+    assert widget(app.multiselect, "Focus on documents (leave empty for all)").value == [
+        documents[0]
+    ]
+    widget(app.selectbox, "Current course").set_value(second).run()
+    assert widget(app.multiselect, "Focus on documents (leave empty for all)").value == []
+    widget(app.multiselect, "Focus on documents (leave empty for all)").set_value(
+        [documents[2]]
+    ).run()
+    widget(app.selectbox, "Current course").set_value(first).run()
+    assert widget(app.multiselect, "Focus on documents (leave empty for all)").value == [
+        documents[0]
+    ]
+    page(app, "Cards")
+    widget(app.radio, "Study tools").set_value("Create cards").run()
+    assert widget(app.multiselect, "Focus on documents (leave empty for all)").value == [
+        documents[1]
+    ]

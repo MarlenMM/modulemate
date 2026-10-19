@@ -4,6 +4,44 @@ from __future__ import annotations
 
 import re
 
+NOTATION_CONSTRAINT = (
+    "Some source equations have layout-sensitive line breaks. Preserve fraction grouping; "
+    "do not silently convert stacked terms into a differently grouped inline equation. "
+    "If notation is unclear, explain the supported idea and identify the equation as needing "
+    "the original layout. For a broad main-concept request, prioritize relationships between "
+    "ideas instead of listing incidental equations or numerical examples."
+)
+
+
+def source_notation_limits(passages):
+    """Flag possible stacked PDF notation, without reconstructing or rejecting it."""
+    limits = []
+    seen = set()
+    for source_id, passage in enumerate(passages, 1):
+        if not passage.name.casefold().endswith(".pdf") or passage.document_id in seen:
+            continue
+        lines = [line.strip() for line in passage.text.splitlines()]
+        page_number = re.search(r"\bpage (\d+)\b", passage.locator, re.I)
+        stacked = any(
+            2 < len(top) <= 80
+            and re.fullmatch(r"[A-Za-z0-9_+*/=().\[\]{}^`×÷− -]+", top)
+            and re.search(r"[+*/^`×÷]", top)
+            and re.fullmatch(r"\d{1,6}|[A-Za-z](?:\^\d)?", bottom)
+            and not (index == len(lines) - 2 and page_number and bottom == page_number[1])
+            for index, (top, bottom) in enumerate(zip(lines, lines[1:], strict=False))
+        )
+        if stacked:
+            seen.add(passage.document_id)
+            limits.append(
+                {
+                    "source_id": source_id,
+                    "document": passage.name,
+                    "location": passage.locator,
+                    "notice": "Possible stacked equation: a short mathematical expression is followed by a separate number or symbol. Verify fraction grouping against the original layout; source text is retained unchanged.",
+                }
+            )
+    return limits
+
 
 def writer_text(passage):
     """Omit only duplicated leading headings already carried by the locator.
@@ -32,7 +70,9 @@ def source_excerpts(passages):
     for source_id, passage in enumerate(passages, 1):
         source = " ".join(writer_text(passage).split())
         excerpts = []
-        while len(source) >= 12:
+        # A complete short fact ("pH = 7", a date, a formula) is still evidence.
+        # Do not silently erase it because long quotations normally need 12 chars.
+        while source:
             if len(source) <= 260:
                 stop = len(source)
             else:
@@ -76,6 +116,130 @@ def bind_evidence(labels, bindings):
             raise ValueError("unknown_evidence_id: select a real ID from source_evidence")
         citations.append(dict(bindings[evidence_id]))
     return labels | {"citations": citations}
+
+
+def preparation_steps(passages):
+    """Preserve explicit source instructions for a preparation request.
+
+    This is a small source inventory, not a plan generator or an availability
+    classifier. Conditional wording stays inside the verbatim step.
+    """
+    steps, seen = [], set()
+    for source_id, passage in enumerate(passages, 1):
+        prose = re.sub(r"```[\s\S]*?```", "", writer_text(passage))
+        for sentence in re.split(r"(?<=[.!?])\s+|\n", prose):
+            sentence = sentence.strip().lstrip("-* ")
+            if (
+                sentence not in seen
+                and re.match(
+                    r"^(?:start|write|finish|collect|list|import|exclude|plot|keep|fold|join|arrange|"
+                    r"prepare|set|record|repeat|label|make|draft|create|add|choose|use|check|measure|"
+                    r"mix|shape|bake|read|mark|select|gather|outline|describe|name|title|draw|reserve)\b",
+                    sentence,
+                    re.I,
+                )
+                and 12 <= len(sentence) <= 700
+            ):
+                steps.append({"source_id": source_id, "step": sentence})
+                seen.add(sentence)
+                if len(steps) == 16:
+                    return steps
+    return steps
+
+
+def information_omission(sentence):
+    """Recognize an explicit statement about the source's missing information.
+
+    A physical object's lack of a property is different: 'shoes provide no
+    protection' must remain an actual constraint, never a removable text gap.
+    Unrecognized wording stays with the writer without a semantic annotation.
+    """
+    source = (
+        r"(?:materials?|notes?|text|documents?|passages?|excerpts?|brief|instructions?|"
+        r"directions?|notices?|handouts?|presentations?|slides?|sources?|cards?|files?|guides?|reports?)"
+    )
+    verbs = r"(?:specify|provide|state|give|include|contain|supply|name|identify|mention|list|record|report)"
+    return bool(
+        re.search(
+            rf"\b{source}\s+(?:(?:does|do|did) not|doesn't|don't|didn't)\s+{verbs}\b"
+            rf"|\b{source}\s+(?:provides?|contains?|suppl(?:y|ies)|gives?|lists?|names?|specif(?:y|ies)|mentions?) no\b"
+            rf"|\bno\b[^.!?\n]{{0,100}}\b(?:provided|supplied|specified|given|stated|named|identified|listed)\b"
+            rf"[^.!?\n]{{0,50}}\b(?:in|from|within)\s+(?:(?:the|this|these|available|provided)\s+)?{source}\b",
+            sentence,
+            re.I,
+        )
+    )
+
+
+def source_information_limits(passages):
+    """Repeat literal information gaps as writer hints, never answerability gates.
+
+    All original passages remain available. These are scope reminders, not new
+    facts, source credibility labels, citations, or proof that no other answer exists.
+    """
+    limits = []
+    for source_id, passage in enumerate(passages, 1):
+        prose = re.sub(r"```[\s\S]*?```", "", writer_text(passage))
+        for sentence in re.split(r"(?<=[.!?])\s+|\n", prose):
+            sentence = sentence.strip()
+            if 12 <= len(sentence) <= 700 and information_omission(sentence):
+                limits.append({"source_id": source_id, "quote": sentence})
+                if len(limits) == 8:
+                    return limits
+    return limits
+
+
+def source_negative_statements(passages):
+    """Literal direct negatives for contrast with a source-information gap.
+
+    These are source assertions, not certificates that the source is true.
+    Unrecognized negatives remain in the original passages without this hint.
+    """
+    statements = []
+    for source_id, passage in enumerate(passages, 1):
+        prose = re.sub(r"```[\s\S]*?```", "", writer_text(passage))
+        for sentence in re.split(r"(?<=[.!?])\s+|\n", prose):
+            sentence = sentence.strip()
+            if (
+                12 <= len(sentence) <= 700
+                and re.search(r"\b(?:has|have|had) no\b", sentence, re.I)
+                and not information_omission(sentence)
+            ):
+                statements.append({"source_id": source_id, "quote": sentence})
+                if len(statements) == 8:
+                    return statements
+    return statements
+
+
+def preparation_omissions(passages, steps):
+    """Select pure omission passages for literal display beside preparation.
+
+    Mixed passages and conditions stay with the writer. These quotes are not
+    evidence that another task is forbidden or requires an unspecified value.
+    """
+    documents = {passages[step["source_id"] - 1].document_id for step in steps}
+    result = []
+    for source_id, passage in enumerate(passages, 1):
+        if passage.document_id not in documents:
+            continue
+        body = writer_text(passage).strip()
+        sentences = [s for s in re.split(r"(?<=[.!?])\s+|\n", body) if s.strip()]
+        if (
+            12 <= len(body) <= 1200
+            and sentences
+            and all(information_omission(sentence) for sentence in sentences)
+            and "```" not in body
+            and not re.search(
+                r"https?://|!\[|<|(?<!\w)\[\d+\]"
+                r"|\b(?:exceptions?|permissions?|prohibitions?|penalties|requirements?|approval|must|only|unless|before|after|allowed|permitted|forbidden|prohibited)\b",
+                body,
+                re.I,
+            )
+        ):
+            result.append({"source_id": source_id, "quote": body})
+            if len(result) == 2:
+                break
+    return result
 
 
 def citation_coverage_hints(answer, passages, cited_ids, bindings):

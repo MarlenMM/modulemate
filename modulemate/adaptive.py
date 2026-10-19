@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from modulemate.context import build_context
+from modulemate.context import broad_request, build_context
 from modulemate.learning import load_evidence_model, reader_signals, score_passages
 from modulemate.local_models import ModelUnavailable
 
@@ -116,7 +116,17 @@ def adaptive_context(
     context = build_context(
         store, course_id, question, plan, history, document_ids, engine=engine, policy=policy
     )
-    if policy != "adaptive" or context.clarification or context.lesson:
+    if (
+        policy != "adaptive"
+        or context.clarification
+        or context.lesson
+        or broad_request(question, plan.mode)
+        or plan.overview
+        or (plan.context_ids and context.passages)
+    ):
+        # Factual answerability labels are not a useful verdict on a main idea
+        # or a transformation of already sourced context. Structural coverage
+        # supplies that evidence without scoring every page with an extractive QA head.
         return context
     resolved = plan.resolved_question or plan.query or question
     report = assess_evidence(resolved, context.passages, engine=engine)
@@ -155,4 +165,42 @@ def adaptive_context(
             "initial_estimates": [p["estimate"] for p in before],
         }
         return recovered
+    # A small head may underrate useful new text. Keep it available for a
+    # response-driven second look rather than letting that score hide it forever.
+    context.recovery_candidate = recovered
     return context
+
+
+def recover_missing_context(
+    context, store, course_id, question, plan, history, document_ids=None, *, engine=None
+):
+    """One wider look after an actual missing answer, independent of confidence.
+
+    Reuse an already performed search where possible. A second generation may
+    still report a gap; this function neither forces an answer nor adds a citation.
+    """
+    if context.complete or context.lesson or context.policy != "adaptive":
+        return None
+    candidate = context.recovery_candidate
+    if candidate is None and not context.evidence.get("recovery_attempted"):
+        candidate = build_context(
+            store,
+            course_id,
+            question,
+            plan,
+            history,
+            document_ids,
+            engine=engine,
+            policy="adaptive",
+            recover=True,
+        )
+    if candidate is None or candidate.clarification:
+        return None
+    before = {p.id for p in context.passages}
+    if not ({p.id for p in candidate.passages} - before):
+        return None
+    candidate.evidence = context.evidence | {
+        "response_recovery_attempted": True,
+        "response_recovery_applied": False,
+    }
+    return candidate

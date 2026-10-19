@@ -10,8 +10,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from modulemate.dialogue import stems
+from modulemate.evidence import source_notation_limits
+from modulemate.requests import material_overview
 from modulemate.retrieval import RetrievalIndex, retrieve, scoped_passages
-from modulemate.search import Passage, overview, tokens
+from modulemate.search import Passage, search, tokens
 
 
 @dataclass
@@ -30,6 +32,8 @@ class Context:
     evidence: dict = field(default_factory=dict)
     policy: str = "baseline"
     links: list[dict] = field(default_factory=list)
+    reading_limits: list[dict] = field(default_factory=list)
+    recovery_candidate: Context | None = field(default=None, repr=False)
 
 
 def estimate_tokens(text):
@@ -141,6 +145,39 @@ def referenced_sections(candidates, groups, store, course_id, question, engine=N
     return passages, links
 
 
+def related_source_passages(candidates, groups, store, course_id, question):
+    """A preferred title must not hide facts about that subject in another file.
+
+    Search the remaining allowed files for the actual title/query subject. This
+    small recall channel adds evidence, not automatic citations or credibility.
+    Generic detail words cannot pull in a different event's instructions.
+    """
+    present = {p.document_id for p in candidates}
+    remaining = set(groups) - present
+    generic = stems(
+        "notes material document presentation slide lecture course file guide handbook handout "
+        "instruction directions project source text topic concept example summary step method "
+        "main key current previous information detail number amount only what how when which"
+    )
+    terms = tokens(question)
+    anchors = (stems(question) & stems(" ".join(p.name for p in candidates[:8]))) - generic
+    words = [word for word in terms if stems(word) & anchors]
+    if not remaining or not words:
+        return []
+    found = search(store, course_id, " ".join(words), sorted(remaining), limit=8)
+    related, documents = [], set()
+    for passage in found:
+        if not anchors & stems(passage.text):
+            continue
+        if passage.document_id not in documents and len(documents) >= 2:
+            continue
+        related.append(passage)
+        documents.add(passage.document_id)
+        if len(related) >= 4:
+            break
+    return related
+
+
 def instruction_packet(passage):
     return bool(
         re.search(
@@ -187,13 +224,13 @@ def teaching_request(question):
 def broad_request(question, mode):
     generic_scope = bool(
         re.search(
-            r"\b(?:lecture|course|notes|materials|chapter|document|library|everything|all topics)\b",
+            r"\b(?:lecture|course|notes|materials|chapter|document|library|presentation|slides?|deck|talk|reading|everything|all topics)\b",
             question,
             re.I,
         )
     )
     topical = bool(re.search(r"\bon\s+(?!(?:this|the|my|all)\b)\w+", question, re.I))
-    return (
+    return material_overview(question) or (
         generic_scope
         and not topical
         and (
@@ -202,6 +239,33 @@ def broad_request(question, mode):
             or bool(re.search(r"\b(?:entire|whole|fully|everything|all topics)\b", question, re.I))
         )
     )
+
+
+def representative_passages(groups, limit=24):
+    """Round-robin structural coverage, including each document's end.
+
+    Outlines are navigation, not evidence. Select actual passages from evenly
+    spaced positions; preserve section diversity before neighboring chunks.
+    """
+    sampled = []
+    for group in groups.values():
+        sections, seen = [], set()
+        for passage in group:
+            section = (passage.locator.split(" · OCR")[0], topic_heading(passage))
+            if section not in seen:
+                sections.append(passage)
+                seen.add(section)
+        count = min(len(sections), max(2, limit // max(1, len(groups))))
+        positions = [round(i * (len(sections) - 1) / max(1, count - 1)) for i in range(count)]
+        # Establish beginning AND conclusion before filling middle sections.
+        positions = list(dict.fromkeys([positions[0], positions[-1], *positions[1:-1]]))
+        sampled.append([sections[i] for i in positions])
+    return [
+        group[i]
+        for i in range(max((len(group) for group in sampled), default=0))
+        for group in sampled
+        if i < len(group)
+    ][:limit]
 
 
 def queries_for(question, plan, history, extra_queries=()):
@@ -312,7 +376,9 @@ def build_context(
         all_passages = [p for p in all_passages if p.document_id in named]
         document_ids = sorted(named)
     deictic_lesson = (teaching_request(question) or plan.mode == "Teach") and bool(
-        re.search(r"\b(?:this|the) (?:lecture|document|chapter)\b", question, re.I)
+        re.search(
+            r"\b(?:this|the) (?:lecture|document|chapter|presentation|deck)\b", question, re.I
+        )
     )
     previous_lesson = {}
     for message in reversed(history):
@@ -370,6 +436,44 @@ def build_context(
     groups = {}
     for passage in all_passages:
         groups.setdefault(passage.document_id, []).append(passage)
+    version_scope = focused_documents(groups, question, plan, allow_topic_filter=False)
+    if version_scope != set(groups):
+        all_passages = [p for p in all_passages if p.document_id in version_scope]
+        groups = {doc: group for doc, group in groups.items() if doc in version_scope}
+        document_ids = sorted(groups)
+        if all_passages:
+            result.total_passages = len(all_passages)
+    if (
+        material_overview(question)
+        and not named
+        and document_ids is None
+        and len(groups) > 1
+        and not re.search(r"\b(?:all|across|each|every|compare|between)\b", question, re.I)
+    ):
+        # A singular deictic document can refer to the previous answer's one
+        # document. Do not silently blend unrelated files into its 'main idea'.
+        prior = {p["document_id"] for p in history[-1].get("sources", [])} if history else set()
+        decks = {
+            doc
+            for doc, group in groups.items()
+            if Path(group[0].name).suffix.casefold() == ".pptx"
+            or re.search(r"\b(?:presentation|slides?|deck)\b", Path(group[0].name).stem, re.I)
+        }
+        inferred = (
+            decks if re.search(r"\b(?:presentation|slides?|deck)\b", question, re.I) else prior
+        )
+        if len(inferred) == 1 and inferred.issubset(groups):
+            groups = {doc: group for doc, group in groups.items() if doc in inferred}
+            all_passages = [p for group in groups.values() for p in group]
+            document_ids = sorted(inferred)
+            result.total_passages = len(all_passages)
+        else:
+            result.clarification = (
+                "Which material should I explain? Select a document above or name it: "
+                + ", ".join(group[0].name for group in list(groups.values())[:12])
+                + ". You can also ask for a connection across all selected materials."
+            )
+            return result
     result.catalog = document_catalog(groups)
     version_scope = focused_documents(groups, question, plan, allow_topic_filter=False)
     reference_groups = {key: group for key, group in groups.items() if key in version_scope}
@@ -418,7 +522,22 @@ def build_context(
             groups = {doc: passages for doc, passages in groups.items() if doc in focus}
             result.catalog = document_catalog(groups)
     ranked = []
-    queries = [] if full_selection else queries_for(question, plan, history, extra_queries)
+    complete_cost = sum(len(p.text) + len(p.name) + len(p.locator) + 80 for p in all_passages)
+    token_budget = min(8500, max(1800, 10500 - estimate_tokens(question)))
+    complete_tokens = sum(
+        estimate_tokens(p.text) + (len(p.name) + len(p.locator) + 80) / 3 for p in all_passages
+    )
+    fits_complete = (
+        complete_cost <= budget and complete_tokens <= token_budget and len(all_passages) <= 48
+    )
+    bound_context = bool(plan.context_ids and any(p.id in plan.context_ids for p in all_passages))
+    queries = (
+        []
+        if full_selection or lesson or bound_context or (broad and fits_complete)
+        else queries_for(question, plan, history, extra_queries)
+    )
+    if broad and not extra_queries:
+        queries = queries[:1]
     index = (
         RetrievalIndex(store, course_id, document_ids, engine, queries)
         if engine and queries
@@ -456,9 +575,7 @@ def build_context(
         # Full short lectures stay in source order. For a long library, sample
         # across documents/locations and explicitly disclose incomplete coverage.
         candidates = (
-            all_passages
-            if sum(len(p.text) for p in all_passages) <= budget
-            else overview(store, course_id, document_ids, limit=24) + hits + all_passages
+            all_passages if fits_complete else representative_passages(groups) + hits + all_passages
         )
     else:
         candidates = list(hits)
@@ -491,9 +608,18 @@ def build_context(
                     all_passages.extend(reference_groups[p.document_id])
             result.catalog = document_catalog(groups)
             result.method += " + linked sections"
+        companions = related_source_passages(
+            candidates, reference_groups, store, course_id, question
+        )
+        if companions:
+            candidates = candidates[:4] + companions + candidates[4:]
+            for passage in companions:
+                if passage.document_id not in groups:
+                    groups[passage.document_id] = reference_groups[passage.document_id]
+            result.catalog = document_catalog(groups)
+            result.method += " + related source text"
     seen = set()
     estimated_tokens = 0
-    token_budget = min(8500, max(1800, 10500 - estimate_tokens(question)))
     consumed = offset
     targets = {}
     substantive = {p.id for p in all_passages if lesson_content(p)} if lesson else set()
@@ -553,4 +679,23 @@ def build_context(
         result.lesson_session = result.lesson
         if not result.passages:
             result.clarification = "There are no further substantive lesson sections in the selected text. You can revisit a topic or ask for a practice question."
+    included = {p.document_id for p in result.passages}
+    for notation in source_notation_limits(result.passages):
+        result.reading_limits.append(
+            {
+                "document": notation["document"],
+                "notation": True,
+                "notices": [notation["location"] + ": " + notation["notice"]],
+            }
+        )
+    for document in store.documents(course_id):
+        if document["id"] in included:
+            warnings = json.loads(document["warnings"])
+            if warnings:
+                result.reading_limits.append(
+                    {
+                        "document": document["name"],
+                        "notices": [w[:600] for w in dict.fromkeys(warnings[:2] + warnings[-2:])],
+                    }
+                )
     return result

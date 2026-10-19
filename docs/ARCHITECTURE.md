@@ -1,4 +1,4 @@
-# ModuleMate 2.3 architecture
+# ModuleMate architecture
 
 `app.py` is the Streamlit interface. There is one local workspace; `db.py` provides
 transactional course/document scoping and cascades. Schema 3 migrates previous
@@ -9,6 +9,27 @@ study records. No runtime authentication code remains.
 text along Markdown/heading boundaries while carrying the actual heading hierarchy.
 PDF pages and presentation slides preserve their locators. No notebook code runs.
 Documents expose text previews so extraction failures can be inspected.
+
+`ocr.py` adds local Apple Vision recognition on macOS and an installed Tesseract
+fallback on other systems. PDFium renders raster-containing PDF pages, including
+mixed native/image pages, and pages with no native text (including outlined
+letters without image objects); native text is retained separately. PPTX group pictures,
+DOCX paragraph/table images and PNG/JPEG/WebP uploads also enter OCR. Recovered
+text keeps an explicit OCR page/slide/image locator. No fuzzy correction edits
+numbers or names. Low recognition scores retain text with an inspection notice;
+they never decide source credibility. Recognition has image/pixel/time limits,
+request-local duplicate reuse and no downloads or hosted calls. The parser's
+resource boundary contains PDFium/native image processing. Unread locations are
+reported; original images are not stored.
+
+`document_parts.py` reads referenced Word header/footer and note parts, text boxes,
+native PowerPoint chart caches and referenced SmartArt labels. It never fetches
+external relationships or runs a workbook. Chart rows retain category/value or
+X/Y alignment, series names and raw number formats; section headings carry series
+identity across chunks. Notebook saved text, raster outputs and attachments are
+read statically with cell/output locators. Rich executable/HTML-only displays are
+omitted with notices; saved output is never recomputed or represented as a result
+of running code in ModuleMate.
 
 `search.py` provides Unicode FTS/BM25 matching and short-topic heading preference.
 `retrieval.py` adds normalized local embeddings, persistent digest-checked vectors,
@@ -107,7 +128,8 @@ quote both the actual disputed draft and supporting source evidence (or referenc
 computed numeric results). Negative verdicts without matching draft/evidence quotes
 are ignored. Missing-evidence responses without factual citations bypass the critic;
 incidental cited claims can be corrected without inventing the absent answer.
-This distinguishes an unknown identity from the false claim that nobody acted.
+The instructions distinguish an unknown identity from the false claim that nobody
+acted; actual model answers can still confuse them, as the 2.4 observations show.
 Review outages
 are labeled and do not erase a valid primary answer. General conceptual lessons
 bypass the model critic after repeated false objections in development challenges.
@@ -174,9 +196,32 @@ keeps the prelude as background and the question as the current action. Retrieva
 validation and saved history retain the original text. Compound questions,
 quotations and code are preserved. Ordinary `How can I…` method questions do not
 become institutional permission requests; explicit policy terms still do.
+Direct preparation questions such as `Can I prepare … before I have …?` also
+retain method treatment. Their literal step inventory is a reminder, not an
+exhaustive replacement for the source's action passages. Pure omission-only
+notes can appear verbatim beside the answer without becoming false prohibitions.
 Procedures retain concrete supported actions and constraints without requiring
 an unavailable final result. These controls do not add model calls or certify
 semantic correctness. Experimental planning/reasoning stages were rejected.
+
+Literal source-information gaps and direct negative statements can also be
+repeated as separate writer hints with source IDs. Their wording is copied, not
+generated, and all ordinary passages stay available. The hints are neither truth
+labels nor answerability gates. Pure omission notes displayed beside preparation
+are excluded from both the action writer's passages and its information-gap hints;
+physical negatives remain in the writer context. Unrecognized phrasing has no hint.
+
+Card fronts/backs are rendered as plain text or escaped labels, so source URLs,
+array indices and angle brackets remain valid literal data. Backs still require
+exact source membership. Chat code is literal; active image/media markup and
+reasoning envelopes outside code are rejected. Displaying a source URL never
+causes a fetch, tool execution or external action.
+
+Inferred fact-finding is a writing hint, not an implicit 50-word user limit.
+Incidental words such as `example` and `calculation` do not relabel source content
+as an outside addition. Citation identity/quotation validation remains mandatory;
+the metadata basis label alone is not an entailment verdict. Explicit sentence
+counts and requested current-version scope remain checked separately.
 
 Single-topic adaptive requests prefer distinctive terms in uploaded filenames
 over incidental body words. This also applies to short libraries, so a generic
@@ -185,3 +230,52 @@ sculpture. Comparisons and compound requests keep their union. Explicit links
 can still add sections from any allowed file, and broader recovery can search
 beyond the preferred titles. Filename matching is a precision heuristic, not
 proof that every relevant source has been found.
+
+Main-idea, takeaway and whole-presentation explanations use structural coverage
+instead of treating an extractive answerability head as a judge of synthesis.
+Short selections are read completely; longer ones sample actual passages across
+the beginning, middle and end. Scoped illustrative follow-ups reuse the prior
+answer's evidence. A shared subject in a preferred title can recover relevant
+body text in differently named allowed files without importing an unrelated
+event's rules. Ambiguous document-level requests ask which file is intended.
+
+The writer may synthesize supported details and mark interpretations/analogies.
+A failed evidence-labeling call retries labels using the same prose. If it still
+fails, the app reports an evidence-attachment error and shows related passages;
+it does not claim that the document lacks the information. Auxiliary evidence
+footers/JSON packets are omitted while requested code and quotations survive.
+Full short source bodies remain citable even below the normal quotation length.
+Explicit prose attributions such as `the text states “…”` and `according to … “…”`
+receive a narrow literal wording check, with terminal sentence punctuation ignored.
+One correction uses the draft and actual source passages, without earlier assistant
+prose. Its original missing-result status survives an incidental marker change.
+An unresolved wording mismatch is disclosed in the notice/source panel rather than
+discarding the useful answer; this check does not judge ordinary synthesis.
+
+Possible stacked PDF equations receive one advisory notation notice per document.
+A narrow short-expression/denominator pattern excludes matching final page numbers
+and ordinary prose; it is not comprehensive math recognition. The unchanged source
+text remains available. The writer receives a grouping reminder and can still
+explain the supported concept while identifying a notation gap. It cannot use
+that notice as a source-credibility or answerability veto.
+
+Independent material requests do not receive prior assistant prose as writer input.
+Actual follow-ups keep the bounded conversation segment starting with the latest
+independent material answer. The source-selection planner still has the conversation
+needed to resolve references, and source permissions remain separate from history.
+
+After an actual missing answer, orchestration can use a previously rejected
+deeper-search candidate, or perform the one wider search if none occurred.
+Only additional allowed text earns this second generation. A learned score
+cannot forbid it. If the second answer is still missing or fails validation, the
+original missing answer survives. This is bounded recovery, never a forced answer.
+
+For preparation with missing inputs, a small verbatim source-step inventory helps
+the writer preserve all prescribed components. Pure omission-only notes from the
+same documents can be attached literally after the prose with their original
+source binding. They are displayed to the learner, not discarded or treated as
+new prohibitions. Mixed passages, policy conditions and strict short-format
+requests retain the ordinary path. Metadata must still cite the written answer
+before a literal omission note is added; an empty labeling result cannot gain
+apparent support just from that note. Procedural `can I` questions no longer
+trigger a policy critic solely because of their modal wording.

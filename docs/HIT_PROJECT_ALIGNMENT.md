@@ -30,7 +30,7 @@ below came from the student's proposed design, not additional instructor rules.
 | O4: classify intent | Original four-label TF-IDF/logistic-regression experiment remains reproducible | The generative tutor follows the actual question instead of letting the tiny classifier block or misroute it |
 | O5: conversational continuity | Recent scoped turns, comparison references, topic changes, learner feedback and ordered lesson continuation | Context is bounded; new document selection drops incompatible history |
 | O6: measurable maintenance | Offline regression tests, real-weight checks, original conversation challenge and recorded model outputs/timing | Constraint checks are diagnostics, not a semantic accuracy percentage |
-| FR1/FR8: ingest and inspect sources | Six formats, isolated parsers, heading-aware chunks and source panels | Image-only pages/diagrams still need supplied OCR/text |
+| FR1/FR8: ingest and inspect sources | Documents and images, isolated parsers, local OCR, heading-aware chunks and source panels | OCR recovers printed labels; visual relationships, unread text and handwriting can need a description |
 | FR2/FR5: local semantic retrieval | Persistent local vectors, word/dense rank fusion, optional reranker/reader and context expansion | Pretrained weights are integrated, not trained on coursework |
 | FR6: generation | Offline MLX instruction model or explicitly enabled compatible provider | Excerpt mode remains available but is clearly a limited fallback |
 | FR9: refresh material | Incremental document/vector ingestion and deletion cascades | No inherited fixed university corpus is imported |

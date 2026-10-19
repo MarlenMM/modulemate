@@ -1,5 +1,43 @@
 # Original evaluation material
 
+`synthesis_challenge.json` adds original fictional presentation, workflow, short
+fact and story probes for main ideas, follow-ups, analogies, connections and
+unknown details. Run `scripts/evaluate_conversations.py --suite synthesis`.
+These are inspected development diagnostics, not a blinded intelligence score.
+`tests/test_ocr.py` constructs original raster, mixed PDF, DOCX and PPTX fixtures;
+`MODULEMATE_TEST_OCR=1` enables actual local recognition in the isolated parser.
+`MODULEMATE_TEST_OCR_STRESS=1` additionally checks a 65-page original scanned PDF.
+`understanding_transfer.json` contains new preparation, interpretation, conditional
+rule and implicit-companion cases. Run `--suite understanding`. Phrase flags can
+be false positives: the model's word “identical” does not match a list containing
+only “same/unchanged/constant”. Keep raw results and read the complete answers.
+`source_check_transfer.json` probes incidental topic words, conditional facts that
+need more than 50 words, explicit missing prices and conceptual reframing. Run
+`--suite source-check`. Its expected phrases are also diagnostics, not a semantic
+verdict. It is original material used in development, with no fitting or retraining.
+`source_scope_transfer.json` adds unknown-versus-negative distinctions and direct
+preparation feasibility after a real missing-name error was observed. Run
+`--suite source-scope`. For example, “not possible to determine if admission is
+free” can trigger the literal forbidden phrase “admission is free” while correctly
+withholding the price. Retain that flag as a diagnostic limitation, not an error
+label for the answer. The scenario's review criteria explain the semantic issue.
+`overview_transfer.json` adds a 72-section original presentation with three major
+parts and a closing connection. It checks an unqualified main-concept question,
+including an ordinary misspelling, and an unsupported measured-outcome question.
+Run `--suite overview`. It exercises sampled breadth rather than claiming every
+long-document detail was read. These are development cases, with no fitting.
+`notation_transfer.json` embeds the bytes of an original native-text PDF containing
+a drawn fraction bar. Run `--suite notation`. It checks useful conceptual help and
+grouping of a complete two-term numerator when applying the displayed rule.
+The original PDF bytes are covered by the JSON fixture fingerprint. A controlled
+writer-annotation comparison is retained; both conditions gave the correct result.
+
+[The 2.4 observations](observations/understanding-v24.json) retain full original
+fixture answers, negative candidates, timing, source identity and code/data/model
+fingerprints. They distinguish a frozen baseline, development trials and a complete
+46-turn checkpoint. Required-word flags are not semantic answer correctness;
+manual observations retain known wrong conclusions and entity substitutions too.
+
 The 2.3 evidence work adds `evidence_learning.json` (original document-grouped
 training/calibration/test annotations), `claim_support.json` (independent NLI
 diagnostics), and `evidence_transfer.json` (new multi-document conversations).

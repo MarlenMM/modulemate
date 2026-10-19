@@ -1,0 +1,69 @@
+{
+  "license": "CC0-1.0",
+  "description": "Original fictional probes for inferred style limits, topic words and supported reasoning. Development diagnostics, not fitting data or an accuracy estimate.",
+  "documents": [
+    {
+      "name": "Workshop card.md",
+      "text": "# Example Calculation workshop\nThe fictional Example Calculation workshop starts at 09:10 in the north room on 14 November 2026. Bring a blank notebook. No ticket price is specified.\n"
+    },
+    {
+      "name": "Team visit.md",
+      "text": "# Team visit\nDay teams bring a paper map and a blue pencil, record the gate number before entry, and meet the guide at the east gate. Night teams bring a torch and a red pencil, record the gate number and arrival time before entry, and meet the guide at the west gate. Both teams wait outside until the guide arrives.\n"
+    },
+    {
+      "name": "Sensor check.md",
+      "text": "# What the check establishes\nA volunteer copies a sensor reading onto a card. An editor compares the card against the saved reading. A successful check means the copied number matches the saved reading. It does not establish that the sensor measured the true temperature.\n## Separate uncertainty\nThe example calculation concerns transcription only. The sensor has no supplied calibration certificate, so its measurement accuracy remains unknown. Repeating the copy check cannot by itself supply the missing calibration.\n"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "topic-words-are-source-facts",
+      "documents": ["Workshop card.md"],
+      "turns": [
+        {
+          "question": "Is the Example Calculation workshop in the north room, and when does it start?",
+          "expected_kind": "generated",
+          "required": ["north", "09:10"],
+          "max_words": 100
+        },
+        {
+          "question": "Give only the ticket price.",
+          "expected_kind": "insufficient",
+          "forbidden": ["free", "zero credits"],
+          "max_words": 60
+        }
+      ]
+    },
+    {
+      "id": "conditions-need-room",
+      "documents": ["Team visit.md"],
+      "turns": [
+        {
+          "question": "Are the conditions the same for day and night teams, and what must each team bring, record and do before entry?",
+          "expected_kind": "generated",
+          "required": ["map", "blue", "east", "torch", "red", "arrival", "west", "wait"],
+          "max_words": 160
+        }
+      ]
+    },
+    {
+      "id": "interpretation-is-not-permission",
+      "documents": ["Sensor check.md"],
+      "turns": [
+        {
+          "question": "Does a successful check mean the sensor is accurate, or only that the copied reading matches the record?",
+          "expected_kind": "generated",
+          "required_any": [["not", "unknown"], ["cop", "transcription"], ["calibrat", "accura"]],
+          "max_words": 140
+        },
+        {
+          "question": "Can we regard this as checking the message rather than the measuring instrument?",
+          "expected_kind": "generated",
+          "required_any": [["yes", "correct"], ["cop", "transcription", "message"], ["sensor", "instrument"]],
+          "forbidden": ["permission", "not allowed"],
+          "max_words": 140
+        }
+      ]
+    }
+  ]
+}

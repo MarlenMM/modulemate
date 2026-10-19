@@ -1,6 +1,7 @@
 """Run original end-to-end challenges. Constraint results are diagnostics, not accuracy."""
 
 import argparse
+import base64
 import hashlib
 import json
 import sys
@@ -112,7 +113,20 @@ def main():
     parser.add_argument("--policy", choices=("adaptive", "baseline", "full"), default="adaptive")
     parser.add_argument(
         "--suite",
-        choices=("general", "probe", "core", "transfer", "evidence", "partial"),
+        choices=(
+            "general",
+            "probe",
+            "core",
+            "transfer",
+            "evidence",
+            "partial",
+            "synthesis",
+            "understanding",
+            "source-check",
+            "source-scope",
+            "overview",
+            "notation",
+        ),
         default="general",
     )
     parser.add_argument(
@@ -138,6 +152,12 @@ def main():
             "transfer": "conversation_transfer.json",
             "evidence": "evidence_transfer.json",
             "partial": "partial_help.json",
+            "synthesis": "synthesis_challenge.json",
+            "understanding": "understanding_transfer.json",
+            "source-check": "source_check_transfer.json",
+            "source-scope": "source_scope_transfer.json",
+            "overview": "overview_transfer.json",
+            "notation": "notation_transfer.json",
         }[args.suite]
     )
     backend = AIBackend(load_settings()) if args.provider else local_backend()
@@ -154,8 +174,13 @@ def main():
         course = store.create_course("Original challenge")
         doc_ids = {}
         for doc in fixture["documents"]:
+            content = (
+                base64.b64decode(doc["base64"], validate=True)
+                if "base64" in doc
+                else doc["text"].encode()
+            )
             doc_ids[doc["name"]] = store.add_document(
-                course, parse_upload(doc["name"], doc["text"].encode(), isolated=False)
+                course, parse_upload(doc["name"], content, isolated=False)
             )[0]
         engine = get_local_models()
         for scenario in fixture["scenarios"]:

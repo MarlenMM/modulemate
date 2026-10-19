@@ -229,6 +229,10 @@ def plan_turn(question, mode, history):
             plan.resolved_question = question.rstrip(".!? ") + f" (about {topic[:300]})."
         if format_followup:
             plan.context_ids = [p["id"] for p in previous["sources"] if type(p.get("id")) is int]
+        if followup and re.search(r"\b(?:examples?|analogy)\b", question, re.I):
+            # An illustration explains the concept just sourced. Re-searching
+            # the whole library can replace it with unrelated examples.
+            plan.context_ids = [p["id"] for p in previous["sources"] if type(p.get("id")) is int]
         if not tokens(topic):
             plan.context_ids = [p["id"] for p in previous["sources"] if type(p.get("id")) is int]
         if selected == "Compare" and not plan.subjects:

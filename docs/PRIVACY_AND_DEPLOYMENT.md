@@ -12,6 +12,13 @@ by Git. They are not encrypted by ModuleMate. JSON exports contain study content
 keep them private. Deleting a document removes its passages/vectors/linked cards
 and clears that course's chat, which may contain paraphrases of the source.
 
+OCR runs locally through Apple Vision or an installed Tesseract engine. PDF
+rendering, image normalization and recognition use bounded request-local buffers;
+original images are discarded after import. Only the extracted text and reading
+notices are saved. No cloud vision endpoint receives uploaded pictures. A hosted
+conversational provider, if explicitly enabled, can receive selected OCR text
+under the same provider boundary as native document text.
+
 Local model setup explicitly downloads public weights. Inference uses local files,
 disables Hub networking/telemetry in the generative worker, and loads no custom
 remote model code. The worker is bounded, serializes requests and discards its

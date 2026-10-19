@@ -53,7 +53,7 @@ def test_size_limit():
         parse_upload("large.txt", b"a" * (MAX_BYTES + 1))
 
 
-def test_notebook_ignores_outputs_and_never_executes(tmp_path):
+def test_notebook_reads_saved_outputs_and_never_executes(tmp_path):
     target = tmp_path / "should-not-exist"
     data = {
         "cells": [
@@ -67,8 +67,8 @@ def test_notebook_ignores_outputs_and_never_executes(tmp_path):
     }
     parsed = parse_upload("demo.ipynb", json.dumps(data).encode())
     assert not target.exists()
-    assert "SECRET OUTPUT" not in parsed.text
-    assert {c.locator for c in parsed.chunks} == {"cell 1", "cell 2"}
+    assert "SECRET OUTPUT" in parsed.text
+    assert {c.locator for c in parsed.chunks} == {"cell 1", "cell 2", "cell 2 · saved output 1"}
 
 
 def test_docx_preserves_paragraph_table_order():

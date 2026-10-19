@@ -1,0 +1,716 @@
+{
+  "original_fictional_only": true,
+  "license": "CC0-1.0",
+  "latest_code_sha256": "5b8f725265308f0a5082999694a304687bead9887683dbbe0b429d338ef033b8",
+  "app_sha256": "733596dc8d4d7536cc45d4e7e6c1e3f010f317f0719a2bcbd01c180ad7953549",
+  "scope": "Actual isolated browser app outputs. Earlier rows predate final changes and have no per-row code fingerprint. No learner database or private source is opened by this exporter.",
+  "manual_review": [
+    "The two signal-card imports disagree; selection of import 2 resolves pH 8 without importing the other source.",
+    "Image OCR supplies the 42-degree label text without inventing a temperature scale.",
+    "The early long-overview rows invent a reporting condition, and the first existing-history replay repeats it.",
+    "The last replay preserves earlier history but explains all three views without the reporting condition. Its process-validation language remains stronger than a strict comparison, so it is not a perfect-entailment claim.",
+    "The separate actual card draft has the exact pH = 8 back; its screenshot is retained, and the draft was not saved as a learner card."
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "question": "What pH is on the signal card?",
+      "answer": "The provided materials contain conflicting information for the signal card: one passage states the pH is 7, while another states it is 8. Because the text offers two different values for the same item without clarification, it is not possible to determine the single correct pH from the available content. [1] [2]",
+      "sources": [
+        {
+          "id": 40,
+          "document_id": "1872d5b62855493f997e3da1ff8d574a",
+          "name": "Signal card.txt",
+          "locator": "part 1",
+          "text": "pH = 7"
+        },
+        {
+          "id": 44,
+          "document_id": "a3a7b08b251344ae8cddcf44b90aee6c",
+          "name": "Signal card.txt",
+          "locator": "part 1",
+          "text": "pH = 8"
+        }
+      ],
+      "metadata": {
+        "intent": "conceptual",
+        "intent_score": null,
+        "query": "What pH is on the signal card?",
+        "topic": "Signal card pH value",
+        "subjects": [
+          "Signal card",
+          "pH"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": null,
+        "basis": "mixed",
+        "baseline_intent": "admin",
+        "baseline_intent_score": 0.544,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": false,
+        "history_turns_omitted": 0,
+        "retrieval": "full short selection",
+        "context_complete": true,
+        "context_passages": 2,
+        "context_characters": 214,
+        "context_links": [],
+        "source_reading_limits": [],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {
+          "model": "modulemate-evidence-reader-v2",
+          "advisory": true,
+          "parts": [
+            {
+              "question": "What pH is on the signal card?",
+              "estimate": 0.2731,
+              "passage_estimate": 0.2315,
+              "context_estimate": 0.2731,
+              "passage_ids": [
+                40,
+                44
+              ],
+              "relevance": 0.1096,
+              "candidate_spans": [
+                {
+                  "margin": 4.158356189727783,
+                  "text": "7",
+                  "start": 5,
+                  "end": 6,
+                  "passage_id": 40,
+                  "estimate": 0.2315
+                },
+                {
+                  "margin": 4.283974647521973,
+                  "text": "8",
+                  "start": 5,
+                  "end": 6,
+                  "passage_id": 44,
+                  "estimate": 0.2276
+                }
+              ]
+            }
+          ],
+          "recovery_attempted": false,
+          "recovery_applied": false
+        },
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Materials with added examples or explanation",
+        "kind": "generated",
+        "suggestions": []
+      }
+    },
+    {
+      "id": 2,
+      "question": "What pH is on the selected signal card?",
+      "answer": "The pH on the selected signal card is 8, as stated in the provided text: \"pH = 8\". [1]",
+      "sources": [
+        {
+          "id": 44,
+          "document_id": "a3a7b08b251344ae8cddcf44b90aee6c",
+          "name": "Signal card.txt",
+          "locator": "part 1",
+          "text": "pH = 8"
+        }
+      ],
+      "metadata": {
+        "intent": "conceptual",
+        "intent_score": null,
+        "query": "What pH is on the selected signal card?",
+        "topic": "pH value on signal card",
+        "subjects": [
+          "pH"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": [
+          "a3a7b08b251344ae8cddcf44b90aee6c"
+        ],
+        "basis": "materials",
+        "baseline_intent": "admin",
+        "baseline_intent_score": 0.575,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": false,
+        "history_turns_omitted": 0,
+        "retrieval": "full short selection",
+        "context_complete": true,
+        "context_passages": 1,
+        "context_characters": 107,
+        "context_links": [],
+        "source_reading_limits": [],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {
+          "model": "modulemate-evidence-reader-v2",
+          "advisory": true,
+          "parts": [
+            {
+              "question": "What pH is on the selected signal card?",
+              "estimate": 0.154,
+              "passage_estimate": 0.154,
+              "context_estimate": 0.0,
+              "passage_ids": [
+                44
+              ],
+              "relevance": 0.1289,
+              "candidate_spans": [
+                {
+                  "margin": 4.16524600982666,
+                  "text": "8",
+                  "start": 5,
+                  "end": 6,
+                  "passage_id": 44,
+                  "estimate": 0.154
+                }
+              ]
+            }
+          ],
+          "recovery_attempted": false,
+          "recovery_applied": false
+        },
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Based on your materials",
+        "kind": "generated",
+        "suggestions": [
+          "What does a pH of 8 indicate about the selected signal card's environment?"
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "question": "At what point does the valve open, according to the label?",
+      "answer": "According to the label, the valve opens at 42 degrees. The text explicitly states, \"The valve opens at 42 degrees. Do not open it earlier,\" indicating this is the specific threshold for operation. [1]",
+      "sources": [
+        {
+          "id": 43,
+          "document_id": "ca24381d783b45b9bd2c247753deffda",
+          "name": "Valve label.png",
+          "locator": "image 1 · OCR",
+          "text": "The valve opens at 42 degrees. Do not open it earlier."
+        }
+      ],
+      "metadata": {
+        "intent": "admin",
+        "intent_score": null,
+        "query": "At what point does the valve open, according to the label?",
+        "topic": "Valve operation threshold",
+        "subjects": [
+          "valve opening temperature"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": [
+          "ca24381d783b45b9bd2c247753deffda"
+        ],
+        "basis": "materials",
+        "baseline_intent": "conceptual",
+        "baseline_intent_score": 0.689,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": true,
+        "history_turns_omitted": 0,
+        "retrieval": "full short selection",
+        "context_complete": true,
+        "context_passages": 1,
+        "context_characters": 162,
+        "context_links": [],
+        "source_reading_limits": [
+          {
+            "document": "Valve label.png",
+            "notices": [
+              "Local OCR (Apple Vision) recovered image text at 1 locations. OCR locations are labeled; verify names, numbers and formulas against the original. Text recognition does not interpret diagrams, arrows or chart values."
+            ]
+          }
+        ],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {
+          "model": "modulemate-evidence-reader-v2",
+          "advisory": true,
+          "parts": [
+            {
+              "question": "At what point does the valve open, according to the label?",
+              "estimate": 0.9577,
+              "passage_estimate": 0.9577,
+              "context_estimate": 0.0,
+              "passage_ids": [
+                43
+              ],
+              "relevance": 0.9543,
+              "candidate_spans": [
+                {
+                  "margin": 10.929393291473389,
+                  "text": "42 degrees",
+                  "start": 19,
+                  "end": 29,
+                  "passage_id": 43,
+                  "estimate": 0.9577
+                }
+              ]
+            }
+          ],
+          "recovery_attempted": false,
+          "recovery_applied": false
+        },
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Based on your materials",
+        "kind": "generated",
+        "suggestions": []
+      }
+    },
+    {
+      "id": 4,
+      "question": "Explain the main concept of the presentation.",
+      "answer": "The main concept is the \"widen-the-window principle,\" which teaches that a sample is only as good as the range of conditions it represents, not just the number of items checked. Initially, inspectors examined only tiles near the kiln door, a convenient \"window\" that failed to reveal defects on the difficult-to-reach back shelves. The presentation corrects this by introducing a representative sampling method: inspecting two tiles from front, middle, and back zones ensures the data reflects the entire kiln's state. This approach prioritizes a balanced view of the whole collection over the ease of access, acknowledging that limited observations can otherwise give a distorted picture of the total batch. [1] [2] [3] [4] [5]",
+      "sources": [
+        {
+          "id": 1,
+          "document_id": "b32ccd68acc649738f8ae0065846993f",
+          "name": "Windows presentation.md",
+          "locator": "part 1 · A window is not the whole room › Opening problem",
+          "text": "# A window is not the whole room\n## Opening problem\nThe fictional Bellweather studio tests ceramic tiles. Inspectors used to check only the tiles nearest the kiln door. Those tiles were easy to reach, but the studio found that they did not represent the back shelves."
+        },
+        {
+          "id": 2,
+          "document_id": "b32ccd68acc649738f8ae0065846993f",
+          "name": "Windows presentation.md",
+          "locator": "part 1 · A window is not the whole room › Sampling rule",
+          "text": "# A window is not the whole room\n## Sampling rule\nThe revised plan divides the kiln into front, middle and back zones. An inspector takes two tiles from each zone before deciding whether the batch needs another inspection. The same pattern is repeated for every batch."
+        },
+        {
+          "id": 4,
+          "document_id": "b32ccd68acc649738f8ae0065846993f",
+          "name": "Windows presentation.md",
+          "locator": "part 1 · A window is not the whole room › Avoiding a shortcut",
+          "text": "# A window is not the whole room\n## Avoiding a shortcut\nPicking six convenient tiles from the front is not equivalent to taking two from each zone. Equal total counts do not fix a plan that omits a whole part of the kiln."
+        },
+        {
+          "id": 5,
+          "document_id": "b32ccd68acc649738f8ae0065846993f",
+          "name": "Windows presentation.md",
+          "locator": "part 1 · A window is not the whole room › Interpretation",
+          "text": "# A window is not the whole room\n## Interpretation\nA visible sample can give a distorted picture of a larger collection. The selection plan matters, not just the number of objects inspected. A balanced check makes the less convenient zones visible."
+        },
+        {
+          "id": 35,
+          "document_id": "b32ccd68acc649738f8ae0065846993f",
+          "name": "Windows presentation.md",
+          "locator": "part 1 · A window is not the whole room › Closing conclusion",
+          "text": "# A window is not the whole room\n## Closing conclusion\nThe central lesson is representative observation: deliberately look beyond the easiest window before drawing a conclusion about the whole collection. The speaker calls this the widen-the-window principle. The presentation offers no causal account of the rough edges."
+        }
+      ],
+      "metadata": {
+        "intent": "conceptual",
+        "intent_score": null,
+        "query": "Explain the main concept of the presentation.",
+        "topic": "Widen-the-window principle",
+        "subjects": [
+          "representative sampling",
+          "inspection strategy",
+          "biased observation"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": [
+          "b32ccd68acc649738f8ae0065846993f"
+        ],
+        "basis": "mixed",
+        "baseline_intent": "conceptual",
+        "baseline_intent_score": 0.798,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": false,
+        "history_turns_omitted": 0,
+        "retrieval": "word matching",
+        "context_complete": true,
+        "context_passages": 35,
+        "context_characters": 20503,
+        "context_links": [],
+        "source_reading_limits": [],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {},
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [
+          {
+            "document_id": "b32ccd68acc649738f8ae0065846993f",
+            "document": "Windows presentation.md",
+            "location": "part 1 · A window is not the whole room › Limits",
+            "quote": "This is a fictional teaching demonstration. It does not establish that zone causes roughness. The notes give no author, chemical composition, firing temperature or numerical defect rate.",
+            "matched_terms": [
+              "defect",
+              "teach"
+            ],
+            "status": "Possible omitted evidence; human review required"
+          }
+        ],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Materials with added examples or explanation",
+        "kind": "generated",
+        "suggestions": []
+      }
+    },
+    {
+      "id": 5,
+      "question": "Can you expalin the main concept from here?",
+      "answer": "The main concept is the **three-view principle**, a decision-making framework that connects observing, mapping, and reviewing.\n\nFirst, **observing** records what is already present, such as existing features and access paths, to describe the site before any changes are proposed. Second, **mapping** connects these observations to show how a change to one area affects another, specifically considering movement and shared uses. Finally, **reviewing** compares the proposal against both the observations and mapped connections to check unresolved questions before approval. This sequence ensures no actual design outcome is reported without verifying these checks. [1] [2] [3] [4]",
+      "sources": [
+        {
+          "id": 48,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 1: Observe",
+          "text": "## Slide 1: Observe\nObservation 1 records what is already present: existing features and access paths. Describe the site before proposing a change."
+        },
+        {
+          "id": 119,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 72: Closing principle",
+          "text": "## Slide 72: Closing principle\nThe three-view principle connects observing, mapping relationships and reviewing proposed changes. Each view supplies a different check before a decision. No actual design outcome is reported."
+        },
+        {
+          "id": 73,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 26: Map",
+          "text": "## Slide 26: Map\nMapping 26 connects observations to show how a change to one area affects another. Consider movement and shared uses."
+        },
+        {
+          "id": 97,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 50: Review",
+          "text": "## Slide 50: Review\nReview 50 compares the proposal with the observations and mapped connections. Check unresolved questions before approving a change."
+        }
+      ],
+      "metadata": {
+        "intent": "conceptual",
+        "intent_score": null,
+        "query": "Can you expalin the main concept from here?",
+        "topic": "three-view principle",
+        "subjects": [
+          "observing",
+          "mapping",
+          "reviewing"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": [
+          "0d228157f78e463fbc7fa2b468ee3064"
+        ],
+        "basis": "mixed",
+        "baseline_intent": "conceptual",
+        "baseline_intent_score": 0.691,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": false,
+        "history_turns_omitted": 0,
+        "retrieval": "hybrid",
+        "context_complete": false,
+        "context_passages": 48,
+        "context_total_passages": 72,
+        "overview_sampled": true,
+        "context_characters": 13152,
+        "context_links": [],
+        "source_reading_limits": [],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {},
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Materials with added examples or explanation · Used selected context from 72 passages",
+        "kind": "generated",
+        "suggestions": []
+      }
+    },
+    {
+      "id": 6,
+      "question": "Which reference URL is given in the selected note?",
+      "answer": "The selected note provides the reference URL **https://example.org/field-notes**. This information is located in part 1 of the document titled \"Reference URL.txt,\" which explicitly states: \"Reference location: https://example.org/field-notes.\" No other URLs are mentioned in the available text. [1]",
+      "sources": [
+        {
+          "id": 47,
+          "document_id": "10b78dd9663d4f6587bf6c11ab011300",
+          "name": "Reference URL.txt",
+          "locator": "part 1",
+          "text": "Reference location: https://example.org/field-notes"
+        }
+      ],
+      "metadata": {
+        "intent": "code_help",
+        "intent_score": null,
+        "query": "Which reference URL is given in the selected note?",
+        "topic": "Reference URL in selected note",
+        "subjects": [
+          "Reference URL",
+          "Document location"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": [
+          "10b78dd9663d4f6587bf6c11ab011300"
+        ],
+        "basis": "materials",
+        "baseline_intent": "admin",
+        "baseline_intent_score": 0.616,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": false,
+        "history_turns_omitted": 0,
+        "retrieval": "full short selection",
+        "context_complete": true,
+        "context_passages": 1,
+        "context_total_passages": 1,
+        "overview_sampled": false,
+        "context_characters": 154,
+        "context_links": [],
+        "source_reading_limits": [],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {
+          "model": "modulemate-evidence-reader-v2",
+          "advisory": true,
+          "parts": [
+            {
+              "question": "Which reference URL is given in the selected note?",
+              "estimate": 0.137,
+              "passage_estimate": 0.137,
+              "context_estimate": 0.0,
+              "passage_ids": [
+                47
+              ],
+              "relevance": 0.2666,
+              "candidate_spans": [
+                {
+                  "margin": 6.2741899490356445,
+                  "text": "field-notes",
+                  "start": 40,
+                  "end": 51,
+                  "passage_id": 47,
+                  "estimate": 0.137
+                }
+              ]
+            }
+          ],
+          "recovery_attempted": false,
+          "recovery_applied": false
+        },
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Based on your materials",
+        "kind": "generated",
+        "suggestions": []
+      }
+    },
+    {
+      "id": 7,
+      "question": "Can you explain the main concept from here?",
+      "answer": "The main concept is the **three-view principle**, an interpretive framework for decision-making that connects observing, mapping, and reviewing. This approach ensures no design outcome is reported without first verifying specific checks. **Observing** records existing features and access paths to describe the site before any changes are proposed. **Mapping** then connects these observations to show how a change to one area affects another, specifically considering movement and shared uses. Finally, **reviewing** compares the proposal against both the observations and mapped connections to check unresolved questions before approval. This sequence creates a safety net where each view supplies a different verification step. [1] [2] [3] [4]",
+      "sources": [
+        {
+          "id": 119,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 72: Closing principle",
+          "text": "## Slide 72: Closing principle\nThe three-view principle connects observing, mapping relationships and reviewing proposed changes. Each view supplies a different check before a decision. No actual design outcome is reported."
+        },
+        {
+          "id": 48,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 1: Observe",
+          "text": "## Slide 1: Observe\nObservation 1 records what is already present: existing features and access paths. Describe the site before proposing a change."
+        },
+        {
+          "id": 73,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 26: Map",
+          "text": "## Slide 26: Map\nMapping 26 connects observations to show how a change to one area affects another. Consider movement and shared uses."
+        },
+        {
+          "id": 97,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 50: Review",
+          "text": "## Slide 50: Review\nReview 50 compares the proposal with the observations and mapped connections. Check unresolved questions before approving a change."
+        }
+      ],
+      "metadata": {
+        "intent": "conceptual",
+        "intent_score": null,
+        "query": "Can you explain the main concept from here?",
+        "topic": "The three-view principle",
+        "subjects": [
+          "Observing",
+          "Mapping",
+          "Reviewing"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": [
+          "0d228157f78e463fbc7fa2b468ee3064"
+        ],
+        "basis": "mixed",
+        "baseline_intent": "conceptual",
+        "baseline_intent_score": 0.82,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": false,
+        "history_turns_omitted": 0,
+        "retrieval": "hybrid",
+        "context_complete": false,
+        "context_passages": 48,
+        "context_total_passages": 72,
+        "overview_sampled": true,
+        "context_characters": 13152,
+        "context_links": [],
+        "source_reading_limits": [],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {},
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Materials with added examples or explanation · Read 48 of 72 passages",
+        "kind": "generated",
+        "suggestions": []
+      }
+    },
+    {
+      "id": 8,
+      "question": "Can you explain the main concept from here?",
+      "answer": "The main concept presented is the **three-view principle**, a structured method for evaluating changes to a site by synthesizing three distinct perspectives before making a decision.\n\n1.  **Observe:** Record existing features and access paths to describe the current state.\n2.  **Map:** Connect observations to show how a change to one area affects another, considering movement and shared uses.\n3.  **Review:** Compare the proposal against the observations and mapped connections to check for unresolved questions.\n\nThis approach ensures that every proposed change is validated against the actual context and its ripple effects, rather than relying on assumptions or isolated facts. Note that while this framework provides the necessary checks, the materials do not report the final design outcomes or confirm that the reviews always lead to specific approvals. [1] [2] [3] [4]",
+      "sources": [
+        {
+          "id": 48,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 1: Observe",
+          "text": "## Slide 1: Observe\nObservation 1 records what is already present: existing features and access paths. Describe the site before proposing a change."
+        },
+        {
+          "id": 119,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 72: Closing principle",
+          "text": "## Slide 72: Closing principle\nThe three-view principle connects observing, mapping relationships and reviewing proposed changes. Each view supplies a different check before a decision. No actual design outcome is reported."
+        },
+        {
+          "id": 73,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 26: Map",
+          "text": "## Slide 26: Map\nMapping 26 connects observations to show how a change to one area affects another. Consider movement and shared uses."
+        },
+        {
+          "id": 97,
+          "document_id": "0d228157f78e463fbc7fa2b468ee3064",
+          "name": "Coverage presentation.md",
+          "locator": "part 1 · Slide 50: Review",
+          "text": "## Slide 50: Review\nReview 50 compares the proposal with the observations and mapped connections. Check unresolved questions before approving a change."
+        }
+      ],
+      "metadata": {
+        "intent": "conceptual",
+        "intent_score": null,
+        "query": "Can you explain the main concept from here?",
+        "topic": "Three-view principle",
+        "subjects": [
+          "Observe",
+          "Map",
+          "Review"
+        ],
+        "resolved_mode": "Explain",
+        "used_context": false,
+        "recall_review": false,
+        "document_scope": [
+          "0d228157f78e463fbc7fa2b468ee3064"
+        ],
+        "basis": "mixed",
+        "baseline_intent": "conceptual",
+        "baseline_intent_score": 0.82,
+        "model": "Qwen3.5 9B · on this Mac",
+        "repaired": false,
+        "audited": false,
+        "history_turns_omitted": 0,
+        "retrieval": "hybrid",
+        "context_complete": false,
+        "context_passages": 48,
+        "context_total_passages": 72,
+        "overview_sampled": true,
+        "context_characters": 13152,
+        "context_links": [],
+        "source_reading_limits": [],
+        "evidence_policy": "adaptive",
+        "evidence_assessment": {},
+        "support_check": {
+          "available": false,
+          "claims": [],
+          "flags": []
+        },
+        "citation_review": [],
+        "lesson": {},
+        "lesson_session": {},
+        "awaiting_answer": false,
+        "notice": "Qwen3.5 9B · on this Mac · Materials with added examples or explanation · Read 48 of 72 passages",
+        "kind": "generated",
+        "suggestions": []
+      }
+    }
+  ]
+}

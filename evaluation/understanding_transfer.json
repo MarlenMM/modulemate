@@ -1,0 +1,181 @@
+{
+  "provenance": "Original fictional CC0 transfer probes authored 19 October 2026, separate from all learned fitting data. Inspected development diagnostics, not accuracy estimates.",
+  "documents": [
+    {
+      "name": "Trial note.md",
+      "text": "# Paper glider trial\nThe fictional Northgate club compares two paper gliders. Both use the same paper and launch point. The second glider changes only the fold at the wing tip. The team records the flight time for each launch and repeats both designs three times.\n## Why this plan\nKeeping the paper and launch point unchanged makes the wing-tip fold the intended difference between the two designs. Repeating launches lets the team see whether a single launch was unusual. No measured flight times or winning design are supplied.\n"
+    },
+    {
+      "name": "Studio memo.md",
+      "text": "# Studio display\nAn entry is written on a card, checked by an editor, then placed on the display. A card cannot go on the display before the editor has checked it. The check concerns whether the entry matches the original record; it does not prove the original record itself is correct.\n"
+    },
+    {
+      "name": "Tree artwork.md",
+      "text": "# Tree artwork assembly\nThe fictional tree artwork has three cardboard branches attached to a flat base. The assembly note gives no width or material masses.\n"
+    },
+    {
+      "name": "Workshop receipt.md",
+      "text": "# Display measurements\nThe tree artwork measures 84 centimetres from its leftmost to rightmost branch. The viewing tower on the field visit is 11 metres tall.\n"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "trial-unprepared",
+      "documents": [
+        "Trial note.md"
+      ],
+      "turns": [
+        {
+          "question": "Explain this presentation to me.",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "fold",
+              "wing"
+            ],
+            [
+              "same",
+              "unchanged",
+              "constant"
+            ]
+          ],
+          "forbidden": [
+            "not supported",
+            "cannot explain"
+          ],
+          "max_words": 180
+        },
+        {
+          "question": "Can I think of this as making a fair comparison?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "fold",
+              "wing"
+            ],
+            [
+              "same",
+              "unchanged",
+              "constant",
+              "control"
+            ]
+          ],
+          "forbidden": [
+            "not permitted",
+            "permission"
+          ],
+          "max_words": 160
+        },
+        {
+          "question": "I do not have any flight times yet. How can I prepare the comparison?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "paper",
+              "launch"
+            ],
+            [
+              "record",
+              "repeat",
+              "three"
+            ]
+          ],
+          "forbidden": [
+            "nothing you can",
+            "cannot help"
+          ],
+          "max_words": 160
+        },
+        {
+          "question": "Which design flew longest?",
+          "expected_kind": "insufficient",
+          "required_any": [
+            [
+              "not",
+              "no",
+              "unknown",
+              "missing"
+            ]
+          ],
+          "max_words": 80
+        }
+      ]
+    },
+    {
+      "id": "display-limits",
+      "documents": [
+        "Studio memo.md"
+      ],
+      "turns": [
+        {
+          "question": "What should I take away from these materials?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "check",
+              "editor"
+            ],
+            [
+              "record"
+            ]
+          ],
+          "max_words": 170
+        },
+        {
+          "question": "Does the check guarantee that the original record is correct?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "no",
+              "not",
+              "cannot"
+            ]
+          ],
+          "max_words": 80
+        }
+      ]
+    },
+    {
+      "id": "implicit-companion",
+      "turns": [
+        {
+          "question": "How wide is the artwork?",
+          "expected_kind": "generated",
+          "required": [
+            "84"
+          ],
+          "forbidden": [
+            "11 metres",
+            "not provided",
+            "no width"
+          ],
+          "max_words": 80
+        }
+      ]
+    },
+    {
+      "id": "explicit-source-boundary",
+      "documents": [
+        "Tree artwork.md"
+      ],
+      "turns": [
+        {
+          "question": "How wide is the artwork?",
+          "expected_kind": "insufficient",
+          "required_any": [
+            [
+              "not",
+              "no",
+              "unknown",
+              "missing"
+            ]
+          ],
+          "forbidden": [
+            "84"
+          ],
+          "max_words": 80
+        }
+      ]
+    }
+  ]
+}

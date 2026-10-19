@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import random
 import re
+from collections import Counter
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
@@ -50,12 +51,31 @@ def flash(message):
     st.rerun()
 
 
-def source_panel(sources, key):
+def source_panel(sources, key, *, related=False, metadata=None):
     if not sources:
         return
     with st.expander(
-        f"Check sources · {len(sources)} {'passage' if len(sources) == 1 else 'passages'}"
+        f"{'Related passages' if related else 'Check sources'} · {len(sources)} {'passage' if len(sources) == 1 else 'passages'}"
     ):
+        metadata = metadata or {}
+        read, total = metadata.get("context_passages"), metadata.get("context_total_passages")
+        if (
+            metadata.get("overview_sampled")
+            and type(read) is int
+            and type(total) is int
+            and 0 < read < total
+        ):
+            st.caption(
+                f"This overview read {read} of {total} available passages. Long materials use a sample; focus on a section or use Teach for guided coverage."
+            )
+        for reading in metadata.get("source_reading_limits", []):
+            st.caption(plain(reading["document"]) + ": " + plain(" ".join(reading["notices"])))
+        for review in metadata.get("citation_review", []):
+            if review.get("type") == "unmatched_attributed_quote":
+                st.caption(
+                    "This attributed phrase could not be matched verbatim. Check the source wording: "
+                    + plain(review["quote"])
+                )
         for i, passage in enumerate(sources, 1):
             st.text(f"[{i}] {passage['name']} · {passage['locator']}")
             st.text(passage["text"])
@@ -86,11 +106,38 @@ def answer_feedback(store, course_id, message):
             flash("Answer feedback saved.")
 
 
+def passage_count(count):
+    return f"{count} passage{'s' if count != 1 else ''}"
+
+
+def document_labels(documents):
+    counts = Counter(d["name"] for d in documents)
+    seen = Counter()
+    labels = {}
+    for document in documents:
+        name = document["name"]
+        seen[name] += 1
+        labels[document["id"]] = (
+            f"{name} · import {seen[name]} · {passage_count(document['chunks'])}"
+            if counts[name] > 1
+            else name
+        )
+    return labels
+
+
 def select_documents(documents, key):
-    names = {d["id"]: d["name"] for d in documents}
+    names = document_labels(documents)
+    # Streamlit drops a widget's state when its page is hidden. Keep the chosen
+    # document scope separately so navigation cannot silently widen it to all.
+    saved_key = f"saved_{key}"
+    previous = st.session_state.get(key, st.session_state.get(saved_key, []))
+    available = [document for document in previous if document in names]
+    if key not in st.session_state or previous != available:
+        st.session_state[key] = available
     selected = st.multiselect(
         "Focus on documents (leave empty for all)", list(names), format_func=names.get, key=key
     )
+    st.session_state[saved_key] = list(selected)
     return selected or None
 
 
@@ -100,16 +147,20 @@ def library(store, course_id):
         "Add material you have permission to use. Search and study tools use only this course's library."
     )
     st.caption(
-        "Extracted text is saved; original files are not retained. Images, handwriting and scanned pages need OCR first."
+        "Extracted text is saved; originals are not retained. Local OCR reads text in scans and embedded images. Diagrams and handwriting may still need a description."
     )
     with (
         st.expander("Upload documents", expanded=True),
         st.form(f"upload_{course_id}", clear_on_submit=True),
     ):
         uploads = st.file_uploader(
-            "PDF, DOCX, PPTX, TXT, Markdown or notebook",
+            "PDF, DOCX, PPTX, TXT, Markdown, notebook or image",
             type=[s[1:] for s in sorted(SUPPORTED)],
             accept_multiple_files=True,
+        )
+        use_ocr = st.checkbox("Read image text with local OCR", value=True)
+        st.caption(
+            "OCR stays on this computer. Reimport an original to recover images omitted by an older import. Changed text creates a separate copy; select the updated import or remove the old copy after checking its text preview."
         )
         rights = st.checkbox(
             "I have permission to use these materials here.", key=f"upload_rights_{course_id}"
@@ -126,7 +177,7 @@ def library(store, course_id):
             for upload in uploads:
                 try:
                     with st.spinner(f"Reading {plain(upload.name)}…"):
-                        parsed = parse_upload(upload.name, upload.getvalue())
+                        parsed = parse_upload(upload.name, upload.getvalue(), use_ocr=use_ocr)
                         _, created = store.add_document(course_id, parsed)
                     st.success(
                         f"{plain(parsed.name)}: {len(parsed.chunks)} passages added."
@@ -200,8 +251,12 @@ def library(store, course_id):
             st.text(f"{hit.name} · {hit.locator}")
             st.text(hit.text)
             st.divider()
+    labels = document_labels(docs)
     for doc in docs:
-        with st.expander(f"{plain(doc['name'])} · {doc['chunks']} passages"):
+        title = labels[doc["id"]]
+        if title == doc["name"]:
+            title += f" · {passage_count(doc['chunks'])}"
+        with st.expander(plain(title)):
             for warning in json.loads(doc["warnings"]):
                 st.warning(plain(warning))
             full = store.document(doc["id"])
@@ -307,7 +362,12 @@ def assistant(store, course_id, settings, backend):
         with st.chat_message("assistant"):
             render_answer(message["answer"])
             st.caption(message.get("metadata", {}).get("notice") or message["mode"])
-            source_panel(message["sources"], message["id"])
+            source_panel(
+                message["sources"],
+                message["id"],
+                related=message.get("metadata", {}).get("kind") == "error",
+                metadata=message.get("metadata"),
+            )
             answer_feedback(store, course_id, message)
     if messages:
         if messages[-1].get("metadata", {}).get("kind") == "error" and st.button(
@@ -347,7 +407,12 @@ def assistant(store, course_id, settings, backend):
             render_answer(result.text)
             if result.notice:
                 st.caption(result.notice)
-            source_panel([p.to_dict() for p in result.passages], "latest")
+            source_panel(
+                [p.to_dict() for p in result.passages],
+                "latest",
+                related=result.kind == "error",
+                metadata=result.metadata,
+            )
         st.rerun()
 
 
@@ -396,7 +461,7 @@ def cards_page(store, course_id, backend, today):
         with st.expander("Write your own card", expanded=True):
             source_names = {
                 None: "My own card (no source link)",
-                **{d["id"]: d["name"] for d in docs},
+                **document_labels(docs),
             }
             source_id = st.selectbox(
                 "Optional card source", list(source_names), format_func=source_names.get

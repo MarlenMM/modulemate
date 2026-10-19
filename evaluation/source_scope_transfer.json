@@ -1,0 +1,157 @@
+{
+  "license": "CC0-1.0",
+  "description": "Original transfer questions written after an observed unknown-to-negative error. Distinguishes unlisted facts, explicit absence, useful preparation and interpretation. Development data, never fitting data.",
+  "documents": [
+    {
+      "name": "Mooring note.md",
+      "text": "# Mooring session\nThe fictional mooring session begins at the blue marker. The note does not name a coordinator and does not specify an admission price.\n"
+    },
+    {
+      "name": "Open day.md",
+      "text": "# Fictional open day\nThe open day has no sponsor. Admission is free. Visitors gather beside the copper model.\n"
+    },
+    {
+      "name": "Sketch directions.md",
+      "text": "# Preparing a field sketch\nFold one sheet in half. Title one side with the site name. Draw a blank grid on that side. Reserve a box on the other side for observations.\n## Open information\nNo site measurements or visit date are supplied in these directions.\n"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "unlisted-identity",
+      "documents": [
+        "Mooring note.md"
+      ],
+      "turns": [
+        {
+          "question": "Who coordinates the mooring session?",
+          "expected_kind": "insufficient",
+          "forbidden": [
+            "has no coordinator",
+            "nobody coordinates",
+            "uncoordinated"
+          ],
+          "max_words": 100,
+          "review": "Unlisted coordinator identity is unknown; do not infer there is no coordinator."
+        },
+        {
+          "question": "Is admission to this session free?",
+          "expected_kind": "insufficient",
+          "forbidden": [
+            "admission is free",
+            "entry is free",
+            "there is no charge"
+          ],
+          "max_words": 100,
+          "review": "Unspecified price does not imply either free or paid admission."
+        }
+      ]
+    },
+    {
+      "id": "explicit-absence",
+      "documents": [
+        "Open day.md"
+      ],
+      "turns": [
+        {
+          "question": "Who sponsors the open day?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "no sponsor",
+              "nobody",
+              "not sponsored"
+            ]
+          ],
+          "forbidden": [
+            "self-funded",
+            "not specified",
+            "not named"
+          ],
+          "max_words": 100,
+          "review": "Explicit absence is an answer; do not confuse it with an unlisted sponsor name."
+        }
+      ]
+    },
+    {
+      "id": "preparation-feasibility",
+      "documents": [
+        "Sketch directions.md"
+      ],
+      "turns": [
+        {
+          "question": "Can I prepare a useful sketch before I have the site measurements?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "fold"
+            ],
+            [
+              "title",
+              "site name"
+            ],
+            [
+              "grid"
+            ],
+            [
+              "box",
+              "observations"
+            ]
+          ],
+          "forbidden": [
+            "cannot begin",
+            "must first obtain",
+            "no useful"
+          ],
+          "max_words": 160
+        },
+        {
+          "question": "Does the missing visit date mean I cannot even prepare the page?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "no",
+              "not"
+            ],
+            [
+              "grid",
+              "fold",
+              "title"
+            ]
+          ],
+          "forbidden": [
+            "must first obtain",
+            "preparation must wait"
+          ],
+          "max_words": 140
+        }
+      ]
+    },
+    {
+      "id": "unknown-versus-negative",
+      "documents": [
+        "Mooring note.md",
+        "Open day.md"
+      ],
+      "turns": [
+        {
+          "question": "What distinction should I make between the missing coordinator name in one notice and the lack of a sponsor in the other?",
+          "expected_kind": "generated",
+          "required_any": [
+            [
+              "unknown",
+              "not named",
+              "does not name",
+              "not specified"
+            ],
+            [
+              "no sponsor",
+              "explicit",
+              "states"
+            ]
+          ],
+          "max_words": 160
+        }
+      ]
+    }
+  ]
+}
