@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 import time
 import uuid
@@ -11,7 +12,7 @@ from contextlib import contextmanager
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 MAX_DOCUMENTS = 100
 MAX_CHUNKS = 12000
 
@@ -34,6 +35,27 @@ def checked_text(value: str, label: str, limit: int) -> str:
         raise UserError(f"{label} must contain 1–{limit:,} characters and no null bytes.")
     return value
 
+
+PLANNER_SCHEMA = """
+CREATE TABLE planner_events (
+ id TEXT PRIMARY KEY, course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ title TEXT NOT NULL, start_date TEXT NOT NULL, data TEXT NOT NULL,
+ identity TEXT NOT NULL, origin_key TEXT, sequence INTEGER NOT NULL DEFAULT 0,
+ created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+ UNIQUE(course_id, identity), UNIQUE(course_id, origin_key)
+);
+CREATE INDEX planner_events_course_date ON planner_events(course_id,start_date);
+CREATE TABLE event_sources (
+ event_id TEXT NOT NULL REFERENCES planner_events(id) ON DELETE CASCADE,
+ document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+ passage_id INTEGER NOT NULL, locator TEXT NOT NULL, quote TEXT NOT NULL,
+ position INTEGER NOT NULL, PRIMARY KEY(event_id,position)
+);
+CREATE INDEX event_sources_document ON event_sources(document_id);
+CREATE TRIGGER document_events BEFORE DELETE ON documents BEGIN
+ DELETE FROM planner_events WHERE id IN (SELECT event_id FROM event_sources WHERE document_id=old.id);
+END;
+"""
 
 CARD_PROVENANCE_SCHEMA = """
 CREATE TABLE card_sources (
@@ -118,6 +140,7 @@ CREATE TABLE embeddings (
 );
 """
     + CARD_PROVENANCE_SCHEMA
+    + PLANNER_SCHEMA
 )
 
 
@@ -131,7 +154,7 @@ class Database:
             with sqlite3.connect(self.path) as source:
                 source_version = source.execute("PRAGMA user_version").fetchone()[0]
                 if 1 <= source_version < SCHEMA_VERSION:
-                    target_version = 3 if source_version < 3 else SCHEMA_VERSION
+                    target_version = 3 if source_version < 3 else 4 if source_version < 4 else 5
                     backup = self.path.with_name(
                         f"{self.path.stem}.pre-v{target_version}-{uid()[:8]}.sqlite3"
                     )
@@ -183,6 +206,8 @@ class Database:
             if version < 4:
                 con.execute("ALTER TABLE cards ADD COLUMN metadata TEXT NOT NULL DEFAULT '{}'")
                 _execute_schema(con, CARD_PROVENANCE_SCHEMA)
+            if version < 5:
+                _execute_schema(con, PLANNER_SCHEMA)
             owner = con.execute("SELECT id FROM workspace LIMIT 1").fetchone()
             if owner and owner[0] != "local":
                 # Canonicalize the internal owner without deleting/reinserting
@@ -727,6 +752,210 @@ class Store:
             elif isinstance(done, bool):
                 con.execute("UPDATE tasks SET done=? WHERE id=?", (int(done), task_id))
 
+    def add_events(self, course_id, drafts):
+        """Reauthorize every source and save a reviewed selection atomically."""
+        from modulemate.calendar_io import event_identity, normalize_event
+
+        if not isinstance(drafts, list) or len(drafts) > 2000:
+            raise UserError("Save at most 2,000 events at a time.")
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
+            existing = list(
+                con.execute(
+                    "SELECT id,identity,origin_key FROM planner_events WHERE course_id=?",
+                    (course_id,),
+                )
+            )
+            identities, origins = (
+                {r["identity"] for r in existing},
+                {r["origin_key"] for r in existing if r["origin_key"]},
+            )
+            prepared = []
+            replacements = set()
+            for raw in drafts:
+                event = normalize_event(raw)
+                replacement = raw.get("replace_id")
+                if replacement is not None:
+                    if not isinstance(replacement, str) or replacement in replacements:
+                        raise UserError("Choose each event to replace at most once.")
+                    target = self._event(con, workspace, replacement)
+                    if target["course_id"] != course_id:
+                        raise UserError("The event to replace is not in this course.")
+                    replacements.add(replacement)
+                    identities.discard(target["identity"])
+                    origins.discard(target["origin_key"])
+                metadata = raw.get("metadata", {})
+                if not isinstance(metadata, dict) or len(json.dumps(metadata)) > 4000:
+                    raise UserError("Invalid event metadata.")
+                if metadata.get("origin") == "unresolved_date_mention" and event[
+                    "title"
+                ].startswith("Date mention:"):
+                    raise UserError(
+                        "Give each date mention a meaningful event title before saving."
+                    )
+                if raw.get("issues") and metadata.get("review") not in {
+                    "user_edited",
+                    "user_confirmed",
+                }:
+                    raise UserError("Review the unresolved event details before saving.")
+                sources = raw.get("sources", [])
+                if not isinstance(sources, list) or len(sources) > 3:
+                    raise UserError("An event can retain at most three supporting excerpts.")
+                for source in sources:
+                    if not isinstance(source, dict) or type(source.get("passage_id")) is not int:
+                        raise UserError("Invalid event evidence.")
+                    row = con.execute(
+                        "SELECT c.*,d.course_id FROM chunks c JOIN documents d ON d.id=c.document_id WHERE c.id=? AND d.course_id=?",
+                        (source["passage_id"], course_id),
+                    ).fetchone()
+                    quote = source.get("quote")
+                    if (
+                        not row
+                        or row["document_id"] != source.get("document_id")
+                        or row["locator"] != source.get("locator")
+                        or not isinstance(quote, str)
+                        or not quote.strip()
+                        or len(quote) > 1500
+                        or " ".join(quote.split()) not in " ".join(row["text"].split())
+                    ):
+                        raise UserError(
+                            "Event evidence changed or is no longer available. Extract again from the current material."
+                        )
+                origin = metadata.get("origin_key") or None
+                if origin is not None and (
+                    not isinstance(origin, str) or not re.fullmatch(r"[a-f0-9]{64}", origin)
+                ):
+                    raise UserError("Invalid event origin.")
+                identity = event_identity(event)
+                if identity in identities or (origin and origin in origins):
+                    if replacement:
+                        raise UserError("The replacement duplicates another saved event.")
+                    continue
+                data = {
+                    k: event[k]
+                    for k in (
+                        "title",
+                        "description",
+                        "location",
+                        "kind",
+                        "status",
+                        "start_date",
+                        "end_date",
+                        "start_time",
+                        "end_time",
+                        "timezone",
+                        "recurrence",
+                    )
+                }
+                data["metadata"] = metadata
+                prepared.append((data, sources, identity, origin, replacement))
+                identities.add(identity)
+                if origin:
+                    origins.add(origin)
+            if len(existing) + sum(not row[4] for row in prepared) > 2000:
+                raise UserError("Limit: 2,000 planner events per course.")
+            for data, sources, identity, origin, replacement in prepared:
+                event_id, stamp = replacement or uid(), now_iso()
+                if replacement:
+                    con.execute(
+                        "UPDATE planner_events SET title=?,start_date=?,data=?,identity=?,origin_key=?,sequence=sequence+1,updated_at=? WHERE id=?",
+                        (
+                            data["title"],
+                            data["start_date"],
+                            json.dumps(data),
+                            identity,
+                            origin,
+                            stamp,
+                            event_id,
+                        ),
+                    )
+                    con.execute("DELETE FROM event_sources WHERE event_id=?", (event_id,))
+                else:
+                    con.execute(
+                        "INSERT INTO planner_events VALUES (?,?,?,?,?,?,?,0,?,?)",
+                        (
+                            event_id,
+                            course_id,
+                            data["title"],
+                            data["start_date"],
+                            json.dumps(data),
+                            identity,
+                            origin,
+                            stamp,
+                            stamp,
+                        ),
+                    )
+                con.executemany(
+                    "INSERT INTO event_sources VALUES (?,?,?,?,?,?)",
+                    [
+                        (event_id, s["document_id"], s["passage_id"], s["locator"], s["quote"], i)
+                        for i, s in enumerate(sources)
+                    ],
+                )
+            return len(prepared)
+
+    def events(self, course_id):
+        with self.transaction() as (con, workspace):
+            self._course(con, workspace, course_id)
+            output = []
+            sources = defaultdict(list)
+            for row in con.execute(
+                "SELECT s.*,d.name AS document_name FROM event_sources s JOIN planner_events e ON e.id=s.event_id JOIN documents d ON d.id=s.document_id WHERE e.course_id=? ORDER BY s.position",
+                (course_id,),
+            ):
+                item = dict(row)
+                sources[item.pop("event_id")].append(item)
+            for row in con.execute(
+                "SELECT * FROM planner_events WHERE course_id=? ORDER BY start_date,title,created_at,id",
+                (course_id,),
+            ):
+                item = json.loads(row["data"])
+                item.update(
+                    {k: row[k] for k in ("id", "course_id", "created_at", "updated_at", "sequence")}
+                )
+                item["sources"] = sources[row["id"]]
+                output.append(item)
+            return output
+
+    def _event(self, con, workspace, event_id):
+        row = con.execute(
+            "SELECT e.* FROM planner_events e JOIN courses c ON c.id=e.course_id WHERE e.id=? AND c.workspace_id=?",
+            (event_id, workspace["id"]),
+        ).fetchone()
+        if not row:
+            raise UserError("Event not found in this workspace.")
+        return row
+
+    def update_event(self, event_id, values):
+        from modulemate.calendar_io import event_identity, normalize_event
+
+        with self.transaction() as (con, workspace):
+            row = self._event(con, workspace, event_id)
+            original = json.loads(row["data"])
+            updated = normalize_event(
+                original | {k: v for k, v in values.items() if k in original and k != "metadata"}
+            )
+            updated["metadata"] = original["metadata"] | {"review": "user_edited"}
+            try:
+                con.execute(
+                    "UPDATE planner_events SET title=?,start_date=?,data=?,identity=?,sequence=sequence+1,updated_at=? WHERE id=?",
+                    (
+                        updated["title"],
+                        updated["start_date"],
+                        json.dumps(updated),
+                        event_identity(updated),
+                        now_iso(),
+                        event_id,
+                    ),
+                )
+            except sqlite3.IntegrityError as exc:
+                raise UserError("An event with these details already exists.") from exc
+
+    def delete_event(self, event_id):
+        with self.transaction() as (con, workspace):
+            self._event(con, workspace, event_id)
+            con.execute("DELETE FROM planner_events WHERE id=?", (event_id,))
+
     def reset_workspace(self):
         """Clear study content; the local workspace remains usable immediately."""
         with self.transaction() as (con, workspace):
@@ -745,7 +974,7 @@ class Store:
             ):
                 course = dict(row)
                 course.pop("workspace_id")
-                for table in ("documents", "cards", "tasks", "messages"):
+                for table in ("documents", "cards", "tasks", "messages", "planner_events"):
                     course[table] = [
                         dict(r)
                         for r in con.execute(
@@ -763,6 +992,13 @@ class Store:
                     dict(r)
                     for r in con.execute(
                         "SELECT s.* FROM card_sources s JOIN cards c ON c.id=s.card_id WHERE c.course_id=? ORDER BY s.card_id,s.position",
+                        (row["id"],),
+                    )
+                ]
+                course["event_sources"] = [
+                    dict(r)
+                    for r in con.execute(
+                        "SELECT s.* FROM event_sources s JOIN planner_events e ON e.id=s.event_id WHERE e.course_id=? ORDER BY s.event_id,s.position",
                         (row["id"],),
                     )
                 ]

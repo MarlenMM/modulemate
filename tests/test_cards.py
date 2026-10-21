@@ -793,6 +793,9 @@ def test_v3_upgrade_keeps_cards_reviews_and_original_backup(tmp_path):
     old = store.cards(course)[0]
     # Reconstruct the actual v3 delta without copying a private database.
     with sqlite3.connect(path) as con:
+        con.execute("DROP TRIGGER document_events")
+        con.execute("DROP TABLE event_sources")
+        con.execute("DROP TABLE planner_events")
         con.execute("DROP TRIGGER document_cards")
         con.execute("DROP TABLE card_sources")
         con.execute("ALTER TABLE cards DROP COLUMN metadata")

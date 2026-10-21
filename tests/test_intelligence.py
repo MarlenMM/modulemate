@@ -136,7 +136,9 @@ def test_version_one_migration_preserves_existing_data(tmp_path):
         )
     database = Database(path)
     with database.connect() as con:
-        assert con.execute("PRAGMA user_version").fetchone()[0] == 4
+        from modulemate.db import SCHEMA_VERSION
+
+        assert con.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION
         assert con.execute("SELECT metadata FROM messages WHERE id='m'").fetchone()[0] == "{}"
         assert con.execute("SELECT name FROM courses WHERE id='c'").fetchone()[0] == "Old course"
 

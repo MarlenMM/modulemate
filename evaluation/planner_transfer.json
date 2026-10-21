@@ -1,0 +1,192 @@
+{
+  "license": "CC0-1.0",
+  "description": "Fresh original transfer challenges authored after the first planner cycles. These become development cases once inspected.",
+  "cases": [
+    {
+      "id": "cross-year-window",
+      "documents": [
+        {
+          "name": "Winter programme.md",
+          "text": "# Winter programme\n\nWinter camp runs from December 30, 2026 through January 2, 2027."
+        }
+      ],
+      "expected": [
+        {
+          "title_contains": "Winter camp",
+          "start_date": "2026-12-30",
+          "end_date": "2027-01-02"
+        }
+      ]
+    },
+    {
+      "id": "iso-and-offset",
+      "documents": [
+        {
+          "name": "Remote schedule.txt",
+          "text": "Deployment seminar: 2026-12-04T10:00Z to 2026-12-04T11:00Z.\n\nFixed-offset interview: November 1, 2026 at 01:30 UTC-04:00.\n\nBridge consultation: November 1, 2026 at 01:30 America/New_York."
+        }
+      ],
+      "expected": [
+        {
+          "title_contains": "Deployment seminar",
+          "start_date": "2026-12-04",
+          "start_time": "10:00",
+          "end_time": "11:00",
+          "timezone": "UTC"
+        },
+        {
+          "title_contains": "Fixed-offset interview",
+          "start_date": "2026-11-01",
+          "start_time": "01:30",
+          "end_time": null,
+          "timezone": "UTC-04:00"
+        }
+      ],
+      "attention_at_least": 1
+    },
+    {
+      "id": "explicit-numeric-order",
+      "date_order": "Day / month",
+      "documents": [
+        {
+          "name": "Appointment sheet.txt",
+          "text": "Advising appointment: 03/04/2027 at 14:00-14:45 KST in Cedar 2."
+        }
+      ],
+      "expected": [
+        {
+          "title_contains": "Advising appointment",
+          "start_date": "2027-04-03",
+          "start_time": "14:00",
+          "end_time": "14:45"
+        }
+      ]
+    },
+    {
+      "id": "separate-dates-and-meridian",
+      "documents": [
+        {
+          "name": "Lab checks.md",
+          "text": "Lab check takes place on October 21 and 28, 2026, 1:30–3:00 pm KST."
+        }
+      ],
+      "expected": [
+        {
+          "title_contains": "Lab check",
+          "start_date": "2026-10-21",
+          "start_time": "13:30",
+          "end_time": "15:00"
+        },
+        {
+          "title_contains": "Lab check",
+          "start_date": "2026-10-28",
+          "start_time": "13:30",
+          "end_time": "15:00"
+        }
+      ]
+    },
+    {
+      "id": "unsupported-daily",
+      "documents": [
+        {
+          "name": "Team routine.md",
+          "text": "Daily standup runs every day from November 2, 2026 through November 6, 2026 at 10:00–10:15 KST."
+        }
+      ],
+      "expected": [],
+      "attention_at_least": 1
+    },
+    {
+      "id": "negation-and-bounds",
+      "documents": [
+        {
+          "name": "Assessment boundary.md",
+          "text": "The Final exam will not be held before November 20, 2026; its actual date is still unknown.\n\nRegistration will not open on November 3, 2026.\n\nThe Practice meeting on November 5, 2026 has been cancelled."
+        }
+      ],
+      "expected": [],
+      "attention_at_least": 1
+    },
+    {
+      "id": "opening-window",
+      "documents": [
+        {
+          "name": "Portal access.md",
+          "text": "The Submission window is open from November 1, 2026 through November 5, 2026. Students may upload their work at any point within this window."
+        }
+      ],
+      "expected": [
+        {
+          "title_contains": "Submission window",
+          "start_date": "2026-11-01",
+          "end_date": "2026-11-05",
+          "start_time": null
+        }
+      ]
+    },
+    {
+      "id": "historical-meeting",
+      "documents": [
+        {
+          "name": "Neri history essay.md",
+          "text": "# A history lesson\n\nIn the Neri chronicle, the Council meeting was scheduled for July 7, 1878. The archive records that it ended on July 8, 1878. These are events in the historical narrative, not current appointments."
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "mock-calendar",
+      "documents": [
+        {
+          "name": "Data-format exercise.md",
+          "text": "# Sample calendar data, not actual appointments\n\nMock Exam: November 2, 2026, 10:00–11:00 KST in Room 7.\n\nUse this invented row to practise converting date formats. Do not put it on your planner."
+        }
+      ],
+      "expected": []
+    },
+    {
+      "id": "conflicting-documents",
+      "documents": [
+        {
+          "name": "Assessment A.md",
+          "text": "Final exam: November 2, 2026."
+        },
+        {
+          "name": "Assessment B.md",
+          "text": "Final exam: November 3, 2026."
+        }
+      ],
+      "expected": [],
+      "attention_at_least": 2
+    },
+    {
+      "id": "ambiguous-time-and-midnight",
+      "documents": [
+        {
+          "name": "Timing clarification.md",
+          "text": "Workshop: November 2, 2026, 9–10 KST. AM/PM is not specified.\n\nEssay deadline: November 3, 2026 at midnight. The notice does not clarify which day boundary."
+        }
+      ],
+      "expected": [],
+      "attention_at_least": 2
+    },
+    {
+      "id": "tail-coverage",
+      "documents": [
+        {
+          "name": "Long learning guide.md",
+          "text": "# Section 1\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 2\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 3\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 4\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 5\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 6\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 7\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 8\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 9\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 10\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 11\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 12\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 13\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 14\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 15\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 16\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 17\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 18\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 19\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 20\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 21\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 22\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 23\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 24\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 25\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 26\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 27\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 28\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 29\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 30\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 31\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 32\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 33\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 34\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 35\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 36\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 37\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 38\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 39\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 40\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 41\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 42\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 43\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 44\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 45\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 46\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 47\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 48\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 49\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 50\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 51\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 52\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 53\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 54\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 55\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 56\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 57\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 58\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 59\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 60\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 61\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 62\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 63\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 64\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 65\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 66\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 67\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 68\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 69\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 70\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 71\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 72\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 73\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 74\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 75\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 76\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 77\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 78\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 79\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Section 80\nAn index maps a key to a record location. A stable key remains unchanged when its record moves. Rebuilding recalculates mappings.\n\n# Final scheduled session\nPoster session: December 1, 2026, 15:00–16:00 UTC in Gallery Willow."
+        }
+      ],
+      "expected": [
+        {
+          "title_contains": "Poster session",
+          "start_date": "2026-12-01",
+          "start_time": "15:00",
+          "end_time": "16:00",
+          "timezone": "UTC"
+        }
+      ]
+    }
+  ]
+}

@@ -3,7 +3,39 @@
 `app.py` is the Streamlit interface. There is one local workspace; `db.py` provides
 transactional course/document scoping and cascades. Schema 3 migrates previous
 account databases after an online backup, without rebuilding source IDs or losing
-study records. No runtime authentication code remains.
+study records. Schema 4 adds card evidence and schema 5 adds planner events,
+each with a private pre-migration backup. No runtime authentication code remains.
+
+Planner events use a separate pipeline from study-capacity tasks.
+`planner_dates.py` enumerates literal dates, clocks and durations, holds ambiguous
+values, and resolves a missing year only from an unambiguous same-document term
+heading or explicit user input. `planner.py` scans every selected passage before
+reviewing date-bearing sections in batches bounded by both sections and date
+options. Explicit Event/Date/Time/Location tables are read by column and receive
+the same AI factual/relevance review, without a redundant writer call. Independent
+rows retain their source headings; exact overlap rows are deduplicated, and a row
+cut between ingestion passages yields to its complete same-context row.
+A saved continuation position lets the
+user review later sections of large selections. Model selection returns local IDs
+and copied text; the app owns temporal normalization. Individual source reviews
+hold uncertain drafts rather than silently export them. Source membership is a
+provenance check, not proof of semantic correctness.
+
+`planner_ui.py` provides selective previews, edits, explicit event replacement,
+manual events and exports alongside existing study tasks. `db.py` reauthorizes
+every source inside the selected-event transaction, retains excerpts after edits,
+and deletes derived events when any supporting document is deleted. Extracting
+again cannot overwrite a saved edit implicitly. Explicit replacement retains
+UID and creation time, increments sequence, and replaces supporting evidence.
+
+`calendar_io.py` validates dates, zones, DST transitions and bounded weekly
+recurrence, then serializes with the maintained `icalendar` library. All-day ends
+are exclusive in the file; timed point events have no invented end. Recurrence
+uses local wall times with VTIMEZONE, bounds and EXDATE exceptions. Event IDs
+provide stable UIDs and saved edits increment SEQUENCE. Google template links
+are offered only for one-off events with a representable end. There is no
+authenticated calendar integration or background calendar synchronization.
+Export labels refresh after saved edits while preserving the selected event IDs.
 
 `ingest.py` runs format extraction in an isolated bounded subprocess, then chunks
 text along Markdown/heading boundaries while carrying the actual heading hierarchy.

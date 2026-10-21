@@ -77,6 +77,35 @@ show their actual passage coverage; concentrate on a smaller selection for depth
 See [card design and experiments](docs/CARDS_DEVELOPMENT.md) and
 [card validation](docs/VALIDATION_V25.md).
 
+## Dates and events from your materials
+
+Open **Planner → Extract from materials**, select documents, and click **Extract
+dates**. The local AI identifies actionable events; literal source date and time
+options supply their values. Each draft keeps its source excerpt and receives a
+separate factual review. A date scan without AI is also available for manual review.
+
+Inspect the preview, change wording or dates, uncheck unwanted entries, and save
+the events you choose. Missing years, ambiguous numeric dates or time zones,
+tentative notices and conflicting dates stay unchecked for correction. You can
+explicitly supply a year or date convention. Explicit source information takes
+precedence; today's year and an event duration are never silently assumed.
+Long selections can continue through subsequent batches after saving or discarding
+the current preview. A revised notice can explicitly replace an existing event
+while retaining its calendar ID.
+
+In **Events and dates**, edit, remove, filter and select saved events. Download
+**Export selected events (.ics)** to import them into Google Calendar, Apple
+Calendar or another iCalendar client. Single events with a known end also offer
+a Google Calendar link. A file import is a snapshot; repeated imports and updates
+depend on the calendar client. Source excerpts are optional in exports. Existing
+capacity planning remains available under **Study tasks**.
+
+The extractor and its reviewer can make mistakes, especially when OCR misreads a
+date or a source leaves its meaning implicit. Unsupported recurrence and unresolved
+relative dates need manual correction. Review the actual material before importing.
+See [Planner design and experiments](docs/PLANNER_DEVELOPMENT.md) and
+[2.6 validation](docs/VALIDATION_V26.md).
+
 ## Understanding and evidence
 
 Qwen supplies the pretrained language capability. ModuleMate now also trains its
@@ -202,6 +231,7 @@ Historical 2.1 retrieval and extraction scores do not measure this new generator
 - [Current intelligence decisions and cycles](docs/INTELLIGENCE_V24.md)
 - [2.4 validation and real-app checks](docs/VALIDATION_V24.md)
 - [2.5 learning-card design, experiments and validation](docs/VALIDATION_V25.md)
+- [2.6 material-based Planner events and calendar validation](docs/VALIDATION_V26.md)
 - [2.2 validation and observed limits](docs/VALIDATION_V22.md)
 - [HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md)
 - [Architecture](docs/ARCHITECTURE.md)

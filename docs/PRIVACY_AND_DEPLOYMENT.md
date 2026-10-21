@@ -6,11 +6,22 @@ who can access this local app shares the same workspace. Its checked-in server
 configuration binds to `127.0.0.1`; public/shared hosting is outside its scope.
 
 The SQLite database stores courses, extracted text, passages, local vectors,
-conversation, cards, reviews and tasks. Uploaded original files are discarded
+conversation, cards, reviews, study tasks, planner events and their supporting
+excerpts. Uploaded original files are discarded
 after extraction. Data files have private filesystem permissions and are ignored
 by Git. They are not encrypted by ModuleMate. JSON exports contain study content;
 keep them private. Deleting a document removes its passages/vectors/linked cards
-and clears that course's chat, which may contain paraphrases of the source.
+and linked events, and clears that course's chat, which may contain paraphrases of the source.
+
+Planner extraction uses only selected material from the active course. It does
+not access a calendar account. Local inference stays local; an explicitly enabled
+provider receives the selected candidate text and draft/source review payloads.
+Saved events and edits remain in the local database. Calendar files contain event
+descriptions and locations; including source excerpts is optional and off by
+default. A Google add-event link contains the chosen event details in its URL and
+sends them to Google only when the user opens it. Import/export is a snapshot,
+not ongoing synchronization. Removing a local event does not delete a previously
+imported event from an external calendar.
 
 OCR runs locally through Apple Vision or an installed Tesseract engine. PDF
 rendering, image normalization and recognition use bounded request-local buffers;

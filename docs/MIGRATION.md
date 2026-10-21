@@ -1,8 +1,24 @@
-# Upgrading to ModuleMate 2.5
+# Upgrading to ModuleMate 2.6
+
+Version 2.6 adds planner events and supporting excerpts. Opening schema 4 creates
+a private online backup named `modulemate.pre-v5-<id>.sqlite3`, then atomically
+adds schema 5 event tables, indexes and a supporting-document deletion trigger.
+Existing courses, documents, passages, conversations, cards, review schedules,
+study tasks and embeddings are retained. Existing tasks remain study tasks;
+the upgrade does not invent calendar events from them.
+
+Selected-event saves recheck all source identities and excerpts before committing.
+Deleting any supporting document removes its derived events. JSON workspace
+exports include `planner_events` and `event_sources`; JSON import is still not
+implemented. The Planner's separate .ics export is intended for calendar import.
+Stop the app before restoring or downgrading; an older version must not open a
+schema 5 database.
+
+## Earlier card evidence migration
 
 Version 2.5 adds durable supporting excerpts and generation metadata for cards.
 Opening a schema 3 database creates `modulemate.pre-v4-<id>.sqlite3` beside it,
-then atomically upgrades to schema 4. Existing document, card and review IDs,
+then atomically upgrades through schema 4 to schema 5. Existing document, card and review IDs,
 answers, due dates and review history are retained. Existing cards do not acquire
 invented evidence or an AI-review label. Subsequent opens do not migrate again.
 
@@ -22,7 +38,7 @@ Start the app normally: the library opens immediately with no login.
 
 On the first schema 1/2 database open, ModuleMate writes a private online backup
 named `modulemate.pre-v3-<id>.sqlite3` beside the database. It then migrates
-through the schema 3 account migration and then to schema 4. Every previous account's courses are retained in the one
+through the schema 3 account migration and then to schema 5. Every previous account's courses are retained in the one
 local workspace, including duplicate course names. Document/chunk/message/card/
 review/task IDs and existing vector data are preserved. Password, salt, session
 and login-attempt storage is removed from the active schema. A second open does

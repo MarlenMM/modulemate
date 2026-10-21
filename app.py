@@ -19,6 +19,7 @@ from modulemate.feedback import review_queue
 from modulemate.generation import GenerationError, chat_model_name, chat_status, local_backend
 from modulemate.ingest import SUPPORTED, parse_upload
 from modulemate.local_models import ModelUnavailable, get_local_models, model_status
+from modulemate.planner_ui import events_panel, extract_panel
 from modulemate.retrieval import prepare_index, scoped_passages
 from modulemate.search import search
 from modulemate.settings import ROOT, load_settings
@@ -275,7 +276,7 @@ def library(store, course_id):
                 key=f"download_{doc['id']}",
             )
             confirm = st.checkbox(
-                "Delete this document, its linked cards and this course's chat history",
+                "Delete this document, its linked cards and events, and this course's chat history",
                 key=f"confirm_{doc['id']}",
             )
             if st.button("Delete document", key=f"delete_{doc['id']}", disabled=not confirm):
@@ -735,7 +736,7 @@ def cards_page(store, course_id, backend, today):
                     flash("Card deleted.")
 
 
-def planner(store, course_id, today):
+def study_tasks(store, course_id, today):
     st.header("Make room for learning")
     st.write(
         "Set your own deadlines and estimates. The plan fits work into your available time, earliest deadlines first."
@@ -948,7 +949,21 @@ def main():
     elif page == "Cards":
         cards_page(store, course_id, backend, today)
     elif page == "Planner":
-        planner(store, course_id, today)
+        st.header("Dates, deadlines and study time")
+        tool = st.radio(
+            "Planner tools",
+            ["Events and dates", "Extract from materials", "Study tasks"],
+            index=0 if store.events(course_id) else 1,
+            horizontal=True,
+        )
+        if tool == "Events and dates":
+            events_panel(store, course_id, today, timezone, document_labels)
+        elif tool == "Extract from materials":
+            extract_panel(
+                store, course_id, backend, today, timezone, select_documents, document_labels
+            )
+        else:
+            study_tasks(store, course_id, today)
 
 
 try:

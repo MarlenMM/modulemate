@@ -1,0 +1,225 @@
+{
+  "license": "CC0-1.0",
+  "description": "Original dense calendar table written after the initial acceptance matrix to test response-capacity coverage.",
+  "cases": [
+    {
+      "id": "dense-assessment-table",
+      "documents": [
+        {
+          "name": "Dense assessment schedule.md",
+          "text": "# Autumn 2026 assessment schedule\n\n| Event | Date | Time | Location |\n|---|---|---|---|\n| Quiz 01 | November 1, 2026 | 09:00–09:30 KST | Room 1 |\n| Quiz 02 | November 2, 2026 | 09:00–09:30 KST | Room 2 |\n| Quiz 03 | November 3, 2026 | 09:00–09:30 KST | Room 3 |\n| Quiz 04 | November 4, 2026 | 09:00–09:30 KST | Room 4 |\n| Quiz 05 | November 5, 2026 | 09:00–09:30 KST | Room 5 |\n| Quiz 06 | November 6, 2026 | 09:00–09:30 KST | Room 6 |\n| Quiz 07 | November 7, 2026 | 09:00–09:30 KST | Room 7 |\n| Quiz 08 | November 8, 2026 | 09:00–09:30 KST | Room 8 |\n| Quiz 09 | November 9, 2026 | 09:00–09:30 KST | Room 9 |\n| Quiz 10 | November 10, 2026 | 09:00–09:30 KST | Room 10 |\n| Quiz 11 | November 11, 2026 | 09:00–09:30 KST | Room 11 |\n| Quiz 12 | November 12, 2026 | 09:00–09:30 KST | Room 12 |\n| Quiz 13 | November 13, 2026 | 09:00–09:30 KST | Room 13 |\n| Quiz 14 | November 14, 2026 | 09:00–09:30 KST | Room 14 |\n| Quiz 15 | November 15, 2026 | 09:00–09:30 KST | Room 15 |\n| Quiz 16 | November 16, 2026 | 09:00–09:30 KST | Room 16 |\n| Quiz 17 | November 17, 2026 | 09:00–09:30 KST | Room 17 |\n| Quiz 18 | November 18, 2026 | 09:00–09:30 KST | Room 18 |\n| Quiz 19 | November 19, 2026 | 09:00–09:30 KST | Room 19 |\n| Quiz 20 | November 20, 2026 | 09:00–09:30 KST | Room 20 |\n| Quiz 21 | November 21, 2026 | 09:00–09:30 KST | Room 21 |\n| Quiz 22 | November 22, 2026 | 09:00–09:30 KST | Room 22 |\n| Quiz 23 | November 23, 2026 | 09:00–09:30 KST | Room 23 |\n| Quiz 24 | November 24, 2026 | 09:00–09:30 KST | Room 24 |\n| Quiz 25 | November 25, 2026 | 09:00–09:30 KST | Room 25 |\n| Quiz 26 | November 26, 2026 | 09:00–09:30 KST | Room 26 |"
+        }
+      ],
+      "expected": [
+        {
+          "title_contains": "Quiz 01",
+          "start_date": "2026-11-01",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 1"
+        },
+        {
+          "title_contains": "Quiz 02",
+          "start_date": "2026-11-02",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 2"
+        },
+        {
+          "title_contains": "Quiz 03",
+          "start_date": "2026-11-03",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 3"
+        },
+        {
+          "title_contains": "Quiz 04",
+          "start_date": "2026-11-04",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 4"
+        },
+        {
+          "title_contains": "Quiz 05",
+          "start_date": "2026-11-05",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 5"
+        },
+        {
+          "title_contains": "Quiz 06",
+          "start_date": "2026-11-06",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 6"
+        },
+        {
+          "title_contains": "Quiz 07",
+          "start_date": "2026-11-07",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 7"
+        },
+        {
+          "title_contains": "Quiz 08",
+          "start_date": "2026-11-08",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 8"
+        },
+        {
+          "title_contains": "Quiz 09",
+          "start_date": "2026-11-09",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 9"
+        },
+        {
+          "title_contains": "Quiz 10",
+          "start_date": "2026-11-10",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 10"
+        },
+        {
+          "title_contains": "Quiz 11",
+          "start_date": "2026-11-11",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 11"
+        },
+        {
+          "title_contains": "Quiz 12",
+          "start_date": "2026-11-12",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 12"
+        },
+        {
+          "title_contains": "Quiz 13",
+          "start_date": "2026-11-13",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 13"
+        },
+        {
+          "title_contains": "Quiz 14",
+          "start_date": "2026-11-14",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 14"
+        },
+        {
+          "title_contains": "Quiz 15",
+          "start_date": "2026-11-15",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 15"
+        },
+        {
+          "title_contains": "Quiz 16",
+          "start_date": "2026-11-16",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 16"
+        },
+        {
+          "title_contains": "Quiz 17",
+          "start_date": "2026-11-17",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 17"
+        },
+        {
+          "title_contains": "Quiz 18",
+          "start_date": "2026-11-18",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 18"
+        },
+        {
+          "title_contains": "Quiz 19",
+          "start_date": "2026-11-19",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 19"
+        },
+        {
+          "title_contains": "Quiz 20",
+          "start_date": "2026-11-20",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 20"
+        },
+        {
+          "title_contains": "Quiz 21",
+          "start_date": "2026-11-21",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 21"
+        },
+        {
+          "title_contains": "Quiz 22",
+          "start_date": "2026-11-22",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 22"
+        },
+        {
+          "title_contains": "Quiz 23",
+          "start_date": "2026-11-23",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 23"
+        },
+        {
+          "title_contains": "Quiz 24",
+          "start_date": "2026-11-24",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 24"
+        },
+        {
+          "title_contains": "Quiz 25",
+          "start_date": "2026-11-25",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 25"
+        },
+        {
+          "title_contains": "Quiz 26",
+          "start_date": "2026-11-26",
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "timezone": "Asia/Seoul",
+          "location": "Room 26"
+        }
+      ]
+    }
+  ]
+}

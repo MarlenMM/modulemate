@@ -1,0 +1,83 @@
+{
+  "license": "CC0-1.0",
+  "description": "Original acceptance challenges authored after six planner development cycles; not a representative accuracy benchmark.",
+  "cases": [
+    {
+      "id": "clock-role-binding",
+      "documents": [{
+        "name": "Exam notice.txt",
+        "text": "The library opens at 08:00. Midterm exam: December 5, 2026 at 10:00–12:00 KST, Room 14. The library opening time is not the exam start."
+      }],
+      "expected": [{"title_contains": "Midterm exam", "start_date": "2026-12-05", "start_time": "10:00", "end_time": "12:00", "timezone": "Asia/Seoul", "location": "Room 14"}]
+    },
+    {
+      "id": "two-submissions-one-paragraph",
+      "documents": [{
+        "name": "Submission stages.md",
+        "text": "Draft submission: December 1, 2026 at 12:00 UTC. Final submission: December 8, 2026 at 16:00 UTC. Upload both versions in the portal."
+      }],
+      "expected": [
+        {"title_contains": "Draft submission", "start_date": "2026-12-01", "start_time": "12:00", "end_time": null, "timezone": "UTC"},
+        {"title_contains": "Final submission", "start_date": "2026-12-08", "start_time": "16:00", "end_time": null, "timezone": "UTC"}
+      ]
+    },
+    {
+      "id": "cancellation-beside-different-event",
+      "documents": [{
+        "name": "Update.txt",
+        "text": "The Final exam on December 5, 2026 is cancelled. A Review workshop will run on December 7, 2026 from 14:00 to 15:30 KST instead."
+      }],
+      "expected": [{"title_contains": "Review workshop", "start_date": "2026-12-07", "start_time": "14:00", "end_time": "15:30", "timezone": "Asia/Seoul"}]
+    },
+    {
+      "id": "conditional-proposal",
+      "documents": [{
+        "name": "Proposal.txt",
+        "text": "Research meeting: December 9, 2026 at 15:00 UTC, if the room request is approved. This is only proposed; no meeting is confirmed."
+      }],
+      "expected": [],
+      "attention_at_least": 1
+    },
+    {
+      "id": "date-shaped-identifiers",
+      "documents": [{
+        "name": "Measurements.txt",
+        "text": "The software version identifier is 2026.11.02. The sample label is 12/03/2026. These are identifiers, not dates or scheduled work. The measured intervals are 10:00 and 12:00 in a simulated trace."
+      }],
+      "expected": []
+    },
+    {
+      "id": "evening-weekly-consultation",
+      "documents": [{
+        "name": "Consultation.md",
+        "text": "Office hours: every Tuesday from November 3, 2026 through December 1, 2026, 9–10 pm America/New_York, Room 2. No session on November 10, 2026."
+      }],
+      "expected": [{
+        "title_contains": "Office hours",
+        "start_date": "2026-11-03",
+        "start_time": "21:00",
+        "end_time": "22:00",
+        "timezone": "America/New_York",
+        "location": "Room 2",
+        "recurrence": {"frequency": "weekly", "days": ["TU"], "until": "2026-12-01", "exclude": ["2026-11-10"]}
+      }]
+    },
+    {
+      "id": "two-digit-year-is-not-a-century",
+      "documents": [{
+        "name": "Short notice.txt",
+        "text": "Submission deadline: 21/10/26 at 16:00 UTC."
+      }],
+      "expected": [],
+      "attention_at_least": 1
+    },
+    {
+      "id": "explicit-archived-schedule",
+      "documents": [{
+        "name": "Archived schedule.md",
+        "text": "# Course schedule: Spring 2019\n\nFinal examination: April 18, 2019, 14:00–16:00 KST, Hall 2."
+      }],
+      "expected": [{"title_contains": "Final examination", "start_date": "2019-04-18", "start_time": "14:00", "end_time": "16:00", "timezone": "Asia/Seoul", "location": "Hall 2"}]
+    }
+  ]
+}

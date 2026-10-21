@@ -107,6 +107,33 @@ threshold harmed recall. `results-local.json` is the final retrieval ablation;
 `answers-without-reader.json` records the sentence pipeline ablation before the
 final within-source reader constraint; it is historical development evidence,
 not a current apples-to-apples causal estimate of reader benefit.
+## Material-based Planner events (2.6)
+
+`planner_materials.json`, `planner_transfer.json`, `planner_acceptance.json` and
+`planner_dense.json`
+contain original fictional CC0 schedules and adversarial non-events. They cover
+source/date/time role binding, ambiguities, cancellations, conflicting notices,
+relative dates, numeric order, term years, time zones/DST, lists, weekly recurrence,
+metadata/history, source instructions, long selections and source-shaped identifiers.
+Transfer and later acceptance cases were authored after earlier implementation
+cycles; all become development cases once inspected.
+
+Run the prepared local generator against isolated temporary databases:
+
+```sh
+uv run --locked --extra ml --extra local python scripts/evaluate_planner.py \
+  --fixture evaluation/planner_dense.json evaluation/planner_materials.json evaluation/planner_transfer.json evaluation/planner_acceptance.json \
+  --output results/planner.json
+```
+
+`--approach free_json` compares free model-written ISO fields with literal temporal
+binding and source review. Reports preserve actual model calls, events, held
+drafts, ignored entries, source membership, transactional save counts and calendar
+round trips. Expected-field diagnostics and minimum uncertainty counts do not
+establish semantic accuracy; read actual events and evidence. Fixture, module and
+app identities are recorded in [the validation](../docs/VALIDATION_V26.md) and
+[retained observations](observations/planner-v26.json). No learner library is used.
+
 ## Material-based cards (2.5)
 
 `card_materials.json` and `card_transfer.json` contain original fictional CC0

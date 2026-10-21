@@ -54,6 +54,7 @@ def test_complete_local_study_journey(tmp_path, monkeypatch):
     click(app, "Check answer")
     click(app, "I recalled it")
     page(app, "Planner")
+    widget(app.radio, "Planner tools").set_value("Study tasks").run()
     widget(app.text_input, "Task or assignment").set_value("Review chapter one")
     click(app, "Add task")
     assert app.dataframe
@@ -64,7 +65,8 @@ def test_complete_local_study_journey(tmp_path, monkeypatch):
     assert any(d.label == "Export all my data (JSON)" for d in app.get("download_button"))
     page(app, "Library")
     widget(
-        app.checkbox, "Delete this document, its linked cards and this course's chat history"
+        app.checkbox,
+        "Delete this document, its linked cards and events, and this course's chat history",
     ).check().run()
     click(app, "Delete document")
     assert any("Your library is empty" in s.value for s in app.info)
