@@ -7,20 +7,22 @@ import random
 import re
 from collections import Counter
 from datetime import date, datetime
+from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 import streamlit as st
 
-from modulemate.assistant import MODES, AIBackend, answer_question, generate_cards
+from modulemate.assistant import MODES, AIBackend, answer_question
+from modulemate.cards import STYLES, draft_deck
 from modulemate.db import Database, Store, UserError
 from modulemate.feedback import review_queue
 from modulemate.generation import GenerationError, chat_model_name, chat_status, local_backend
 from modulemate.ingest import SUPPORTED, parse_upload
 from modulemate.local_models import ModelUnavailable, get_local_models, model_status
-from modulemate.retrieval import prepare_index
-from modulemate.search import overview, search
+from modulemate.retrieval import prepare_index, scoped_passages
+from modulemate.search import search
 from modulemate.settings import ROOT, load_settings
-from modulemate.study import calendar_export, cloze_cards, plan_tasks
+from modulemate.study import calendar_export, plan_tasks
 
 st.set_page_config(page_title="ModuleMate · Your study workspace", page_icon="📖", layout="wide")
 st.markdown(
@@ -416,11 +418,214 @@ def assistant(store, course_id, settings, backend):
         st.rerun()
 
 
+def card_sources(card):
+    sources = card.get("sources", [])
+    if sources:
+        with st.expander("Supporting material"):
+            if card.get("metadata", {}).get("review") == "user_edited":
+                st.caption("You edited this card. The excerpts are retained for your comparison.")
+            for source in sources:
+                st.text(f"{source.get('document_name', '')} · {source['locator']}".strip(" ·"))
+                st.text(source["quote"])
+    elif card.get("document_name"):
+        st.caption(f"{plain(card['document_name'])} · {plain(card['locator'])}")
+
+
+def create_cards_page(store, course_id, backend, today, saved_cards):
+    docs = store.documents(course_id)
+    generated, manual = st.tabs(["Generate from materials", "Write your own"])
+    with manual:
+        source_names = {None: "My own card (no source link)", **document_labels(docs)}
+        source_id = st.selectbox(
+            "Optional card source", list(source_names), format_func=source_names.get
+        )
+        locator = ""
+        if source_id:
+            source_passages = store.document_passages(source_id)
+            locator = st.selectbox(
+                "Source location", list(dict.fromkeys(p["locator"] for p in source_passages))
+            )
+            st.text(
+                "\n\n".join(p["text"] for p in source_passages if p["locator"] == locator)[:6000]
+            )
+        with st.form(f"manual_card_{course_id}", clear_on_submit=True):
+            front = st.text_area("Question", max_chars=1000)
+            back = st.text_area("Answer", max_chars=4000)
+            if st.form_submit_button("Save card"):
+                created = store.add_card(course_id, front, back, source_id, locator, today=today)
+                flash("Card saved." if created else "That card already exists.")
+    with generated:
+        st.subheader("Turn your materials into learning cards")
+        st.write(
+            "Choose your material. Get focused questions, concise answers and the excerpts behind them."
+        )
+        if not docs:
+            st.info(
+                "Add material in Library to generate cards. You can always write your own card."
+            )
+            return
+        doc_ids = select_documents(docs, f"card_docs_{course_id}")
+        selected_docs = [d for d in docs if doc_ids is None or d["id"] in doc_ids]
+        scope = [(d["id"], d["created_at"], d["chunks"]) for d in selected_docs]
+        draft_key = f"draft_{course_id}"
+        previous = st.session_state.get(draft_key)
+        if previous and previous.get("scope") != scope:
+            st.session_state.pop(draft_key, None)
+            st.info("Your material selection changed. Generate a new preview for this selection.")
+        topic = st.text_input(
+            "Optional topic for new cards",
+            max_chars=500,
+            placeholder="Leave empty for the main ideas across your selection",
+        )
+        if backend:
+            method = st.radio("Create with", ["AI learning cards", "Source cloze"], horizontal=True)
+            st.caption(
+                "AI chooses learning targets and writes questions. Answers preserve the source wording. Inspect, edit or discard any draft before saving."
+            )
+        else:
+            method = "Source cloze"
+            st.info(
+                "Source cloze mode makes literal fill-in-the-blank cards. Select a prepared AI model in the sidebar for AI-written questions and concise answers."
+            )
+        left, right = st.columns(2)
+        count = left.number_input("Number of cards", min_value=1, max_value=24, value=8, step=1)
+        style = right.selectbox(
+            "Card style", list(STYLES) if method == "AI learning cards" else ["Fill in the blank"]
+        )
+        for document in selected_docs:
+            notices = json.loads(document["warnings"])
+            if notices:
+                with st.expander("Reading notices · " + plain(document["name"])):
+                    for notice in notices:
+                        st.text(notice)
+        if st.button("Generate learning cards", type="primary"):
+            progress = st.progress(0, text="Reading the selected material…")
+            try:
+                passages = scoped_passages(store, course_id, doc_ids)
+                try:
+                    engine = get_local_models() if method == "AI learning cards" else None
+                except ModelUnavailable:
+                    engine = None
+                deck = draft_deck(
+                    passages,
+                    backend if method == "AI learning cards" else None,
+                    count=int(count),
+                    topic=topic,
+                    style=style,
+                    existing=saved_cards,
+                    engine=engine,
+                    progress=lambda fraction, text: progress.progress(fraction, text=text),
+                )
+                if deck.cards:
+                    st.session_state[draft_key] = {
+                        "id": uuid4().hex,
+                        "cards": deck.cards,
+                        "diagnostics": deck.diagnostics,
+                        "scope": scope,
+                        "topic": topic.strip(),
+                        "method": "Source cloze"
+                        if all(c["metadata"]["origin"] == "source_cloze" for c in deck.cards)
+                        else method,
+                    }
+                else:
+                    st.info(
+                        "No new suitable cards were found. Try a different topic or document, or choose Source cloze. Any earlier preview is retained."
+                    )
+                for warning in deck.diagnostics.get("warnings", []):
+                    st.warning(warning)
+            except (GenerationError, ModelUnavailable, ValueError, TypeError):
+                st.warning(
+                    "Card generation could not finish. Try fewer cards or a smaller selection. Any earlier preview is retained."
+                )
+            finally:
+                progress.empty()
+        preview = st.session_state.get(draft_key)
+        if not preview:
+            return
+        drafts, info = preview["cards"], preview["diagnostics"]
+        st.subheader(f"Your preview · {len(drafts)} cards")
+        st.caption(
+            f"{preview['method']} · Read {info['read_passages']} of {info['available_passages']} passages "
+            f"across {info['read_documents']} of {info['available_documents']} documents. "
+            + (f"Topic: {plain(preview['topic'])}. " if preview["topic"] else "")
+            + f"Target: {info['requested']} cards. Weak or repeated targets are omitted."
+        )
+        if info["read_passages"] < info["available_passages"]:
+            st.info(
+                "This preview samples the selected material. Focus on a smaller section or topic for more targeted coverage."
+            )
+        st.caption(
+            "AI checks can miss mistakes. Compare important details with the supporting material, especially scanned text and formulas."
+        )
+        names = document_labels(docs)
+        with st.form(f"save_drafts_{preview['id']}"):
+            selection = []
+            for i, draft in enumerate(drafts):
+                with st.container(border=True):
+                    st.caption(
+                        plain(names.get(draft["document_id"], "Source"))
+                        + " · "
+                        + plain(draft["locator"])
+                    )
+                    selected = st.checkbox(
+                        f"Save draft {i + 1}", value=True, key=f"select_{preview['id']}_{i}"
+                    )
+                    front = st.text_area(
+                        f"Question · draft {i + 1}",
+                        value=draft["front"],
+                        max_chars=1000,
+                        key=f"front_{preview['id']}_{i}",
+                    )
+                    back = st.text_area(
+                        f"Answer · draft {i + 1}",
+                        value=draft["back"],
+                        max_chars=4000,
+                        key=f"back_{preview['id']}_{i}",
+                    )
+                    display = draft | {
+                        "sources": [
+                            s | {"document_name": names.get(s["document_id"], "Source")}
+                            for s in draft["sources"]
+                        ]
+                    }
+                    card_sources(display)
+                    edited = front.strip() != draft["front"] or back.strip() != draft["back"]
+                    selection.append(
+                        (
+                            selected,
+                            draft
+                            | {
+                                "front": front,
+                                "back": back,
+                                "metadata": draft["metadata"]
+                                | ({"review": "user_edited"} if edited else {}),
+                            },
+                        )
+                    )
+            if st.form_submit_button("Save selected cards", type="primary"):
+                to_save = [draft for selected, draft in selection if selected]
+                if not to_save:
+                    st.info("Select at least one card to save, or discard the preview.")
+                else:
+                    saved = store.add_cards(course_id, to_save, today=today)
+                    st.session_state.pop(draft_key, None)
+                    flash(f"Saved {saved} new cards. Identical cards are skipped.")
+        if st.button("Discard preview"):
+            st.session_state.pop(draft_key, None)
+            st.rerun()
+
+
 def cards_page(store, course_id, backend, today):
-    use_ai = backend is not None
     st.header("Recall beats recognition")
     st.write("Create focused cards, try the answer from memory, then check your source.")
     cards = store.cards(course_id)
+    # Saved recall/quiz views need the same import distinction as the picker.
+    names = document_labels(store.documents(course_id))
+    for card in cards:
+        if card["document_id"]:
+            card["document_name"] = names.get(card["document_id"], card["document_name"])
+        for source in card["sources"]:
+            source["document_name"] = names.get(source["document_id"], source["document_name"])
     due = [c for c in cards if c["due"] <= today.isoformat()]
     counts = store.review_counts(course_id)
     a, b, c = st.columns(3)
@@ -428,7 +633,10 @@ def cards_page(store, course_id, backend, today):
     b.metric("Due today", len(due))
     c.metric("Reviews completed", sum(counts.values()))
     tool = st.radio(
-        "Study tools", ["Review", "Create cards", "Practice quiz", "Manage cards"], horizontal=True
+        "Study tools",
+        ["Review", "Create cards", "Practice quiz", "Manage cards"],
+        index=0 if cards else 1,
+        horizontal=True,
     )
     if tool == "Review":
         if not due:
@@ -440,14 +648,15 @@ def cards_page(store, course_id, backend, today):
             return
         card = due[0]
         st.caption(f"{len(due)} cards due · recall first")
+        if card["document_name"]:
+            st.caption(f"{plain(card['document_name'])} · {plain(card['locator'])}")
         st.text(card["front"])
         reveal_key = f"reveal_{card['id']}"
         if st.button("Reveal answer", key=f"show_{card['id']}"):
             st.session_state[reveal_key] = True
         if st.session_state.get(reveal_key):
             st.text(card["back"])
-            if card["document_name"]:
-                st.caption(f"{plain(card['document_name'])} · {plain(card['locator'])}")
+            card_sources(card)
             st.caption(
                 "Again: tomorrow · Hard: a short interval · Good/Easy: increasing intervals. These are self-ratings, not an exam score."
             )
@@ -457,85 +666,7 @@ def cards_page(store, course_id, backend, today):
                     st.session_state.pop(reveal_key, None)
                     st.rerun()
     elif tool == "Create cards":
-        docs = store.documents(course_id)
-        with st.expander("Write your own card", expanded=True):
-            source_names = {
-                None: "My own card (no source link)",
-                **document_labels(docs),
-            }
-            source_id = st.selectbox(
-                "Optional card source", list(source_names), format_func=source_names.get
-            )
-            locator = ""
-            if source_id:
-                source_passages = store.document_passages(source_id)
-                locator = st.selectbox(
-                    "Source location", list(dict.fromkeys(p["locator"] for p in source_passages))
-                )
-                st.text(
-                    "\n\n".join(p["text"] for p in source_passages if p["locator"] == locator)[
-                        :6000
-                    ]
-                )
-            with st.form(f"manual_card_{course_id}", clear_on_submit=True):
-                front = st.text_area("Question", max_chars=1000)
-                back = st.text_area("Answer", max_chars=4000)
-                if st.form_submit_button("Save card"):
-                    created = store.add_card(
-                        course_id, front, back, source_id, locator, today=today
-                    )
-                    flash("Card saved." if created else "That card already exists.")
-        if not docs:
-            st.info("Add material to create source-linked cards automatically.")
-            return
-        doc_ids = select_documents(docs, f"card_docs_{course_id}")
-        topic = st.text_input("Optional topic for new cards", max_chars=500)
-        st.caption(
-            "AI drafts recall questions when enabled. Local mode makes fill-in-the-blank cards from source sentences. Review drafts before saving."
-        )
-        if st.button("Draft cards from material", type="primary"):
-            passages = (
-                search(store, course_id, topic, doc_ids)
-                if topic.strip()
-                else overview(store, course_id, doc_ids)
-            )
-            if not passages:
-                st.info("No matching material. Try a different topic.")
-            else:
-                with st.spinner("Preparing card drafts…"):
-                    try:
-                        drafts = (
-                            generate_cards(passages, backend) if use_ai else cloze_cards(passages)
-                        )
-                    except (GenerationError, ValueError, KeyError, TypeError):
-                        drafts = cloze_cards(passages)
-                        st.warning(
-                            "AI drafts could not be verified. Showing local cloze drafts instead."
-                        )
-                st.session_state[f"draft_{course_id}"] = drafts
-                if not drafts:
-                    st.info("No suitable cards found. Try another document or write a card above.")
-        drafts = st.session_state.get(f"draft_{course_id}", [])
-        if drafts:
-            with st.form(f"save_drafts_{course_id}"):
-                selected = []
-                for i, draft in enumerate(drafts):
-                    selected.append(
-                        st.checkbox(
-                            f"Save draft {i + 1}", value=True, key=f"draft_select_{course_id}_{i}"
-                        )
-                    )
-                    st.text(draft["front"])
-                    st.text(draft["back"])
-                    st.caption(draft["locator"])
-                if st.form_submit_button("Save selected cards"):
-                    saved = sum(
-                        store.add_card(course_id, **draft, today=today)
-                        for draft, select in zip(drafts, selected, strict=True)
-                        if select
-                    )
-                    st.session_state.pop(f"draft_{course_id}", None)
-                    flash(f"Saved {saved} new cards. Identical cards are skipped.")
+        create_cards_page(store, course_id, backend, today, cards)
     elif tool == "Practice quiz":
         if not cards:
             st.info("Create some cards to start a quiz.")
@@ -565,6 +696,8 @@ def cards_page(store, course_id, backend, today):
             st.session_state.pop(quiz_key, None)
             st.rerun()
         st.progress(quiz["position"] / len(quiz["ids"]))
+        if card["document_name"]:
+            st.caption(f"{plain(card['document_name'])} · {plain(card['locator'])}")
         st.text(card["front"])
         st.text_area(
             "Your recall attempt (not saved)", key=f"quiz_attempt_{course_id}_{quiz['position']}"
@@ -573,8 +706,7 @@ def cards_page(store, course_id, backend, today):
             quiz["revealed"] = True
         if quiz["revealed"]:
             st.text(card["back"])
-            if card["document_name"]:
-                st.caption(f"{plain(card['document_name'])} · {plain(card['locator'])}")
+            card_sources(card)
             for col, label, score in zip(
                 st.columns(2), ["I recalled it", "Needs more practice"], [1, 0], strict=True
             ):
@@ -588,6 +720,7 @@ def cards_page(store, course_id, backend, today):
             st.info("No saved cards yet.")
         for card in cards:
             with st.expander(plain(card["front"][:90])):
+                card_sources(card)
                 with st.form(f"edit_{card['id']}"):
                     front = st.text_area("Question", value=card["front"], max_chars=1000)
                     back = st.text_area("Answer", value=card["back"], max_chars=4000)

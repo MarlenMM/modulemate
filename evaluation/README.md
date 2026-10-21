@@ -107,3 +107,32 @@ threshold harmed recall. `results-local.json` is the final retrieval ablation;
 `answers-without-reader.json` records the sentence pipeline ablation before the
 final within-source reader constraint; it is historical development evidence,
 not a current apples-to-apples causal estimate of reader benefit.
+## Material-based cards (2.5)
+
+`card_materials.json` and `card_transfer.json` contain original fictional CC0
+material for card generation across concepts, constraints, code, distinct source
+values, short facts, literary interpretation, tables, formulas, source instructions,
+and topic focus. `card_long.json` is a 72-section coverage/deduplication stress
+case with repeated fictional concepts and a unique closing principle. These are
+authored development cases, not a blind or representative accuracy benchmark.
+
+Run against the explicitly prepared local generator in isolated temporary storage:
+
+```sh
+uv run --locked --extra ml --extra local python scripts/evaluate_cards.py \
+  --fixture evaluation/card_materials.json evaluation/card_transfer.json evaluation/card_long.json \
+  --semantic --output results/cards.json
+```
+
+Use `--style "Question and answer"` or `--style "Fill in the blank"` for focused
+style checks. `--approach legacy` compares the older whole-excerpt API. The
+`--semantic` flag uses prepared local semantic selection, independent QA reading
+and conservative duplicate checks; it never downloads models or fits user data.
+
+The report retains actual cards, per-call outputs/stats, source/answer membership,
+transactional save counts and diagnostic phrase mentions. Read the questions and
+answers: a matching phrase in evidence is not semantic correctness, and a forbidden
+phrase may occur in a valid negation. Results from different fingerprints must not
+be relabeled as one release. See [the output records](observations/cards-v25.json),
+[development notes](../docs/CARDS_DEVELOPMENT.md) and
+[validation](../docs/VALIDATION_V25.md) for the retained evidence.

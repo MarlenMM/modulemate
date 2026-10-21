@@ -90,3 +90,35 @@ CARD_SCHEMA = _object(
     }
 )
 SUPPORT_SCHEMA = _object({"supported": {"type": "boolean"}})
+
+DECK_SCHEMA = _object(
+    {
+        "cards": {
+            "type": "array",
+            "maxItems": 6,
+            "items": _object(
+                {
+                    "kind": {"enum": ["qa", "cloze"]},
+                    "front": STRING,
+                    "answer_id": {"type": "integer", "minimum": 1},
+                }
+            ),
+        }
+    }
+)
+
+CARD_REVIEW_SCHEMA = _object(
+    {
+        "reviews": {
+            "type": "array",
+            "maxItems": 6,
+            "items": _object(
+                {
+                    "card_id": {"type": "integer", "minimum": 1, "maximum": 6},
+                    "verdict": {"enum": ["keep", "revise", "drop"]},
+                    "issue": STRING,
+                }
+            ),
+        }
+    }
+)

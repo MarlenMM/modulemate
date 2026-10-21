@@ -1,0 +1,60 @@
+{
+  "description": "Fresh original fictional transfer material, authored after the first card-pipeline experiments. CC0. Development checks, not a blind benchmark.",
+  "cases": [
+    {
+      "id": "possibility-and-unknown",
+      "count": 5,
+      "documents": [
+        {"name": "Arco carrier.md", "text": "# Arco carrier\n\n## Power\nThe fictional Arco carrier can operate without a battery when connected to the station cable. A battery is optional, not prohibited.\n\n## Loads\nA load below 0.5 kg can be carried on the upper tray. A load of exactly 0.5 kg must go on the lower tray.\n\n## Record\nThe record does not identify the carrier's designer. This omission does not establish that nobody designed it."}
+      ],
+      "concepts": ["station cable", "optional", "below 0.5", "lower tray"],
+      "forbidden": ["has no battery", "never uses a battery", "at or below 0.5", "nobody designed"]
+    },
+    {
+      "id": "literary-signals",
+      "count": 5,
+      "documents": [
+        {"name": "The courtyard story.md", "text": "# The courtyard story\n\n## Recurring signals\nIn the fictional courtyard story, a sealed letter represents a promise that has not yet been fulfilled. A broken ribbon signals a change of allegiance.\n\n## Viewpoint\nThe narrator describes only events visible from the courtyard. The reader learns that the visitor has left because the narrator sees an empty chair, not because the narrator reports the visitor's thoughts.\n\n## Interpretive limit\nThe teaching note uses the empty chair as an example of indirect characterization through visible action. It does not state why the author chose a courtyard setting."}
+      ],
+      "concepts": ["promise", "allegiance", "visible", "indirect characterization"],
+      "forbidden": ["symbolizes death", "author wanted to isolate"]
+    },
+    {
+      "id": "formula-and-table",
+      "count": 6,
+      "documents": [
+        {"name": "Tavi buffer.md", "text": "# Tavi buffer\n\n## Accounting\nIn the fictional Tavi buffer, ready = queued - blocked. Here queued is the number of entries waiting in the buffer, and blocked is the number currently unavailable for processing.\n\n## Labels\n| Label | Meaning |\n|---|---|\n| green | ready for processing |\n| amber | blocked |\n| grey | already processed |\n\n## Retry\nA blocked entry can return to green only after its lock is released. Releasing a lock permits a retry; it does not guarantee that the retry will succeed."}
+      ],
+      "concepts": ["queued - blocked", "green", "amber", "lock", "retry"],
+      "forbidden": ["queued + blocked", "guarantees success"]
+    },
+    {
+      "id": "focused-topic",
+      "count": 5,
+      "topic": "collision handling",
+      "documents": [
+        {"name": "Nalo archive.md", "text": "# Nalo archive\n\n## Drawing\nA vector outline stores a path using anchor points. A raster drawing stores colour values in a grid.\n\n## Collisions\nIn the fictional Nalo archive, a collision means two labels map to the same drawer. Resolve a collision by adding the second label to that drawer's lookup list. Keep both labels in the list; do not overwrite the first label.\n\n## Studio\nA palette is the surface used for mixing paint. A drying rack holds painted sheets apart while they dry."}
+      ],
+      "concepts": ["same drawer", "lookup list", "both labels"],
+      "forbidden": ["palette", "drying rack", "raster drawing"]
+    },
+    {
+      "id": "sparse-metadata",
+      "count": 8,
+      "documents": [
+        {"name": "Outline.txt", "text": "Contents\nPage 1\nFigure 2\nEnd of presentation.\nCopyright notice.\nContact: archive@example.invalid"}
+      ],
+      "concepts": [],
+      "forbidden": ["archive@example", "Page 1", "Figure 2", "Copyright"]
+    },
+    {
+      "id": "operators",
+      "count": 4,
+      "documents": [
+        {"name": "Selo switches.md", "text": "# Selo switches\nThe fictional Selo A switch accepts x < 0.5. It rejects x = 0.5.\nThe Selo B switch accepts x <= 0.5. It accepts x = 0.5.\nThe Selo C switch accepts x < -0.5. Negative signs are part of the threshold value."}
+      ],
+      "concepts": ["Selo A", "Selo B", "0.5", "-0.5"],
+      "forbidden": ["Selo A switch accepts x <=", "Selo C switch accepts x < 0.5"]
+    }
+  ]
+}

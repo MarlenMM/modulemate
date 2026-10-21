@@ -1,6 +1,6 @@
 # Local data and provider boundaries
 
-ModuleMate 2.2 is a single-user local application for a GitHub portfolio/demo.
+ModuleMate is a single-user local application for a GitHub portfolio/demo.
 It has no account, password, session token, sign-in or registration flow. Anyone
 who can access this local app shares the same workspace. Its checked-in server
 configuration binds to `127.0.0.1`; public/shared hosting is outside its scope.

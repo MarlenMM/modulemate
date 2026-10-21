@@ -160,11 +160,38 @@ and offline tests exercise filters, migration, continuation, numeric routines,
 citation binding, errors and UI flows. Real-weight checks are separate from
 network-free CI. We do not fine-tune a language model on private coursework.
 
-Generated cards select an evidence-span ID. The app copies the actual source
-substring into the back, strips leading heading boilerplate from candidates and
-deduplicates identical backs. It validates each selected ID and its original source
-again before checking the question's support. Legacy provider responses with an
-explicit back still require an exact source match. Cards remain drafts for review.
+`cards.py` implements the 2.5 learning-card path separately from conversation.
+It samples scoped material across document positions, with optional local semantic
+topic ranking. It offers app-owned literal answer spans inside exact evidence;
+the generator chooses an answer ID and writes a focused question. The app owns
+answer wording, source identity and cloze reconstruction. Direct model-addressed
+instructions and standalone footer/metadata lines are omitted from the card input,
+while retained text must still match its original passage. Tables use question/
+answer cards. Numeric bounds, negation and adjacent modal words remain attached
+to selected answers. A small labelled numerical fact takes a deterministic path.
+
+Individual model verdicts can request a targeted repair without discarding other
+cards. They remain fallible; phrase binding proves source membership rather than
+entailment. A prepared extractive reader can independently point to a different
+answer to the generated question, using validated source offsets and a conservative
+margin/overlap heuristic. Strong disagreement requests a repair; weak or absent
+spans never veto a card. A proposed answer re-binding preserves the question and
+still passes source validation and model review. A whole-statement cloze choice
+can be refined to a smaller offered span in the identical evidence statement.
+Lexical and optional pretrained embedding checks reduce duplicates
+while protecting numbers, operators, qualifications and named subjects. Context,
+outputs and repair attempts are bounded for interactive use. No user material is
+used to fit a card-quality model or fine-tune a language model.
+
+Previews are course scoped, editable and invalidated when the document selection
+changes. Fresh generation IDs isolate their widget state. `Store.add_cards` saves
+the selected batch atomically after rechecking current passage identity, locator,
+course and exact quotation. Schema 4 stores evidence in `card_sources`, with a
+backup before upgrading an existing database. Deleting any supporting document
+removes its derived cards and reviews. Editing a saved card retains evidence but
+changes the review label to user-edited. Supporting material is hidden until the
+answer is revealed in recall/quiz views. The older `assistant.generate_cards` API
+retains its exact-excerpt behavior for compatibility; the Cards UI uses `draft_deck`.
 
 `support.py` is an explicitly enabled independent NLI experiment, disabled by
 default after false-positive trials. It checks bounded source/claim pairs with

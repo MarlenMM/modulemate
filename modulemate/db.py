@@ -6,11 +6,12 @@ import json
 import sqlite3
 import time
 import uuid
+from collections import defaultdict
 from contextlib import contextmanager
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 MAX_DOCUMENTS = 100
 MAX_CHUNKS = 12000
 
@@ -34,7 +35,32 @@ def checked_text(value: str, label: str, limit: int) -> str:
     return value
 
 
-SCHEMA = """
+CARD_PROVENANCE_SCHEMA = """
+CREATE TABLE card_sources (
+ card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+ document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+ passage_id INTEGER NOT NULL, locator TEXT NOT NULL, quote TEXT NOT NULL,
+ position INTEGER NOT NULL, PRIMARY KEY(card_id, position)
+);
+CREATE INDEX card_sources_document ON card_sources(document_id);
+CREATE TRIGGER document_cards BEFORE DELETE ON documents BEGIN
+ DELETE FROM cards WHERE id IN (SELECT card_id FROM card_sources WHERE document_id=old.id);
+END;
+"""
+
+
+def _execute_schema(con, script):
+    # executescript would implicitly commit the surrounding migration.
+    statement = ""
+    for line in script.splitlines(keepends=True):
+        statement += line
+        if sqlite3.complete_statement(statement):
+            con.execute(statement)
+            statement = ""
+
+
+SCHEMA = (
+    """
 CREATE TABLE workspace (
  id TEXT PRIMARY KEY CHECK(id='local'), name TEXT NOT NULL, created_at TEXT NOT NULL
 );
@@ -72,7 +98,7 @@ CREATE TABLE cards (
  document_id TEXT REFERENCES documents(id) ON DELETE CASCADE,
  front TEXT NOT NULL, back TEXT NOT NULL, locator TEXT NOT NULL,
  due TEXT NOT NULL, interval INTEGER NOT NULL DEFAULT 0, repetitions INTEGER NOT NULL DEFAULT 0,
- created_at TEXT NOT NULL, UNIQUE(course_id, front, back)
+ created_at TEXT NOT NULL, metadata TEXT NOT NULL DEFAULT '{}', UNIQUE(course_id, front, back)
 );
 CREATE INDEX cards_course_due ON cards(course_id, due);
 CREATE TABLE reviews (
@@ -91,6 +117,8 @@ CREATE TABLE embeddings (
  vector BLOB NOT NULL, PRIMARY KEY(chunk_id, model)
 );
 """
+    + CARD_PROVENANCE_SCHEMA
+)
 
 
 class Database:
@@ -101,8 +129,12 @@ class Database:
         # The online backup includes committed WAL content; copies are private and ignored.
         if self.path.exists():
             with sqlite3.connect(self.path) as source:
-                if source.execute("PRAGMA user_version").fetchone()[0] in (1, 2):
-                    backup = self.path.with_name(f"{self.path.stem}.pre-v3-{uid()[:8]}.sqlite3")
+                source_version = source.execute("PRAGMA user_version").fetchone()[0]
+                if 1 <= source_version < SCHEMA_VERSION:
+                    target_version = 3 if source_version < 3 else SCHEMA_VERSION
+                    backup = self.path.with_name(
+                        f"{self.path.stem}.pre-v{target_version}-{uid()[:8]}.sqlite3"
+                    )
                     with sqlite3.connect(backup) as target:
                         source.backup(target)
                     backup.chmod(0o600)
@@ -113,12 +145,7 @@ class Database:
             if version > SCHEMA_VERSION:
                 raise RuntimeError("This database needs a newer ModuleMate version.")
             if version == 0:
-                statement = ""
-                for line in SCHEMA.splitlines(keepends=True):
-                    statement += line
-                    if sqlite3.complete_statement(statement):
-                        con.execute(statement)
-                        statement = ""
+                _execute_schema(con, SCHEMA)
                 con.execute("INSERT INTO workspace VALUES ('local','My workspace',?)", (now_iso(),))
                 version = SCHEMA_VERSION
             if version < 2:
@@ -153,6 +180,9 @@ class Database:
                 con.execute("ALTER TABLE courses RENAME COLUMN user_id TO workspace_id")
                 con.execute("UPDATE workspace SET name='My workspace'")
                 # Legacy IDs can remain internal; the Store never needs a credential.
+            if version < 4:
+                con.execute("ALTER TABLE cards ADD COLUMN metadata TEXT NOT NULL DEFAULT '{}'")
+                _execute_schema(con, CARD_PROVENANCE_SCHEMA)
             owner = con.execute("SELECT id FROM workspace LIMIT 1").fetchone()
             if owner and owner[0] != "local":
                 # Canonicalize the internal owner without deleting/reinserting
@@ -428,30 +458,109 @@ class Store:
                 (json.dumps(metadata), message_id, course_id),
             )
 
-    def add_card(self, course_id, front, back, document_id=None, locator="", *, today=None):
-        front = checked_text(front, "Card question", 1000)
-        back = checked_text(back, "Card answer", 4000)
+    def add_card(
+        self,
+        course_id,
+        front,
+        back,
+        document_id=None,
+        locator="",
+        *,
+        today=None,
+        sources=(),
+        metadata=None,
+    ):
+        return bool(
+            self.add_cards(
+                course_id,
+                [
+                    {
+                        "front": front,
+                        "back": back,
+                        "document_id": document_id,
+                        "locator": locator,
+                        "sources": sources,
+                        "metadata": metadata or {},
+                    }
+                ],
+                today=today,
+            )
+        )
+
+    def add_cards(self, course_id, drafts, *, today=None):
+        """Validate and save a whole selection atomically, including provenance.
+
+        A deleted/reimported source or invalid edit cannot leave a half-saved deck.
+        Recheck source identity inside the write transaction after model inference.
+        """
+        if not isinstance(drafts, list) or len(drafts) > 24:
+            raise UserError("Save at most 24 card drafts at a time.")
         with self.transaction() as (con, workspace):
             self._course(con, workspace, course_id)
-            if document_id:
-                doc = self._document(con, workspace, document_id)
-                if doc["course_id"] != course_id:
-                    raise UserError("Card source is not in the selected course.")
-                if not con.execute(
-                    "SELECT 1 FROM chunks WHERE document_id=? AND locator=?", (document_id, locator)
-                ).fetchone():
-                    raise UserError("Card source location is no longer available.")
-            if (
-                con.execute(
-                    "SELECT count(*) FROM cards WHERE course_id=?", (course_id,)
-                ).fetchone()[0]
-                >= 2000
-            ):
+            existing = {
+                (" ".join(r[0].split()).casefold(), " ".join(r[1].split()).casefold())
+                for r in con.execute("SELECT front,back FROM cards WHERE course_id=?", (course_id,))
+            }
+            prepared = []
+            for draft in drafts:
+                front = checked_text(draft.get("front", ""), "Card question", 1000)
+                back = checked_text(draft.get("back", ""), "Card answer", 4000)
+                identity = (" ".join(front.split()).casefold(), " ".join(back.split()).casefold())
+                if identity in existing:
+                    continue
+                document_id, locator = draft.get("document_id"), draft.get("locator", "")
+                if not isinstance(locator, str) or len(locator) > 1000:
+                    raise UserError("Invalid card source location.")
+                if document_id:
+                    doc = self._document(con, workspace, document_id)
+                    if doc["course_id"] != course_id:
+                        raise UserError("Card source is not in the selected course.")
+                    if not con.execute(
+                        "SELECT 1 FROM chunks WHERE document_id=? AND locator=?",
+                        (document_id, locator),
+                    ).fetchone():
+                        raise UserError("Card source location is no longer available.")
+                sources = draft.get("sources", [])
+                if not isinstance(sources, (list, tuple)) or len(sources) > 3:
+                    raise UserError("A card can have at most three supporting excerpts.")
+                for source in sources:
+                    if not isinstance(source, dict) or type(source.get("passage_id")) is not int:
+                        raise UserError("Invalid card evidence.")
+                    row = con.execute(
+                        "SELECT c.*,d.course_id FROM chunks c JOIN documents d ON d.id=c.document_id WHERE c.id=? AND d.course_id=?",
+                        (source["passage_id"], course_id),
+                    ).fetchone()
+                    quote = source.get("quote")
+                    if (
+                        not row
+                        or row["document_id"] != source.get("document_id")
+                        or row["locator"] != source.get("locator")
+                        or not isinstance(quote, str)
+                        or not quote.strip()
+                        or len(quote) > 1500
+                        or " ".join(quote.split()) not in " ".join(row["text"].split())
+                    ):
+                        raise UserError(
+                            "Card evidence changed or is no longer available. Generate new drafts from the current material."
+                        )
+                if sources and (
+                    document_id != sources[0]["document_id"] or locator != sources[0]["locator"]
+                ):
+                    raise UserError("Card source does not match its supporting evidence.")
+                metadata = draft.get("metadata", {})
+                if not isinstance(metadata, dict) or len(json.dumps(metadata)) > 4000:
+                    raise UserError("Invalid card metadata.")
+                prepared.append((front, back, document_id, locator, sources, metadata))
+                existing.add(identity)
+            current = con.execute(
+                "SELECT count(*) FROM cards WHERE course_id=?", (course_id,)
+            ).fetchone()[0]
+            if current + len(prepared) > 2000:
                 raise UserError("Limit: 2,000 cards per course.")
-            card_id = uid()
-            try:
+            for front, back, document_id, locator, sources, metadata in prepared:
+                card_id = uid()
                 con.execute(
-                    "INSERT INTO cards(id,course_id,document_id,front,back,locator,due,created_at) VALUES (?,?,?,?,?,?,?,?)",
+                    "INSERT INTO cards(id,course_id,document_id,front,back,locator,due,created_at,metadata) VALUES (?,?,?,?,?,?,?,?,?)",
                     (
                         card_id,
                         course_id,
@@ -461,22 +570,39 @@ class Store:
                         locator,
                         (today or date.today()).isoformat(),
                         now_iso(),
+                        json.dumps(metadata),
                     ),
                 )
-            except sqlite3.IntegrityError:
-                return False
-            return True
+                con.executemany(
+                    "INSERT INTO card_sources VALUES (?,?,?,?,?,?)",
+                    [
+                        (card_id, s["document_id"], s["passage_id"], s["locator"], s["quote"], i)
+                        for i, s in enumerate(sources)
+                    ],
+                )
+            return len(prepared)
 
     def cards(self, course_id):
         with self.transaction() as (con, workspace):
             self._course(con, workspace, course_id)
-            return [
+            cards = [
                 dict(r)
                 for r in con.execute(
                     "SELECT c.*,d.name AS document_name FROM cards c LEFT JOIN documents d ON d.id=c.document_id WHERE c.course_id=? ORDER BY c.due,c.created_at,c.id",
                     (course_id,),
                 )
             ]
+            evidence = defaultdict(list)
+            for row in con.execute(
+                "SELECT s.*,d.name AS document_name FROM card_sources s JOIN cards c ON c.id=s.card_id JOIN documents d ON d.id=s.document_id WHERE c.course_id=? ORDER BY s.position",
+                (course_id,),
+            ):
+                item = dict(row)
+                evidence[item.pop("card_id")].append(item)
+            for card in cards:
+                card["metadata"] = json.loads(card["metadata"])
+                card["sources"] = evidence[card["id"]]
+            return cards
 
     def _card(self, con, workspace, card_id):
         row = con.execute(
@@ -491,9 +617,15 @@ class Store:
         front = checked_text(front, "Card question", 1000)
         back = checked_text(back, "Card answer", 4000)
         with self.transaction() as (con, workspace):
-            self._card(con, workspace, card_id)
+            card = self._card(con, workspace, card_id)
             try:
-                con.execute("UPDATE cards SET front=?,back=? WHERE id=?", (front, back, card_id))
+                metadata = json.loads(card["metadata"])
+                if front != card["front"] or back != card["back"]:
+                    metadata["review"] = "user_edited"
+                con.execute(
+                    "UPDATE cards SET front=?,back=?,metadata=? WHERE id=?",
+                    (front, back, json.dumps(metadata), card_id),
+                )
             except sqlite3.IntegrityError as exc:
                 raise UserError("An identical card already exists.") from exc
 
@@ -624,6 +756,13 @@ class Store:
                     dict(r)
                     for r in con.execute(
                         "SELECT r.* FROM reviews r JOIN cards c ON c.id=r.card_id WHERE c.course_id=?",
+                        (row["id"],),
+                    )
+                ]
+                course["card_sources"] = [
+                    dict(r)
+                    for r in con.execute(
+                        "SELECT s.* FROM card_sources s JOIN cards c ON c.id=s.card_id WHERE c.course_id=? ORDER BY s.card_id,s.position",
                         (row["id"],),
                     )
                 ]

@@ -32,6 +32,8 @@ Keep that variable set when running the app to select it. No external GPU is nee
 The `ml` extra provides semantic retrieval, reranking and an extractive reader.
 The `local` extra provides MLX generation on Apple Silicon. Use both extras in
 `uv run` commands so uv preserves the installed runtimes.
+Use the uv setup: the project explicitly overrides Streamlit's Pillow upper bound
+to install Pillow 13 security fixes. See [compatibility validation](docs/VALIDATION_V25.md).
 
 ## Other computers and optional providers
 
@@ -46,6 +48,34 @@ API key. Hosted providers require HTTPS, a model name and a key. Select the
 configured provider in the sidebar and explicitly enable provider requests.
 These send selected text and recent conversation to that provider. Local MLX
 never silently falls back to a hosted API.
+
+## Learning cards from your materials
+
+Open **Cards → Create cards → Generate from materials**. Select documents, add an
+optional topic, choose 1–24 cards and a recall style, then click **Generate learning
+cards**. AI selects learning targets and writes questions; the application copies
+concise answer spans from the actual source. It constructs cloze sentences itself
+so blanks cannot silently rewrite a condition, number or formula.
+
+The selection samples useful sections across documents, including their endings.
+Topic selection and conservative paraphrase checks can use the prepared local
+embedding model. Each generated question/answer receives an individual source
+review; a prepared independent QA reader can also request a repair for a strong
+question/answer mismatch. Targeted repairs retain independently useful cards and
+can fill a useful missed section. Sparse material can
+produce fewer cards. Short labelled numerical facts need no model call.
+
+Inspect the preview, edit any question or answer, select the cards to keep, and
+save them together. **Supporting material** stays available after saving and
+revealing an answer. Your edits retain the excerpts but are marked as edited.
+**Write your own** remains available, as does explicitly labelled **Source cloze**
+practice without a generator. A failed AI run preserves an earlier preview.
+
+Model checks are fallible. Exact source membership does not prove that a question
+has the right premise, or that OCR correctly read the original. Long selections
+show their actual passage coverage; concentrate on a smaller selection for depth.
+See [card design and experiments](docs/CARDS_DEVELOPMENT.md) and
+[card validation](docs/VALIDATION_V25.md).
 
 ## Understanding and evidence
 
@@ -171,6 +201,7 @@ Historical 2.1 retrieval and extraction scores do not measure this new generator
 - [2.3 validation](docs/VALIDATION_V23.md)
 - [Current intelligence decisions and cycles](docs/INTELLIGENCE_V24.md)
 - [2.4 validation and real-app checks](docs/VALIDATION_V24.md)
+- [2.5 learning-card design, experiments and validation](docs/VALIDATION_V25.md)
 - [2.2 validation and observed limits](docs/VALIDATION_V22.md)
 - [HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md)
 - [Architecture](docs/ARCHITECTURE.md)
