@@ -59,24 +59,18 @@ def mixed_pdf():
 
 
 def vector_pdf():
-    # Original block-letter outlines: no PDF text operators or image objects.
-    glyphs = {
-        "O": ("01110", "10001", "10001", "10001", "10001", "10001", "01110"),
-        "P": ("11110", "10001", "10001", "11110", "10000", "10000", "10000"),
-        "E": ("11111", "10000", "10000", "11110", "10000", "10000", "11111"),
-        "N": ("10001", "11001", "11001", "10101", "10011", "10011", "10001"),
-        "A": ("01110", "10001", "10001", "11111", "10001", "10001", "10001"),
-        "T": ("11111", "00100", "00100", "00100", "00100", "00100", "00100"),
-        "4": ("00010", "00110", "01010", "10010", "11111", "00010", "00010"),
-        "2": ("01110", "10001", "00001", "00010", "00100", "01000", "11111"),
-        " ": ("00000",) * 7,
-    }
+    # Draw a bundled regular font as paths, with no PDF text or image objects.
+    # Hand-authored 5x7 glyphs made Tesseract confuse N/M; this fixture checks
+    # path-only page recovery rather than recognition of a stylized alphabet.
+    mask = Image.new("L", (450, 180), 0)
+    ImageDraw.Draw(mask).text(
+        (20, 60), "OPEN AT 42", font=ImageFont.load_default(size=38), fill=255
+    )
     paths = [
-        f"{20 + (i * 6 + x) * 6} {110 - y * 6} 6 6 re f"
-        for i, char in enumerate("OPEN AT 42")
-        for y, row in enumerate(glyphs[char])
-        for x, bit in enumerate(row)
-        if bit == "1"
+        f"{x} {mask.height - y - 1} 1 1 re f"
+        for y in range(mask.height)
+        for x in range(mask.width)
+        if mask.getpixel((x, y)) >= 128
     ]
     writer = PdfWriter()
     page = writer.add_blank_page(width=450, height=180)

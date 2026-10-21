@@ -159,6 +159,8 @@ The latest full local run includes real neural-weight checks, native OCR and the
 
 The publication check on **22 October 2026** repeated the full local suite: **480 passed**, with one upstream Torch deprecation warning, in 28.68 seconds. Ruff lint/format and the locked-environment dependency audit also passed. These local results are separate from the repository's linked CI status.
 
+The first publication CI run passed both Python jobs but exposed a Linux OCR fixture issue: Tesseract read a hand-authored 5×7 `N` as `M`. The path-only PDF fixture now uses ordinary bundled-font glyphs while retaining the exact `OPEN AT 42` assertion and checks that the PDF has neither native text nor image objects. This is a fixture portability repair, not a claim that arbitrary stylized OCR became more accurate; recognition uncertainty remains visible. The [original run](https://github.com/MarlenMM/modulemate/actions/runs/39654698217) preserves the failure, and [current CI](https://github.com/MarlenMM/modulemate/actions/workflows/ci.yml) reports subsequent checks.
+
 Recorded output archives include 34 material-understanding runs/209 fixture turns, 25 card-generation checkpoints plus a reader diagnostic, and 11 Planner baseline/cycle reports. Final, superseded and incomplete runs keep their own implementation identities; a historical filename containing “final” does not override its status.
 
 We rejected broad NLI vetoes, additional planning calls, long-thinking configurations, automatic citation-gap relabeling, free card-answer writing and free timestamp JSON when actual outputs showed false flags, invented prerequisites, incompletion, altered conditions or mismatched dates. Green phrase checks were not treated as proof of correctness.
