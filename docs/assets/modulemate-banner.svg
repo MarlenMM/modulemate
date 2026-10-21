@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">ModuleMate 2</title>
+  <desc id="desc">A local study workspace. Understand, practise and plan with your own materials.</desc>
+  <rect width="1280" height="360" rx="22" fill="#123F36"/>
+  <circle cx="1230" cy="-30" r="285" fill="#195548"/>
+  <circle cx="1250" cy="10" r="200" fill="#206453"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">
+    <text x="58" y="61" font-size="15" font-weight="600" letter-spacing="3" fill="#B7D7C5">LOCAL STUDY WORKSPACE</text>
+    <text x="54" y="137" font-size="64" font-weight="700" letter-spacing="-2" fill="#FAF9F6">ModuleMate 2</text>
+    <text x="58" y="181" font-size="23" fill="#D7E8DD">Understand, practise and plan with your own materials.</text>
+    <g transform="translate(58 237)">
+      <rect width="356" height="72" rx="12" fill="#1A5145" stroke="#427262"/>
+      <text x="22" y="43" font-size="17" fill="#ACD1BB">01</text>
+      <text x="65" y="45" font-size="25" font-weight="600" fill="#FAF9F6">Understand</text>
+    </g>
+    <g transform="translate(462 237)">
+      <rect width="356" height="72" rx="12" fill="#1A5145" stroke="#427262"/>
+      <text x="22" y="43" font-size="17" fill="#ACD1BB">02</text>
+      <text x="65" y="45" font-size="25" font-weight="600" fill="#FAF9F6">Practise</text>
+    </g>
+    <g transform="translate(866 237)">
+      <rect width="356" height="72" rx="12" fill="#1A5145" stroke="#427262"/>
+      <text x="22" y="43" font-size="17" fill="#ACD1BB">03</text>
+      <text x="65" y="45" font-size="25" font-weight="600" fill="#FAF9F6">Plan</text>
+    </g>
+  </g>
+  <g transform="translate(1090 67)" fill="none" stroke="#D0E2D4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 0h47l21 21v80H0z"/>
+    <path d="M47 0v21h21M15 42h37M15 58h37M15 74h23"/>
+  </g>
+</svg>

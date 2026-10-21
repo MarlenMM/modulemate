@@ -1,253 +1,167 @@
-# ModuleMate
+<p align="center">
+  <img src="docs/assets/modulemate-banner.svg" alt="ModuleMate 2 — understand, practise and plan with your own materials" width="1200">
+</p>
 
-A local chatbot for understanding and working with your own materials. Built from the
-HIT Summer School 2026 Smart Chatbot project, then extended as a portfolio project.
+# ModuleMate 2
 
-Ask questions, explain a passage, summarize, compare, work through a method, or
-rewrite text you provide. The same conversation system works across subjects and
-document types. Answers use your selected materials; if the information is missing,
-ModuleMate says so. It can explain the supported part of an exercise without
-inventing a complete solution. Use **Check sources** to inspect
-cited passages. The interface and answers are in English. No login, registration,
-or hosted deployment is required.
+**A local AI study workspace for your own materials.** Ask questions with inspectable sources, create learning cards, and turn important dates into editable calendar events.
 
-## Start on Apple Silicon
+[![Quality](https://github.com/MarlenMM/modulemate/actions/workflows/ci.yml/badge.svg)](https://github.com/MarlenMM/modulemate/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.12%20%E2%80%93%203.13-176B5B?style=flat)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-176B5B?style=flat)](LICENSE)
 
-Python 3.12 or 3.13 and [uv](https://docs.astral.sh/uv/) are required.
+[Quick start](#quick-start) · [Project overview](docs/PROJECT_OVERVIEW.md) · [Architecture](docs/ARCHITECTURE.md) · [Validation](#validation) · [Privacy](docs/PRIVACY_AND_DEPLOYMENT.md)
+
+ModuleMate starts with an empty library. Add your notes, slides, documents or images, then work with them in one English-language workspace. Prepared local inference runs on your computer; the app requires no account or hosted service.
+
+## From materials to study tools
+
+| Workspace | What you can do |
+|---|---|
+| **Library** | Organize courses, import materials, recover printed image text with local OCR, and inspect located passages. |
+| **Assistant** | Explain, summarize, compare and follow up. Inspect citations and get supported steps when a complete answer needs missing information. |
+| **Cards** | Generate focused questions or clozes from selected materials. Edit and select drafts, inspect source excerpts, and practise with spaced review or quizzes. Manual creation remains available. |
+| **Planner** | Extract events and deadlines, correct uncertain details, and save selected drafts. Edit your events and export them to a calendar. Study tasks also support daily capacity planning. |
+
+### Planner: review first, then export
+
+Select materials in **Planner → Extract from materials** and click **Extract dates**. Each draft keeps its supporting excerpt. Missing years, ambiguous clocks/timezones, tentative notices and conflicting dates remain unchecked for correction.
+
+Edit the wording and event details, remove unwanted drafts, and save the selection. In **Events and dates**, download selected events as an `.ics` file for Google Calendar, Apple Calendar or another iCalendar client. Eligible single events also offer a Google Calendar link.
+
+![Planner with selected saved events, calendar export and import guidance](docs/screenshots/v26-planner-events.png)
+
+*Actual application screenshot using original fictional material. Calendar files are snapshots; importing a file does not establish ongoing synchronization.*
+
+<details>
+<summary><strong>Cards: editable generation with supporting material</strong></summary>
+
+Open **Cards → Create cards → Generate from materials**. Choose documents, an optional topic, 1–24 cards and a style: Mixed recall, Question and answer, or Fill in the blank. Review, edit or exclude drafts before saving. Reveal answers and supporting excerpts during practice.
+
+![Generated learning-card preview with an editable question, answer and exact supporting excerpt](docs/screenshots/v25-generated-cards.png)
+
+AI writes the questions; application code binds answers to literal source spans and constructs clozes. Individual review and an independent source-bound QA reader can request targeted repairs. Sparse material can produce fewer cards. **Write your own** and offline **Source cloze** remain available.
+
+[Design decisions](docs/CARDS_DEVELOPMENT.md) · [Inspected output and browser checks](docs/VALIDATION_V25.md)
+
+</details>
+
+<details>
+<summary><strong>Assistant: local answers with inspectable evidence</strong></summary>
+
+Ask a focused question, explain a concept, compare notes, or continue with a follow-up. Broader questions can connect several passages; sampled selections show actual coverage. Independent questions use current material without copying previous assistant claims.
+
+![Assistant answering from an OCR-recovered label with its source passage expanded](docs/screenshots/v24-ocr-answer.png)
+
+The example returns the source's “42 degrees” without inventing a missing temperature scale. Conceptual synthesis, supported partial help, bounded numerical tools and literal source inspection share the same course/document boundaries.
+
+[Material-understanding decisions](docs/INTELLIGENCE_V24.md) · [Actual answers and limitations](docs/VALIDATION_V24.md)
+
+</details>
+
+## Quick start
+
+The prepared conversational runtime uses **Apple Silicon**, **Python 3.12 or 3.13**, and [uv](https://docs.astral.sh/uv/).
 
 ```sh
+git clone https://github.com/MarlenMM/modulemate.git
+cd modulemate
 uv sync --locked --extra ml --extra local
-uv run --extra ml --extra local python scripts/prepare_models.py
-uv run --extra ml --extra local python scripts/prepare_chat_model.py
-uv run --extra ml --extra local streamlit run app.py
+uv run --locked --extra ml --extra local python scripts/prepare_models.py
+uv run --locked --extra ml --extra local python scripts/prepare_chat_model.py
+uv run --locked --extra ml --extra local streamlit run app.py
 ```
 
-Open <http://127.0.0.1:8501>, create a course, and upload notes or add the original
-Learning Lab example. Model setup downloads pinned public weights into your home
-cache; it never uploads your study material. Subsequent local inference works offline.
-The 9B conversational model uses about 5.5 GiB of downloaded weights. A smaller
-candidate can be prepared with `MODULEMATE_CHAT_VARIANT=4b` (see validation for results).
-Keep that variable set when running the app to select it. No external GPU is needed.
+Open **http://127.0.0.1:8501**, create a course, and upload material or add the original Learning Lab example.
 
-The `ml` extra provides semantic retrieval, reranking and an extractive reader.
-The `local` extra provides MLX generation on Apple Silicon. Use both extras in
-`uv run` commands so uv preserves the installed runtimes.
-Use the uv setup: the project explicitly overrides Streamlit's Pillow upper bound
-to install Pillow 13 security fixes. See [compatibility validation](docs/VALIDATION_V25.md).
+Model preparation explicitly downloads pinned public weights into your local cache. The default 9B generator uses about 5.5 GiB of downloaded weights. Once prepared, local inference works offline and study material is not uploaded. Keep both extras in local `uv run` commands so uv preserves the installed runtimes.
 
-## Other computers and optional providers
+The documented uv setup includes a tested Pillow security override for Streamlit's upstream dependency constraint. See the [compatibility record](docs/VALIDATION_V25.md#automated-and-storage-checks).
 
-All library, cards and planning tools also run with `uv sync` and
-`uv run streamlit run app.py`. Without a conversational model, the assistant
-explicitly shows **Excerpt mode**; it is a limited source-reading fallback.
+<details>
+<summary><strong>Other computers and optional providers</strong></summary>
 
-For a compatible local server (for example, an already installed Ollama server),
-copy `.env.example` to `.env`, set its base URL (such as
-`http://127.0.0.1:11434/v1`) and an installed model name. A loopback server needs no
-API key. Hosted providers require HTTPS, a model name and a key. Select the
-configured provider in the sidebar and explicitly enable provider requests.
-These send selected text and recent conversation to that provider. Local MLX
-never silently falls back to a hosted API.
-
-## Learning cards from your materials
-
-Open **Cards → Create cards → Generate from materials**. Select documents, add an
-optional topic, choose 1–24 cards and a recall style, then click **Generate learning
-cards**. AI selects learning targets and writes questions; the application copies
-concise answer spans from the actual source. It constructs cloze sentences itself
-so blanks cannot silently rewrite a condition, number or formula.
-
-The selection samples useful sections across documents, including their endings.
-Topic selection and conservative paraphrase checks can use the prepared local
-embedding model. Each generated question/answer receives an individual source
-review; a prepared independent QA reader can also request a repair for a strong
-question/answer mismatch. Targeted repairs retain independently useful cards and
-can fill a useful missed section. Sparse material can
-produce fewer cards. Short labelled numerical facts need no model call.
-
-Inspect the preview, edit any question or answer, select the cards to keep, and
-save them together. **Supporting material** stays available after saving and
-revealing an answer. Your edits retain the excerpts but are marked as edited.
-**Write your own** remains available, as does explicitly labelled **Source cloze**
-practice without a generator. A failed AI run preserves an earlier preview.
-
-Model checks are fallible. Exact source membership does not prove that a question
-has the right premise, or that OCR correctly read the original. Long selections
-show their actual passage coverage; concentrate on a smaller selection for depth.
-See [card design and experiments](docs/CARDS_DEVELOPMENT.md) and
-[card validation](docs/VALIDATION_V25.md).
-
-## Dates and events from your materials
-
-Open **Planner → Extract from materials**, select documents, and click **Extract
-dates**. The local AI identifies actionable events; literal source date and time
-options supply their values. Each draft keeps its source excerpt and receives a
-separate factual review. A date scan without AI is also available for manual review.
-
-Inspect the preview, change wording or dates, uncheck unwanted entries, and save
-the events you choose. Missing years, ambiguous numeric dates or time zones,
-tentative notices and conflicting dates stay unchecked for correction. You can
-explicitly supply a year or date convention. Explicit source information takes
-precedence; today's year and an event duration are never silently assumed.
-Long selections can continue through subsequent batches after saving or discarding
-the current preview. A revised notice can explicitly replace an existing event
-while retaining its calendar ID.
-
-In **Events and dates**, edit, remove, filter and select saved events. Download
-**Export selected events (.ics)** to import them into Google Calendar, Apple
-Calendar or another iCalendar client. Single events with a known end also offer
-a Google Calendar link. A file import is a snapshot; repeated imports and updates
-depend on the calendar client. Source excerpts are optional in exports. Existing
-capacity planning remains available under **Study tasks**.
-
-The extractor and its reviewer can make mistakes, especially when OCR misreads a
-date or a source leaves its meaning implicit. Unsupported recurrence and unresolved
-relative dates need manual correction. Review the actual material before importing.
-See [Planner design and experiments](docs/PLANNER_DEVELOPMENT.md) and
-[2.6 validation](docs/VALIDATION_V26.md).
-
-## Understanding and evidence
-
-Qwen supplies the pretrained language capability. ModuleMate now also trains its
-own passage-ranking, relevance and answerability heads on original labeled data.
-The models combine text features, pretrained embeddings and source-bound reader
-signals. Training, calibration and test documents are separate; inspectable JSON
-weights and reproduction commands are included.
-
-The assistant checks evidence for each requested part and their combined context.
-Uncertain coverage can trigger one deeper search, without letting a small model
-force a refusal. Explicit references to another uploaded file can bring in its
-relevant sections within your selection. Short libraries are read together.
-Request-local caches batch searches; input-only rewrites omit unnecessary library
-retrieval and unrelated history.
-
-Main ideas, themes, interpretations and connections are supported learning tasks;
-they need not appear as a ready-made sentence in a slide. Broad questions read
-across the material. Long selections include passages from their beginning,
-middle and end. If a document reference is ambiguous, the assistant asks which
-one you mean. Source checks bind citations to real text; they do not require an
-explanation to be a quotation. Short facts and formulas remain citable.
-If an answer reports missing information, one wider look can reconsider additional
-allowed passages even when a small evidence model was confidently wrong.
-Document focus survives navigation between Assistant and Cards, separately for
-each course and tool. Sampled replies show how many available passages were read.
-An explicit source quotation whose wording cannot be verified receives one focused
-correction attempt; an unresolved wording mismatch is marked for inspection rather
-than turning the whole answer into a refusal.
-Fresh material questions use current source text without copying prior assistant
-claims. Follow-ups retain the conversation segment needed to resolve their references.
-Possible stacked PDF equations get a layout notice. The source stays available;
-unclear fraction grouping can be checked without blocking the conceptual explanation.
-
-Rate an answer to save a local correction. **Conversation options → Export answer
-review cases** prepares a queue ordered by feedback and estimated uncertainty.
-These are cases for human review; feedback never automatically retrains the model.
+The library, manual cards, review, tasks and calendar tools also run with:
 
 ```sh
-uv run python scripts/train_evidence.py
-uv run python scripts/evaluate_evidence.py --split test
-uv run --extra ml --extra local python scripts/train_evidence.py --reader
-uv run --extra ml --extra local python scripts/evaluate_evidence.py --reader --split test
-uv run --extra ml --extra local python scripts/evaluate_conversations.py --suite evidence --policy adaptive
+uv sync --locked
+uv run --locked streamlit run app.py
 ```
 
-See the [evidence model/data card](docs/EVIDENCE_MODEL_CARD.md) and
-[2.3 experiments and limitations](docs/VALIDATION_V23.md). Small synthetic results
-do not establish general chatbot accuracy. An independent NLI experiment remains
-disabled by default after falsely flagging valid answers; adding another model
-was not automatically an improvement.
+Without a prepared conversational model, the Assistant clearly displays **Excerpt mode**. AI card/event generation requires a generator; manual workflows, source clozes and an explicitly unreviewed date scan remain available.
 
-## Conversational foundation from 2.2
+A compatible local server can be configured through [.env.example](.env.example), for example an installed Ollama model at `http://127.0.0.1:11434/v1`. Hosted providers require HTTPS, a model and a key. Select and explicitly enable the configured provider in the sidebar; it receives selected context and relevant review payloads. Local failure does not silently activate a hosted provider.
 
-- Genuine instruction-model conversations replace sentence selection as the main
-  prepared local experience. Short topics, examples, code explanations, learner
-  feedback and topic changes use the actual latest question and recent context.
-  Factual answers need supporting material. Text supplied in a question can also
-  be rewritten or organized without inventing a document citation.
-- Section-aware ingestion preserves headings; evidence assembly handles multiple
-  question parts, adjacent passages, complete short documents and ordered lessons
-  that continue through long material without claiming unseen coverage. Distinctive
-  topic terms keep supplies, dates and rules attached to the right document.
-- Bounded numeric tools handle explicitly supplied numbers. Examples that
-  illustrate a provided concept are distinguished from statements in the notes.
-- Source IDs and exact quotes are checked. An additional factual review can request
-  one correction supported by real evidence; its outage does not erase an otherwise valid primary response.
-  A model refusal remains a refusal, and rejected drafts are never disguised as
-  answers by substituting an unrelated quotation.
-- Local answers are written separately from their evidence metadata. Constrained
-  decoding keeps protocol fields out of the explanation; short-format requests,
-  quiz actions and learner replies have explicit conversation state.
-- One local workspace replaces accounts. Existing account databases are backed up
-  and migrated, preserving every course and its documents, chats and study tools.
-- Cards support spaced review and practice quizzes; a capacity-aware planner exports
-  deadlines to a calendar. Generated cards select actual source spans for their
-  backs and remove duplicates. Documents, courses and conversations can be managed locally.
+A smaller 4B local candidate can be selected using `MODULEMATE_CHAT_VARIANT=4b` during preparation and application startup. Its smaller size is not a claim of equivalent quality. See the [local-model validation](docs/VALIDATION_V22.md).
+
+</details>
 
 ## Supported materials
 
-PDF, DOCX, PPTX, TXT, Markdown, IPYNB, PNG, JPEG and WebP (15 MB per file).
-Notebook code and saved text/image outputs are read as static material, never
-executed or recomputed. Saved results may be stale. Local OCR recovers printed text
-from scanned and mixed PDF pages, embedded slide/document pictures and uploaded
-images, including outlined PDF letters that have no native text or image objects.
-Apple Vision is installed on macOS with the normal setup. Linux/Windows
-use an installed [Tesseract engine with English data](https://tesseract-ocr.github.io/tessdoc/Installation.html)
-(Ubuntu: `sudo apt install tesseract-ocr tesseract-ocr-eng`). Native text remains
-usable when OCR is unavailable. No hosted OCR service is called.
+| Input | Reading support |
+|---|---|
+| **PDF and images** | Native PDF text, scanned/mixed pages, outlined PDF letters, PNG, JPEG and WebP. Local OCR retains locations and reading notices. |
+| **Word and PowerPoint** | Body text, tables, notes, referenced Word document parts, embedded pictures, cached chart values and SmartArt labels. |
+| **Notes and notebooks** | TXT, Markdown, pasted notes and static IPYNB code/text/saved image outputs. Notebook code is never executed or recomputed. |
 
-Word headers, footers, referenced notes and text boxes are also searchable.
-Presentations retain native chart categories and cached values with their number
-formats, plus SmartArt text labels. Cached values are not recalculated workbook
-results, and text labels do not establish a diagram's visual relationships.
+Uploads are limited to **15 MB per file**. macOS OCR uses Apple Vision. Linux/Windows require an installed [Tesseract engine with English data](https://tesseract-ocr.github.io/tessdoc/Installation.html); Ubuntu packages are `tesseract-ocr` and `tesseract-ocr-eng`.
 
-OCR locations and import notices identify recovered and unread content. Inspect
-the text preview, especially numbers, names and formulas. Diagram relationships,
-chart values and handwriting may still need a description. Imports are bounded
-to 500 OCR images and a 35-second recognition budget; remaining locations are
-reported. Original uploads are discarded, so reimport an original file to recover
-images omitted by an older version. No university corpus, personal student submission,
-credentials, runtime database or model weights are bundled in this repository.
+OCR is bounded and can misread names, numbers, formulas or layout. Chart/diagram relationships and handwriting may need a description; saved outputs can be stale. Original files are discarded after extraction, so older imports may require reimporting the original to recover newly supported content.
 
-## Quality and project evidence
+## AI and engineering
+
+The system combines a pretrained local generator with original supervised evidence components and application-owned source binding.
+
+| Component | Implementation |
+|---|---|
+| **Language generation** | Pinned Qwen3.5 9B, quantized for local MLX inference. |
+| **Retrieval** | SQLite FTS5, persistent MiniLM embeddings, hybrid rank fusion, optional reranking and a source-bound extractive reader. |
+| **Original ML** | Relevance, answerability and pairwise-ranking logistic heads fitted on original labeled material with separate training/calibration/test documents. |
+| **Evidence contracts** | Course/document scope, validated source IDs and literal spans; advisory estimates can request one bounded deeper look. |
+| **Study outputs** | App-owned card answer/cloze construction and temporal normalization, editable drafts, atomic saves and durable supporting excerpts. |
+| **Persistence and export** | SQLite migrations/backups, spaced scheduling, and iCalendar export with timezone/recurrence handling. |
+
+Our evidence dataset contains **22 original documents, 88 passages, 154 questions and 1,386 candidate/bundle examples**. The generator, encoder, reranker and reader use pretrained weights; no foundation model is trained on learner materials. Local feedback is available for human review and never automatically retrains the system.
+
+Read the [project overview](docs/PROJECT_OVERVIEW.md), [evidence model/data card](docs/EVIDENCE_MODEL_CARD.md) and [architecture](docs/ARCHITECTURE.md) for the development history, fitted models, rejected approaches and implementation boundaries.
+
+## Validation
+
+| Evidence | Recorded result |
+|---|---|
+| **Full local regression suite** | 480 passing tests with real local-weight checks, OCR and a 65-page scan stress case enabled. |
+| **Learning-card inspection** | 22 case/style runs, 88 retained cards read against their excerpts, with exact answer/source membership and isolated saves. |
+| **Planner inspection** | 32 cases, 53 ready events and 17 held drafts. Specified ready-event fields matched; exports round-tripped through iCalendar. |
+| **Application acceptance** | Actual browser generation/edit/select/save/review flows and parsed calendar downloads, plus automated Streamlit journeys. |
+| **Reproducibility** | Original fictional fixtures, actual model-call/output records, pinned weights and implementation/fixture identities. |
+
+These are authored development cases, not a blind real-world accuracy estimate. Matching source text or an approving model review does not prove an inference correct. The Planner's final matrix had no extra or mismatched ready events; this does not establish zero false positives on arbitrary material.
+
+To repeat the main checks after model setup:
 
 ```sh
-uv run --extra ml --extra local ruff check .
-uv run --extra ml --extra local pytest -q
-uv run --extra ml --extra local python scripts/evaluate_conversations.py
+uv run --locked --extra ml --extra local ruff check .
+uv run --locked --extra ml --extra local ruff format --check .
+MODULEMATE_TEST_LOCAL_ML=1 MODULEMATE_TEST_OCR=1 MODULEMATE_TEST_OCR_STRESS=1 \
+  uv run --locked --extra ml --extra local pytest -q
+uv run --locked --extra ml --extra local pip-audit
+uv run --locked --extra ml --extra local python scripts/check_release.py
 ```
 
-The default conversation challenge uses original fictional material spanning
-events, history, biology, project requirements, practical notices, code and fiction.
-It covers conflicting versions, precise questions, explanations, exercise help,
-follow-ups, transformations and missing evidence. It records
-actual prose, model calls and timing. Its automated phrase/length constraints are
-**diagnostics, not a claim of semantic accuracy**. Read the answers as well.
-Historical 2.1 retrieval and extraction scores do not measure this new generator.
+[Conversation validation](docs/VALIDATION_V22.md) · [Evidence experiments](docs/VALIDATION_V23.md) · [Material understanding](docs/VALIDATION_V24.md) · [Cards](docs/VALIDATION_V25.md) · [Planner and calendars](docs/VALIDATION_V26.md) · [Evaluation guide](evaluation/README.md)
 
-- [Rebuild plan and cycle log](docs/INTELLIGENCE_REBUILD.md)
-- [ML development plan and cycles](docs/ML_DEVELOPMENT.md)
-- [Evidence model and original dataset](docs/EVIDENCE_MODEL_CARD.md)
-- [2.3 validation](docs/VALIDATION_V23.md)
-- [Current intelligence decisions and cycles](docs/INTELLIGENCE_V24.md)
-- [2.4 validation and real-app checks](docs/VALIDATION_V24.md)
-- [2.5 learning-card design, experiments and validation](docs/VALIDATION_V25.md)
-- [2.6 material-based Planner events and calendar validation](docs/VALIDATION_V26.md)
-- [2.2 validation and observed limits](docs/VALIDATION_V22.md)
-- [HIT project alignment](docs/HIT_PROJECT_ALIGNMENT.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Local data and provider boundaries](docs/PRIVACY_AND_DEPLOYMENT.md)
-- [Migration](docs/MIGRATION.md)
+## Data and privacy
 
-The model can still make mistakes. A matching quote or model review does not prove
-that an explanation is correct; the source panel is there to help you inspect it.
+One local workspace replaces sign-in. SQLite stores extracted text and study records with private file permissions; ModuleMate does not encrypt the database. No university corpus, personal submissions, runtime database, credentials or neural weights are bundled in this repository.
 
-## Model and implementation references
+Local OCR and prepared inference stay on the machine. Explicitly enabled providers receive selected context. Deleting supporting material removes locally derived records, while external calendar imports and previous backups remain separate copies. Source excerpts are optional and off by default in calendar exports.
 
-[MLX LM](https://github.com/ml-explore/mlx-lm),
-[Outlines Core](https://github.com/dottxt-ai/outlines-core),
-[Qwen3.5](https://huggingface.co/Qwen/Qwen3.5-9B), and
-[the pinned MLX conversion](https://huggingface.co/mlx-community/Qwen3.5-9B-4bit)
-provide the local generative runtime and weights. The app integrates pretrained
-models; it does not claim to have trained an LLM on student work.
+[Local data and provider boundaries](docs/PRIVACY_AND_DEPLOYMENT.md) · [Migration and backups](docs/MIGRATION.md)
 
-MIT license for the application. Model licenses remain with their respective authors.
+## Origin and license
+
+ModuleMate began as the **HIT Summer School 2026 Artificial Intelligence and Machine Learning Smart Chatbot project**, then developed into this general material-based study workspace. The [project alignment](docs/HIT_PROJECT_ALIGNMENT.md) distinguishes the original brief, later engineering and trained versus integrated models.
+
+The application is [MIT licensed](LICENSE). Original evaluation material is identified in the [evaluation guide](evaluation/README.md); pretrained models retain their respective licenses.
+
+Built with [Streamlit](https://streamlit.io/), [MLX LM](https://github.com/ml-explore/mlx-lm), [Qwen](https://huggingface.co/Qwen/Qwen3.5-9B), [Sentence Transformers](https://www.sbert.net/) and [icalendar](https://icalendar.readthedocs.io/).
