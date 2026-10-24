@@ -6,7 +6,7 @@ tasks, Cards and the local-first, user-owned-material boundary remain in scope.
 
 ## Design and evaluation decisions
 
-The user wants selected-material extraction, descriptions and necessary event
+The Planner needs selected-material extraction, descriptions and necessary event
 details, editable/selectable drafts, durable events and portable calendar export.
 Precision takes priority over an apparently complete but invented schedule.
 
