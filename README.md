@@ -121,7 +121,7 @@ The system combines a pretrained local generator with original supervised eviden
 | **Study outputs** | App-owned card answer/cloze construction and temporal normalization, editable drafts, atomic saves and durable supporting excerpts. |
 | **Persistence and export** | SQLite migrations/backups, spaced scheduling, and iCalendar export with timezone/recurrence handling. |
 
-Our evidence dataset contains **22 original documents, 88 passages, 154 questions and 1,386 candidate/bundle examples**. The generator, encoder, reranker and reader use pretrained weights; no foundation model is trained on learner materials. Local feedback is available for human review and never automatically retrains the system.
+The evidence dataset contains **22 original documents, 88 passages, 154 questions and 1,386 candidate/bundle examples**. The generator, encoder, reranker and reader use pretrained weights; no foundation model is trained on learner materials. Local feedback is available for human review and never automatically retrains the system.
 
 Read the [project overview](docs/PROJECT_OVERVIEW.md), [evidence model/data card](docs/EVIDENCE_MODEL_CARD.md) and [architecture](docs/ARCHITECTURE.md) for the development history, fitted models, rejected approaches and implementation boundaries.
 
