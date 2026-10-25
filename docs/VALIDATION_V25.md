@@ -7,7 +7,7 @@ defects; these checks do not establish universal card accuracy or learning benef
 
 ## Implementation identity
 
-Development base: `994adf7`. Runtime: Python 3.12.13 on an Apple Silicon Mac,
+Development base: `a3ea4a8`. Runtime: Python 3.12.13 on an Apple Silicon Mac,
 using the prepared local Qwen3.5 9B model, semantic encoder and extractive reader.
 No hosted inference, Kaggle job or fine-tuning was used. The existing supervised
 evidence artifacts and frozen partitions are unchanged.

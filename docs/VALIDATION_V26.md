@@ -1,6 +1,6 @@
 # ModuleMate 2.6 material-based Planner validation
 
-Validated locally on 21 October 2026, from development base `56784df`. The Planner
+Validated locally on 21 October 2026, from development base `7d3d5a2`. The Planner
 now provides selected-material extraction, editable/selectable drafts, durable
 events, explicit replacement, manual creation and portable calendar export.
 Existing capacity planning remains available as **Study tasks**.

@@ -2551,7 +2551,7 @@
     "Normalize strict scalar labels and nested source footers.",
     "Strengthen evidence selection instructions; keep omitted-detail hints for local review after rejecting automatic relabeling."
   ],
-  "qa_checkpoint_commit": "87ed0ed",
+  "qa_checkpoint_commit": "d22c854",
   "presentation_followup": {
     "model": "Qwen3.5 9B \u00b7 on this Mac",
     "code_sha256": "b4c0f12d8ef1d51ea5ac5c45b5114e356505f047cc1ab35b02adf06486b4c48a",

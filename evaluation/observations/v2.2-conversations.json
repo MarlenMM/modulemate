@@ -953,6 +953,6 @@
       "matches_qa_checkpoint": true
     }
   ],
-  "qa_checkpoint_commit": "645a62d6ff184622975ebf247d1748765df4eaa9",
+  "qa_checkpoint_commit": "f3006741d5b3985c4de4bc1e63664dd407a98dbf",
   "subsequent_changes": "The later card-span protocol and duplicate-back correction do not change conversational answering logic. Those changes were tested separately."
 }

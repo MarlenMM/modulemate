@@ -48,7 +48,7 @@ help, a reserved book, an unnamed sponsor and rewriting supplied text.
 
 All three retained runs use the same inference-code/model-artifact fingerprint
 `778f63e7762c65bafe3eef204d56bdaedb6992c3eed9960701d7208dc4289bd7`,
-retained in commit `87ed0ed`. Neither code nor fixture changed during these runs.
+retained in commit `d22c854`. Neither code nor fixture changed during these runs.
 The full policy provides a
 larger context allowance; these are policy/cost comparisons, not equal-token
 experiments. Medians include first-request loading and are machine/run specific.

@@ -89,7 +89,7 @@ or representative accuracy estimate.
 [Recorded questions, answers, actual source chunks and timings](../evaluation/observations/v2.2-conversations.json)
 retain all three runs, including failures and source/data fingerprints. The full
 32-turn run predates the presentation cleanup. The seven-turn recovery and eight-turn
-probe match QA checkpoint commit `645a62d`; the later card-only correction was
+probe match QA checkpoint commit `f300674`; the later card-only correction was
 verified separately. Medians were 17.29, 16.88 and 9.61 seconds respectively, on this
 machine and these small inputs; they are not a general latency guarantee.
 

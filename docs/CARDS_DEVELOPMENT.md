@@ -1,6 +1,6 @@
 # Material-based learning cards
 
-Development started 21 October 2026 from `994adf7`. This record separates actual
+Development started 21 October 2026 from `a3ea4a8`. This record separates actual
 observations from intended behavior. Only original fictional material is used in
 the public evaluation; the learner's library and saved cards are preserved.
 

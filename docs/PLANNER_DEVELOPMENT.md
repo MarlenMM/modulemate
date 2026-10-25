@@ -1,6 +1,6 @@
 # Material-based planner events
 
-Work starts from `56784df` on 21 October 2026. The original local suite passes
+Work starts from `7d3d5a2` on 21 October 2026. The original local suite passes
 406 tests with real weights, OCR and OCR stress enabled. Existing manual study
 tasks, Cards and the local-first, user-owned-material boundary remain in scope.
 
